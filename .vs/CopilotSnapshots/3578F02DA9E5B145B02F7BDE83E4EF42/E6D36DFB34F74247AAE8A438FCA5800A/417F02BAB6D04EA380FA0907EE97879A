@@ -1,0 +1,32 @@
+﻿<Window x:Class="Macro.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Macro"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="56*"/>
+            <RowDefinition Height="379*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="125" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Sidebar esquerdo -->
+        <StackPanel Grid.Column="0" Background="#FF2D2D30" Orientation="Vertical" Margin="0,-15,0,0" Grid.RowSpan="2">
+            <Button x:Name="BtnDashboard" Margin="10,20,10,0" Content="Dashboard" Height="20" Background="Transparent" BorderThickness="0" Foreground="#ebeadc" FontFamily="Arial"/>
+            <Button x:Name="BtnFarming" Content="Farming" Margin="10" Height="20" Background="Transparent" BorderThickness="0" Foreground="#ebeadc" FontFamily="Arial" Click="BtnFarming_Click"/>
+        </StackPanel>
+
+        <!-- Área principal -->
+        <Grid Grid.Column="1" Background="White" Grid.RowSpan="2">
+         
+           
+        </Grid>
+
+    </Grid>
+</Window>
