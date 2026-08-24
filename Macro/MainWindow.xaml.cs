@@ -1,14 +1,10 @@
-﻿using System.Text;
+﻿using Emgu.CV;
+using Emgu.CV.CvEnum;
+using System.IO;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-
+using SDPoint = System.Drawing.Point;
+using static Macro.Services.ScreenCaptureService;
+using Macro.Views;
 namespace Macro
 {
     /// <summary>
@@ -16,23 +12,27 @@ namespace Macro
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly FarmingPage _farmingPage;
+        private readonly DailyPage _dailyPage;
         public MainWindow()
         {
             InitializeComponent();
+
+            _farmingPage = new FarmingPage();
+            _dailyPage = new DailyPage();
+            MainFrame.Content = _farmingPage;
         }
+
 
         private void BtnFarming_Click(object sender, RoutedEventArgs e)
         {
-
+            MainFrame.Content = _farmingPage;
         }
-
-        private void BtnStop_Click(object sender, RoutedEventArgs e)
+        private void BtnDaily_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Parado");
+            MainFrame.Content = _dailyPage;
         }
-        private void BtnStart_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Iniciado!");
-        }
+
+ 
     }
 }

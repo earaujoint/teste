@@ -1,0 +1,79 @@
+﻿using Emgu.CV;
+using Emgu.CV.CvEnum;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Windows;
+using SDPoint = System.Drawing.Point;
+using static Macro.Utils.ImagesUtils;
+using static Macro.Services.ScreenCaptureService;
+using Macro.Views;
+namespace Macro
+{
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow : Window
+    {
+        public MainWindow()
+        {
+            InitializeComponent();
+        }
+
+        private void BtnFarming_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void BtnStop_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Parado");
+        }
+        private void BtnStart_Click(object sender, RoutedEventArgs e)
+        {
+            using Mat screen = CaptureScreen();
+            string path = Path.Combine(AppContext.BaseDirectory,"Assets","teste.png");
+
+            using Mat template = CvInvoke.Imread(path, ImreadModes.ColorBgr);
+
+            if (template.IsEmpty)
+            {
+                MessageBox.Show("Não foi possível carregar o template.");
+                return;
+            }
+
+            using Mat result = new Mat();
+
+            CvInvoke.MatchTemplate(screen, template, result, TemplateMatchingType.CcoeffNormed);
+
+            double minVal = 0;
+            double maxVal = 0;
+
+            SDPoint minLoc = new SDPoint();
+            SDPoint maxLoc = new SDPoint();
+
+            CvInvoke.MinMaxLoc(result, ref minVal, ref maxVal, ref minLoc, ref maxLoc);
+
+            if (maxVal >= 0.7)
+            {
+                var messageBox = new CommonMessageBox(
+                    "Imagem encontrada",
+                    $"Confiança: {maxVal:P2}\n" +
+                    $"X: {maxLoc.X}\n" +
+                    $"Y: {maxLoc.Y}");
+
+                messageBox.Owner = this;
+                messageBox.ShowDialog();
+            }
+            else
+            {
+                var messageBox = new CommonMessageBox(
+                    "Imagem  não encontrada",
+                    $"Confiança: {maxVal:P2}\n");
+
+                messageBox.Owner = this;
+                messageBox.ShowDialog();
+            }
+        }
+    }
+}

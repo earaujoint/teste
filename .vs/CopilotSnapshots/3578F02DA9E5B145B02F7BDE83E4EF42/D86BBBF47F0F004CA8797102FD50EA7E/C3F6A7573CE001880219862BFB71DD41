@@ -1,0 +1,47 @@
+﻿using System.Windows;
+using System.Windows.Controls;
+
+namespace Macro.Controls
+{
+    public partial class StateCard : UserControl
+    {
+        public static readonly DependencyProperty TitleProperty = DependencyProperty.Register(
+            nameof(Title), typeof(string), typeof(StateCard), new PropertyMetadata(string.Empty, OnTitleChanged));
+
+        public static readonly DependencyProperty DescriptionProperty = DependencyProperty.Register(
+            nameof(Description), typeof(string), typeof(StateCard), new PropertyMetadata(string.Empty, OnDescriptionChanged));
+
+        public string Title
+        {
+            get => (string)GetValue(TitleProperty);
+            set => SetValue(TitleProperty, value);
+        }
+
+        public string Description
+        {
+            get => (string)GetValue(DescriptionProperty);
+            set => SetValue(DescriptionProperty, value);
+        }
+
+        public StateCard()
+        {
+            InitializeComponent();
+        }
+
+        private static void OnTitleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is StateCard card && e.NewValue is string s)
+            {
+                card.TitleText.Text = s;
+            }
+        }
+
+        private static void OnDescriptionChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is StateCard card && e.NewValue is string s)
+            {
+                card.DescriptionText.Text = s;
+            }
+        }
+    }
+}

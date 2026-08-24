@@ -10,6 +10,19 @@
 
   <ItemGroup>
     <Folder Include="Assets\Fonts\" />
+    <Folder Include="Controls\" />
+    <Folder Include="Styles\" />
+  </ItemGroup>
+
+<ItemGroup>
+	<Content Include="Assets\teste.png">
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</Content>
+</ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Emgu.CV" Version="4.13.0.5924" />
+    <PackageReference Include="Emgu.CV.runtime.windows" Version="4.13.0.5924" />
   </ItemGroup>
 
 </Project>

@@ -1,8 +1,14 @@
 {
   "version": 2,
-  "dgSpecHash": "sVgSD8jnvOM=",
+  "dgSpecHash": "awzT3NqJUxg=",
   "success": true,
   "projectFilePath": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\Macro.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\earau\\.nuget\\packages\\emgu.cv\\4.13.0.5924\\emgu.cv.4.13.0.5924.nupkg.sha512",
+    "C:\\Users\\earau\\.nuget\\packages\\emgu.cv.runtime.windows\\4.13.0.5924\\emgu.cv.runtime.windows.4.13.0.5924.nupkg.sha512",
+    "C:\\Users\\earau\\.nuget\\packages\\emgu.runtime.windows.msvc.rt.arm64\\19.44.35224\\emgu.runtime.windows.msvc.rt.arm64.19.44.35224.nupkg.sha512",
+    "C:\\Users\\earau\\.nuget\\packages\\emgu.runtime.windows.msvc.rt.x64\\19.44.35224\\emgu.runtime.windows.msvc.rt.x64.19.44.35224.nupkg.sha512",
+    "C:\\Users\\earau\\.nuget\\packages\\emgu.runtime.windows.msvc.rt.x86\\19.44.35224\\emgu.runtime.windows.msvc.rt.x86.19.44.35224.nupkg.sha512"
+  ],
   "logs": []
 }

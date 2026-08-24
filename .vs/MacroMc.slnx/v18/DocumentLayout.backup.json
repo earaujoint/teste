@@ -3,24 +3,39 @@
   "WorkspaceRootPath": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{241C62EA-AFE4-42FE-B589-838A7AF0981A}|Macro\\Macro.csproj|c:\\users\\earau\\onedrive\\desktop\\windowsform\\macromc\\macro\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{241C62EA-AFE4-42FE-B589-838A7AF0981A}|Macro\\Macro.csproj|solutionrelative:macro\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\users\\earau\\onedrive\\desktop\\windowsform\\macromc\\macro\\views\\farmingpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\views\\farmingpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{241C62EA-AFE4-42FE-B589-838A7AF0981A}|Macro\\Macro.csproj|c:\\users\\earau\\onedrive\\desktop\\windowsform\\macromc\\macro\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{241C62EA-AFE4-42FE-B589-838A7AF0981A}|Macro\\Macro.csproj|solutionrelative:macro\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\users\\earau\\onedrive\\desktop\\windowsform\\macromc\\macro\\views\\farmingpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\views\\farmingpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{241C62EA-AFE4-42FE-B589-838A7AF0981A}|Macro\\Macro.csproj|c:\\users\\earau\\onedrive\\desktop\\windowsform\\macromc\\macro\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{241C62EA-AFE4-42FE-B589-838A7AF0981A}|Macro\\Macro.csproj|solutionrelative:macro\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\users\\earau\\onedrive\\desktop\\windowsform\\macromc\\macro\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\Assets\\Fonts\\README.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Macro\\Assets\\Fonts\\README.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
+      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\users\\earau\\onedrive\\desktop\\windowsform\\macromc\\macro\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{241C62EA-AFE4-42FE-B589-838A7AF0981A}|Macro\\Macro.csproj|c:\\users\\earau\\onedrive\\desktop\\windowsform\\macromc\\macro\\macro.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{241C62EA-AFE4-42FE-B589-838A7AF0981A}|Macro\\Macro.csproj|solutionrelative:macro\\macro.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\earau\\AppData\\Local\\Temp\\.vsdbgsrc\\01f2357d0915602293a465666c73013aeab677df109eb5dafdaac46f8d925114\\Page.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\users\\earau\\onedrive\\desktop\\windowsform\\macromc\\macro\\styles\\sidebarbuttonstyle.xaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\styles\\sidebarbuttonstyle.xaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\users\\earau\\onedrive\\desktop\\windowsform\\macromc\\macro\\views\\commonmessagebox.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\views\\commonmessagebox.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\users\\earau\\onedrive\\desktop\\windowsform\\macromc\\macro\\views\\dailypage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\views\\dailypage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\users\\earau\\onedrive\\desktop\\windowsform\\macromc\\macro\\services\\screencaptureservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\services\\screencaptureservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -30,69 +45,119 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "README.txt",
-              "DocumentMoniker": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\Assets\\Fonts\\README.txt",
-              "RelativeDocumentMoniker": "Macro\\Assets\\Fonts\\README.txt",
-              "ToolTip": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\Assets\\Fonts\\README.txt",
-              "RelativeToolTip": "Macro\\Assets\\Fonts\\README.txt",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
-              "WhenOpened": "2026-08-21T18:46:01.916Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 4,
-              "Title": "Macro",
-              "DocumentMoniker": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\Macro.csproj",
-              "RelativeDocumentMoniker": "Macro\\Macro.csproj",
-              "ToolTip": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\Macro.csproj",
-              "RelativeToolTip": "Macro\\Macro.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAjAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-08-21T17:59:30.107Z",
-              "EditorCaption": ""
+              "Title": "Page.cs",
+              "DocumentMoniker": "C:\\Users\\earau\\AppData\\Local\\Temp\\.vsdbgsrc\\01f2357d0915602293a465666c73013aeab677df109eb5dafdaac46f8d925114\\Page.cs",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\AppData\\Local\\Temp\\.vsdbgsrc\\01f2357d0915602293a465666c73013aeab677df109eb5dafdaac46f8d925114\\Page.cs",
+              "ToolTip": "C:\\Users\\earau\\AppData\\Local\\Temp\\.vsdbgsrc\\01f2357d0915602293a465666c73013aeab677df109eb5dafdaac46f8d925114\\Page.cs [Somente Leitura]",
+              "RelativeToolTip": "..\\..\\..\\..\\AppData\\Local\\Temp\\.vsdbgsrc\\01f2357d0915602293a465666c73013aeab677df109eb5dafdaac46f8d925114\\Page.cs [Somente Leitura]",
+              "ViewState": "AgIAAHUCAAAAAAAAAAAgwJYCAAACAAAAAQAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-24T19:46:13.389Z",
+              "EditorCaption": " [Somente Leitura]"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "App.xaml",
-              "DocumentMoniker": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\App.xaml",
-              "RelativeDocumentMoniker": "Macro\\App.xaml",
-              "ToolTip": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\App.xaml",
-              "RelativeToolTip": "Macro\\App.xaml",
+              "DocumentIndex": 0,
+              "Title": "FarmingPage.xaml",
+              "DocumentMoniker": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\Views\\FarmingPage.xaml",
+              "RelativeDocumentMoniker": "Macro\\Views\\FarmingPage.xaml",
+              "ToolTip": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\Views\\FarmingPage.xaml*",
+              "RelativeToolTip": "Macro\\Views\\FarmingPage.xaml*",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-08-21T17:59:23.831Z",
+              "WhenOpened": "2026-08-24T19:38:41.102Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "MainWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\MainWindow.xaml",
-              "RelativeDocumentMoniker": "Macro\\MainWindow.xaml",
-              "ToolTip": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\MainWindow.xaml*",
-              "RelativeToolTip": "Macro\\MainWindow.xaml*",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-08-21T17:58:19.729Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
               "Title": "MainWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\MainWindow.xaml.cs",
               "RelativeDocumentMoniker": "Macro\\MainWindow.xaml.cs",
               "ToolTip": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\MainWindow.xaml.cs",
               "RelativeToolTip": "Macro\\MainWindow.xaml.cs",
-              "ViewState": "AgIAAAsAAAAAAAAAAAAgwB4AAAAmAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-21T17:58:15.287Z",
+              "WhenOpened": "2026-08-24T19:30:01.881Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "FarmingPage.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\Views\\FarmingPage.xaml.cs",
+              "RelativeDocumentMoniker": "Macro\\Views\\FarmingPage.xaml.cs",
+              "ToolTip": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\Views\\FarmingPage.xaml.cs",
+              "RelativeToolTip": "Macro\\Views\\FarmingPage.xaml.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAACcAAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-24T19:47:39.667Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "DailyPage.xaml",
+              "DocumentMoniker": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\Views\\DailyPage.xaml",
+              "RelativeDocumentMoniker": "Macro\\Views\\DailyPage.xaml",
+              "ToolTip": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\Views\\DailyPage.xaml",
+              "RelativeToolTip": "Macro\\Views\\DailyPage.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-08-24T19:38:26.508Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "CommonMessageBox.xaml",
+              "DocumentMoniker": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\Views\\CommonMessageBox.xaml",
+              "RelativeDocumentMoniker": "Macro\\Views\\CommonMessageBox.xaml",
+              "ToolTip": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\Views\\CommonMessageBox.xaml",
+              "RelativeToolTip": "Macro\\Views\\CommonMessageBox.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-08-24T19:38:46.213Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "MainWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\MainWindow.xaml",
+              "RelativeDocumentMoniker": "Macro\\MainWindow.xaml",
+              "ToolTip": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\MainWindow.xaml",
+              "RelativeToolTip": "Macro\\MainWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-08-24T18:07:24.907Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "SidebarButtonStyle.xaml",
+              "DocumentMoniker": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\Styles\\SidebarButtonStyle.xaml",
+              "RelativeDocumentMoniker": "Macro\\Styles\\SidebarButtonStyle.xaml",
+              "ToolTip": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\Styles\\SidebarButtonStyle.xaml",
+              "RelativeToolTip": "Macro\\Styles\\SidebarButtonStyle.xaml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-08-24T18:07:13.117Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "ScreenCaptureService.cs",
+              "DocumentMoniker": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\Services\\ScreenCaptureService.cs",
+              "RelativeDocumentMoniker": "Macro\\Services\\ScreenCaptureService.cs",
+              "ToolTip": "C:\\Users\\earau\\OneDrive\\Desktop\\WindowsForm\\MacroMc\\Macro\\Services\\ScreenCaptureService.cs",
+              "RelativeToolTip": "Macro\\Services\\ScreenCaptureService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-24T18:06:38.492Z",
               "EditorCaption": ""
             }
           ]

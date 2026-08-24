@@ -1,0 +1,38 @@
+﻿<UserControl x:Class="Macro.Controls.Sidebar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="120">
+    <Border Background="#2D2D30">
+        <StackPanel Orientation="Vertical" Margin="0,10,12,0">
+            <Button x:Name="BtnFarming"
+                    Height="36"
+                    Background="Transparent"
+                    Margin="0,2,0,0"
+                    BorderThickness="0"
+                    Foreground="#EBEADC"
+                    FontSize="14"
+                    FontWeight="SemiBold"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Left"
+                    Cursor="Hand"
+                    Click="BtnFarming_Click">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Viewbox Width="18" Height="18" Margin="0,0,8,0">
+                        <Canvas Width="24" Height="24">
+                            <Path Data="M13 8l-9.383 9.418a2.091 2.091 0 0 0 0 2.967a2.11 2.11 0 0 0 2.976 0l9.407 -9.385"
+                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
+                                  StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent"/>
+                            <Path Data="M9 3h4.586a1 1 0 0 1 .707 .293l6.414 6.414a1 1 0 0 1 .293 .707v4.586a2 2 0 1 1 -4 0v-3l-5 -5h-3a2 2 0 1 1 0 -4"
+                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
+                                  StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent"/>
+                        </Canvas>
+                    </Viewbox>
+                    <TextBlock Text="Farming" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" />
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </Border>
+</UserControl>
