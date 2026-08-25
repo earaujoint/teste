@@ -18,8 +18,8 @@
         </Grid.ColumnDefinitions>
 
         <Border Grid.Column="0" Background="#2D2D30">
-            <StackPanel Orientation="Vertical" Margin="0,0,12,0">
-                <Button Style="{StaticResource SidebarButtonStyle}" Click="BtnFarming_Click">
+            <StackPanel Orientation="Vertical">
+                <Button Style="{StaticResource SidebarButtonStyle}" Click="BtnFarming_Click" x:Name="BtnFarming">
                     <StackPanel Orientation="Horizontal"
                  VerticalAlignment="Center">
                         <Viewbox Width="18"
@@ -51,7 +51,41 @@
                                RelativeSource={RelativeSource AncestorType={x:Type Button}}}"/>
                     </StackPanel>
                 </Button>
-                <Button Style="{StaticResource SidebarButtonStyle}" Click="BtnDaily_Click">
+                <Button Style="{StaticResource SidebarButtonStyle}" Click="BtnTimer_Click" x:Name="BtnTimer">
+                    <StackPanel Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <Viewbox Width="18" Height="18" Margin="0,0,8,0">
+                            <Canvas Width="24" Height="24">
+                                <Path Data="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"
+                                      Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
+                                      StrokeThickness="2"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      StrokeLineJoin="Round"
+                                      Fill="Transparent" />
+                                <Path Data="M12 12l3 2"
+                                      Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
+                                      StrokeThickness="2"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      StrokeLineJoin="Round"
+                                      Fill="Transparent" />
+                                <Path Data="M12 7v5"
+                                      Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
+                                      StrokeThickness="2"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      StrokeLineJoin="Round"
+                                      Fill="Transparent" />
+                            </Canvas>
+                        </Viewbox>
+                        <TextBlock Text="Timer"
+                                   VerticalAlignment="Center"
+                                   Foreground="{Binding Foreground,
+                                              RelativeSource={RelativeSource AncestorType={x:Type Button}}}"/>
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource SidebarButtonStyle}" Click="BtnDaily_Click" x:Name="BtnDaily">
                     <StackPanel Orientation="Horizontal"
                                 VerticalAlignment="Center">
                         <Viewbox Width="18" Height="18" Margin="0,0,8,0">
@@ -103,7 +137,7 @@
             
         </Border>
 
-        <Frame x:Name="MainFrame" Grid.Column="1" NavigationUIVisibility="Hidden"></Frame>
+        <Frame x:Name="MainFrame" Grid.Column="1" NavigationUIVisibility="Hidden" Navigated="MainFrame_Navigated"></Frame>
   
     </Grid>
 

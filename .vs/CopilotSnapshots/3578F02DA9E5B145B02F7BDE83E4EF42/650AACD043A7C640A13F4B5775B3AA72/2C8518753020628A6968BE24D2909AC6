@@ -1,0 +1,93 @@
+﻿<Page x:Class="Macro.Views.TimerPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Macro.Views"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="TimerPage">
+
+    <Grid Background="#1a1a19">
+        <Grid.Resources>
+            <!-- TextBlock style used inside DataGrid cells to ensure exact alignment -->
+            <Style x:Key="DataGridTextBlockStyle" TargetType="TextBlock">
+                <Setter Property="Margin" Value="0" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="TextAlignment" Value="Left" />
+            </Style>
+
+            <!-- Header content template that wraps header text in a TextBlock with no extra offsets -->
+            <DataTemplate x:Key="DataGridHeaderTemplate">
+                <TextBlock Text="{Binding}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+            </DataTemplate>
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="15">
+            <TextBlock Text="Próximos chefes disponíveis"
+           Foreground="#f0efec"
+           FontSize="18"
+           FontWeight="SemiBold"/>
+        </StackPanel>
+        
+        <DataGrid x:Name="BossDataGrid"
+          AutoGenerateColumns="False"
+          CanUserAddRows="False"
+          IsReadOnly="True"
+          HeadersVisibility="Column"
+          GridLinesVisibility="None"
+          Background="#1a1a19"
+          Foreground="#F0EFEC"
+          BorderThickness="0"
+          FontSize="13"
+          Grid.Row="1"
+          RowBackground="#151515"
+          HorizontalScrollBarVisibility="Hidden"
+          AlternatingRowBackground="#1a1a19"
+                  Padding="15">
+    
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="#1a1a19"/>
+                    <Setter Property="Foreground" Value="#EBEADC"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Padding" Value="2, 0, 0, 8"/>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+
+            <DataGrid.CellStyle>
+                <Style TargetType="DataGridCell">
+                    <Setter Property="Background" Value="#1a1a19"/>
+                    <Setter Property="Foreground" Value="#f0efec"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                </Style>
+            </DataGrid.CellStyle>
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Mundo"
+                    Binding="{Binding World}"
+                    Width="*"/>
+
+                <DataGridTextColumn Header="Localização"
+                    Binding="{Binding Localization}"
+                    Width="2*"/>
+
+                <DataGridTextColumn Header="Boss"
+                    Binding="{Binding Name}"
+                    Width="*"/>
+
+                <DataGridTextColumn Header="Tempo restante"
+                    Binding="{Binding TimeRemainingText}"
+                    Width="*"/>
+
+            </DataGrid.Columns>
+
+        </DataGrid>
+    </Grid>
+</Page>

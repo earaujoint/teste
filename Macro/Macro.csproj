@@ -11,13 +11,18 @@
   <ItemGroup>
     <Folder Include="Assets\Fonts\" />
     <Folder Include="Controls\" />
-    <Folder Include="Styles\" />
   </ItemGroup>
 
 <ItemGroup>
 	<Content Include="Assets\teste.png">
 		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	</Content>
+</ItemGroup>
+
+<ItemGroup>
+	<None Update="Data\bosses.json">
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</None>
 </ItemGroup>
 
   <ItemGroup>
