@@ -433,5 +433,30 @@ namespace Macro.Services
             //Start missions
             ClickRelative(handle, 80, 86);
         }
+
+        public static void DailyDonates(WindowTarget target)
+        {
+            var process = FindProcess(target);
+            if (process == null)
+                return;
+            IntPtr handle = process.MainWindowHandle;
+            SetForegroundWindow(handle);
+            ShowWindow(handle, SW_MAXIMIZE);
+
+            ClickRelative(handle, 80.21, 4.76);
+            ClickRelative(handle, 69.58, 83.45);
+            ClickRelative(handle, 47.92, 93.66);
+            ClickRelative(handle, 67.55, 67.99);
+            ClickRelative(handle, 66.87, 81.67);
+            ClickRelative(handle, 56.25, 63.63);
+            ClickRelative(handle, 30.89, 41.23);
+            ClickRelative(handle, 67.19, 68.29);
+            ClickRelative(handle, 66.15, 82.56);
+            ClickRelative(handle, 56.41, 64.12);
+            ClickRelative(handle, 30.52, 54.31);
+            ClickRelative(handle, 67.66, 67.39);
+            ClickRelative(handle, 67.50, 80.97);
+            ClickRelative(handle, 56.09, 64.22);
+        }
     }
 }
