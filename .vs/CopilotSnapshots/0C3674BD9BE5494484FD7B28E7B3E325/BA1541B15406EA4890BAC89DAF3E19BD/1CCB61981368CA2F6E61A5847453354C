@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net10.0-windows</TargetFramework>
+
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UseWPF>true</UseWPF>
+
+		<!-- Publicação -->
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<SelfContained>true</SelfContained>
+		<PublishSingleFile>true</PublishSingleFile>
+
+		<!-- Opcional: reduz um pouco o tamanho -->
+		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+	</PropertyGroup>
+
+	<!-- Pastas -->
+	<ItemGroup>
+		<Folder Include="Assets\Fonts\" />
+		<Folder Include="Controls\" />
+	</ItemGroup>
+
+	<!-- Recursos -->
+	<ItemGroup>
+		<!-- Imagem usada pelo WPF -->
+		<Resource Include="Assets\teste.png" />
+
+		<!-- JSON embutido no executável -->
+		<EmbeddedResource Include="Data\bosses.json" />
+	</ItemGroup>
+
+</Project>

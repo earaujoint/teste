@@ -1,0 +1,37 @@
+﻿using Macro.Models;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Text.Json;
+using System.Windows;
+using System.Windows.Media.Animation;
+namespace Macro.Services
+{
+    public static class BossService
+    {
+        public static async Task<List<Boss>> LoadBossesAsync()
+        {
+            string path = Path.Combine(
+                AppContext.BaseDirectory,
+                "Data",
+                "bosses.json"
+            );
+
+            string json = await File.ReadAllTextAsync(path);
+
+            var bossesJson = JsonSerializer.Deserialize<List<BossJson>>(json);
+
+            return bossesJson.Select(b => new Boss
+            {
+                World = b.World,
+                Localization = b.Localization,
+                Name = b.Name,
+
+                SpawnTimes = b.SpawnTimes.Select(TimeSpan.Parse).ToList()})
+                 .OrderBy(b => b.TimeRemaining.TotalSeconds)
+                 .ThenBy(b => b.World)
+                 .ToList();
+        }
+    }
+}

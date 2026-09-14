@@ -1,0 +1,129 @@
+﻿using Macro.Models;
+using Macro.Services;
+using System.Collections.ObjectModel;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Threading;
+
+namespace Macro.Views
+{
+    public partial class TimerPage : Page
+    {
+        private readonly DispatcherTimer _timer;
+
+        private List<Boss> _bosses = new();
+
+        private readonly ObservableCollection<Boss> _availableBosses = new();
+
+        private readonly HashSet<string> _processedSpawns = new();
+
+        private DateTime _lastCheck = DateTime.Now;
+
+        public TimerPage()
+        {
+            InitializeComponent();
+
+            AvailableBossesItemsControl.ItemsSource = _availableBosses;
+
+            _timer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(1)
+            };
+
+            _timer.Tick += Timer_Tick;
+
+            _timer.Start();
+
+            _ = GetBosses();
+        }
+
+        private async Task GetBosses()
+        {
+            _bosses = await BossService.LoadBossesAsync();
+
+            BossDataGrid.ItemsSource = _bosses;
+
+            var itemsControl =
+                this.FindName("AvailableBossesItemsControl") as ItemsControl;
+
+            if (itemsControl != null)
+            {
+                itemsControl.ItemsSource = _availableBosses;
+            }
+
+            _lastCheck = DateTime.Now;
+        }
+
+        private void Timer_Tick(object? sender, EventArgs e)
+        {
+            if (_bosses.Count == 0)
+                return;
+
+            var now = DateTime.Now;
+
+            CheckBossSpawns(_lastCheck, now);
+
+            _lastCheck = now;
+
+            BossDataGrid.Items.Refresh();
+
+            RefreshBosses();
+        }
+
+        private void CheckBossSpawns(DateTime lastCheck, DateTime now)
+        {
+            foreach (var boss in _bosses)
+            {
+                if (boss.SpawnTimes == null ||
+                    boss.SpawnTimes.Count == 0)
+                {
+                    continue;
+                }
+
+                foreach (var spawnTime in boss.SpawnTimes)
+                {
+                    var spawnDateTime =
+                        now.Date.Add(spawnTime);
+
+                    var spawnKey =
+                        $"{boss.Name}_{boss.World}_{spawnDateTime:yyyyMMddHHmm}";
+
+                    if (spawnDateTime > lastCheck &&
+                        spawnDateTime <= now)
+                    {
+                        if (_processedSpawns.Contains(spawnKey))
+                            continue;
+
+                        _processedSpawns.Add(spawnKey);
+
+                        AddAvailableBoss(boss);
+                    }
+                }
+            }
+        }
+
+        private void AddAvailableBoss(Boss boss)
+        {
+            if (_availableBosses.Any(b =>
+                b.Name == boss.Name &&
+                b.World == boss.World))
+            {
+                return;
+            }
+
+            _availableBosses.Add(boss);
+
+            AvailablePanel.Visibility = Visibility.Visible;
+        }
+
+        private void RefreshBosses()
+        {
+            _bosses = _bosses
+                .OrderBy(b => b.TimeRemaining.TotalSeconds)
+                .ThenBy(b => b.World)
+                .ToList();
+
+            BossDataGrid.ItemsSource = _bosses;
+        }
+    }
+}

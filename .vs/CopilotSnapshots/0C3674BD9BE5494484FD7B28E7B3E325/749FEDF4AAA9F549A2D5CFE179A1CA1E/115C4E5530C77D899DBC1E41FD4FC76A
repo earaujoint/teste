@@ -1,0 +1,316 @@
+﻿[
+  {
+    "World": "W1",
+    "Localization": "Floresta do Touro Malvado",
+    "Name": "Mata",
+    "SpawnTimes": [
+      "01:00",
+      "03:00",
+      "05:00",
+      "07:00",
+      "09:00",
+      "11:00",
+      "13:00",
+      "15:00",
+      "17:00",
+      "19:00",
+      "21:00"
+    ]
+  },
+  {
+    "World": "W1",
+    "Localization": "1F do Templo do Touro Demoníaco",
+    "Name": "Boltox",
+    "SpawnTimes": [
+      "00:00",
+      "02:00",
+      "04:00",
+      "06:00",
+      "08:00",
+      "10:00",
+      "12:00",
+      "14:00",
+      "16:00",
+      "18:00",
+      "20:00",
+      "22:00"
+    ]
+  },
+  {
+    "World": "W1",
+    "Localization": "Santuário do Rei dos Touros Malvados",
+    "Name": "Rei dos Touros Malvados",
+    "SpawnTimes": [
+      "02:00",
+      "05:00",
+      "08:00",
+      "11:00",
+      "14:00",
+      "17:00",
+      "20:00"
+    ]
+  },
+  {
+    "World": "W8",
+    "Localization": "Círculo de Selo dos Gigantes Branco",
+    "Name": "Yeo Wihwang",
+    "SpawnTimes": [
+      "00:00",
+      "04:00",
+      "08:00",
+      "12:00",
+      "16:00",
+      "20:00"
+    ]
+  },
+  {
+    "World": "W7",
+    "Localization": "Jardim de Taehyul",
+    "Name": "Taehyul",
+    "SpawnTimes": [
+      "00:00",
+      "02:00",
+      "04:00",
+      "06:00",
+      "08:00",
+      "10:00",
+      "12:00",
+      "14:00",
+      "16:00",
+      "18:00",
+      "20:00",
+      "22:00"
+    ]
+  },
+  {
+    "World": "W7",
+    "Localization": "Construção Principal do Culto Demoníaco",
+    "Name": "Yiun",
+    "SpawnTimes": [
+      "01:00",
+      "04:00",
+      "07:00",
+      "10:00",
+      "13:00",
+      "16:00",
+      "19:00",
+      "22:00"
+    ]
+  },
+  {
+    "World": "W4",
+    "Localization": "Deserto Fantasia",
+    "Name": "Nefariox Obdurate Zenith",
+    "SpawnTimes": [
+      "01:00",
+      "03:00",
+      "05:00",
+      "07:00",
+      "09:00",
+      "11:00",
+      "13:00",
+      "15:00",
+      "17:00",
+      "19:00",
+      "21:00"
+    ]
+  },
+  {
+    "World": "W4",
+    "Localization": "Círculo do Selo do Suserano",
+    "Name": "Kurilica",
+    "SpawnTimes": [
+      "02:00",
+      "05:00",
+      "08:00",
+      "11:00",
+      "14:00",
+      "17:00",
+      "20:00"
+    ]
+  },
+  {
+    "World": "W2",
+    "Localization": "Feiotoria Seocheon",
+    "Name": "Ma Wonwi",
+    "SpawnTimes": []
+  },
+  {
+    "World": "W2",
+    "Localization": "Montanha da Lúnula de Sangue",
+    "Name": "Juhui",
+    "SpawnTimes": [
+      "01:30",
+      "04:30",
+      "07:30",
+      "10:30",
+      "13:30",
+      "16:30",
+      "19:30",
+      "22:30"
+    ]
+  },
+  {
+    "World": "W5",
+    "Localization": "Nine Dragon Ice Field",
+    "Name": "Illusory Dream",
+    "SpawnTimes": []
+  },
+  {
+    "World": "W5",
+    "Localization": "Grande Muralha de Sabuk",
+    "Name": "Faluk",
+    "SpawnTimes": [
+      "02:30",
+      "05:30",
+      "08:30",
+      "11:30",
+      "14:30",
+      "17:30",
+      "20:30",
+      "23:30"
+    ]
+  },
+  {
+    "World": "W5",
+    "Localization": "Templo Ilusório",
+    "Name": "Tale Warper Fiend",
+    "SpawnTimes": [
+      "00:30",
+      "03:30",
+      "06:30",
+      "09:30",
+      "12:30",
+      "15:30",
+      "18:30",
+      "21:30"
+    ]
+  },
+  {
+    "World": "W3",
+    "Localization": "Necrópole de Nefariox",
+    "Name": "Tombeast Gyo",
+    "SpawnTimes": [
+      "01:30",
+      "07:30",
+      "13:30",
+      "19:30"
+    ]
+  },
+  {
+    "World": "W3",
+    "Localization": "Planície das Víboras Monstruosas",
+    "Name": "Dusk Armado Emperor",
+    "SpawnTimes": [
+      "00:30",
+      "02:30",
+      "04:30",
+      "06:30",
+      "08:30",
+      "10:30",
+      "12:30",
+      "14:30",
+      "16:30",
+      "18:30",
+      "20:30",
+      "22:30"
+    ]
+  },
+  {
+    "World": "W3",
+    "Localization": "Túmulo de Rockcut",
+    "Name": "Boodo",
+    "SpawnTimes": [
+      "02:30",
+      "08:30",
+      "14:30",
+      "20:30"
+    ]
+  },
+  {
+    "World": "W3",
+    "Localization": "Túmulo de Rockcut",
+    "Name": "Mara",
+    "SpawnTimes": [
+      "01:30",
+      "04:30",
+      "07:30",
+      "10:30",
+      "13:30",
+      "16:30",
+      "19:30",
+      "22:30"
+    ]
+  },
+  {
+    "World": "W3",
+    "Localization": "Cidade de Bicheon",
+    "Name": "Sura",
+    "SpawnTimes": [
+      "03:30",
+      "09:30",
+      "15:30",
+      "21:30"
+    ]
+  },
+  {
+    "World": "W6",
+    "Localization": "Cidade de Bicheon",
+    "Name": "Mokgang",
+    "SpawnTimes": [
+      "01:30",
+      "03:30",
+      "05:30",
+      "07:30",
+      "09:30",
+      "11:30",
+      "13:30",
+      "15:30",
+      "17:30",
+      "19:30",
+      "21:30",
+      "23:30"
+    ]
+  },
+  {
+    "World": "W6",
+    "Localization": "Bosques Fantasmas",
+    "Name": "Wuihan",
+    "SpawnTimes": [
+      "04:30",
+      "10:30",
+      "16:30",
+      "22:30"
+    ]
+  },
+  {
+    "World": "W6",
+    "Localization": "Labirinto de Bicheon",
+    "Name": "Obscene Yeticlops",
+    "SpawnTimes": [
+      "05:30",
+      "11:30",
+      "17:30",
+      "23:30"
+    ]
+  },
+  {
+    "World": "W6",
+    "Localization": "Abisso da Mina Demoníaca",
+    "Name": "Transformed Hong Yeom",
+    "SpawnTimes": [
+      "00:30",
+      "02:30",
+      "04:30",
+      "06:30",
+      "08:30",
+      "10:30",
+      "12:30",
+      "14:30",
+      "16:30",
+      "18:30",
+      "20:30",
+      "22:30"
+    ]
+  }
+]

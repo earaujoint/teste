@@ -1,0 +1,98 @@
+﻿using Macro.Models;
+using Macro.Services;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Threading;
+
+namespace Macro.Views
+{
+    public partial class TimerPage : Page
+    {
+        private readonly DispatcherTimer _timer;
+
+        private List<Boss> _bosses = new();
+
+        public TimerPage()
+        {
+            InitializeComponent();
+
+            _timer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(1)
+            };
+
+            _timer.Tick += Timer_Tick;
+            _timer.Start();
+
+            _ = GetBosses();
+        }
+
+        private async Task GetBosses()
+        {
+            _bosses = await BossService.LoadBossesAsync();
+
+            BossDataGrid.ItemsSource = _bosses;
+        }
+
+        private async void Timer_Tick(object? sender, EventArgs e)
+        {
+            BossDataGrid.Items.Refresh();
+
+            if (_bosses.Any(b => b.TimeRemaining.TotalSeconds <= 0))
+            {
+                await RefreshBossesAsync();
+            }
+        }
+
+        private async Task RefreshBossesAsync()
+        {
+            // Reorder in-memory list immediately
+            _bosses = _bosses.OrderBy(b => b.TimeRemaining).ToList();
+            BossDataGrid.ItemsSource = _bosses;
+
+            // Update the JSON file: subtract 1 hour from every spawn time
+            try
+            {
+                string path = Path.Combine(AppContext.BaseDirectory, "Data", "bosses.json");
+
+                if (File.Exists(path))
+                {
+                    var json = await File.ReadAllTextAsync(path);
+                    var bossesJson = JsonSerializer.Deserialize<List<BossJson>>(json);
+
+                    if (bossesJson != null)
+                    {
+                        foreach (var b in bossesJson)
+                        {
+                            for (int i = 0; i < b.SpawnTimes.Count; i++)
+                            {
+                                if (TimeSpan.TryParse(b.SpawnTimes[i], out var ts))
+                                {
+                                    var newTs = ts - TimeSpan.FromHours(1);
+                                    if (newTs < TimeSpan.Zero)
+                                        newTs = newTs + TimeSpan.FromDays(1);
+
+                                    b.SpawnTimes[i] = newTs.ToString(@"hh\:mm");
+                                }
+                            }
+                        }
+
+                        var writeOptions = new JsonSerializerOptions { WriteIndented = true };
+                        var newJson = JsonSerializer.Serialize(bossesJson, writeOptions);
+                        await File.WriteAllTextAsync(path, newJson);
+                    }
+                }
+            }
+            catch
+            {
+                // Não falhar a UI por conta de erro ao atualizar o arquivo
+            }
+
+            // Reload bosses from file to reflect changes and reorder correctly
+            await GetBosses();
+        }
+    }
+}

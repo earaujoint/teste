@@ -1,0 +1,44 @@
+﻿using Macro.Models;
+using System.IO;
+using System.Reflection;
+using System.Text.Json;
+
+public static class BossService
+{
+    public static async Task<List<Boss>> LoadBossesAsync()
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+
+        using Stream? stream = assembly.GetManifestResourceStream(
+            "Macro.Data.bosses.json"
+        );
+
+        if (stream == null)
+            throw new FileNotFoundException(
+                "O recurso Data/bosses.json não foi encontrado dentro do executável."
+            );
+
+        var bossesJson =
+            await JsonSerializer.DeserializeAsync<List<BossJson>>(stream);
+
+        if (bossesJson == null)
+            return new List<Boss>();
+
+        return bossesJson
+            .Select(b => new Boss
+            {
+                World = b.World,
+                Localization = b.Localization,
+                Name = b.Name,
+
+                SpawnTimes = b.SpawnTimes
+                    .Select(TimeSpan.Parse)
+                    .OrderBy(t => t)
+                    .ToList()
+            })
+            .OrderBy(b => b.SpawnTimes.Count == 0)
+            .ThenBy(b => b.NextSpawnTime)
+            .ThenBy(b => b.World)
+            .ToList();
+    }
+}

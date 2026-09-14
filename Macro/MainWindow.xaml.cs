@@ -1,6 +1,4 @@
-﻿using Emgu.CV;
-using Emgu.CV.CvEnum;
-using Macro.Views;
+﻿using Macro.Views;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -25,7 +23,7 @@ namespace Macro
             _farmingPage = new FarmingPage();
             _dailyPage = new DailyPage();
             _timerPage = new TimerPage();
-            MainFrame.Navigate(_farmingPage);
+            MainFrame.Navigate(_timerPage);
         }
 
         private void BtnFarming_Click(object sender, RoutedEventArgs e)

@@ -1,0 +1,71 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace Macro.Models
+{
+    public class Boss
+    {
+        public string? World { get; set; }
+        public string? Localization { get; set; }
+        public string? Name { get; set; }
+        public List<TimeSpan> SpawnTimes { get; set; } = new List<TimeSpan>();
+        public TimeSpan NextSpawnTime
+        {
+            get
+            {
+                if (SpawnTimes == null || SpawnTimes.Count == 0)
+                    return TimeSpan.Zero;
+
+                var now = DateTime.Now.TimeOfDay;
+
+                // Procura o próximo horário hoje (inclui horários iguais ao atual)
+                var future = SpawnTimes
+                    .Where(hour => hour >= now)
+                    .OrderBy(hour => hour)
+                    .ToList();
+
+                if (future.Any())
+                    return future.First();
+
+                // Se não houver mais hoje, retorna o primeiro horário do próximo dia
+                return SpawnTimes
+                    .OrderBy(hour => hour)
+                    .First();
+            }
+        }
+
+        public TimeSpan TimeRemaining
+        {
+            get
+            {
+                var nextSpawn = NextSpawnTime;
+
+                var now = DateTime.Now.TimeOfDay;
+                if (nextSpawn >= now)
+                {
+                    return nextSpawn - now;
+                }
+
+                return (TimeSpan.FromDays(1) - now) + nextSpawn;
+            }
+        }
+
+        public string TimeRemainingText
+        {
+            get
+            {
+                return TimeRemaining.ToString(@"hh\:mm\:ss");
+            }
+        }
+
+        public string SpawnTimesText
+        {
+            get
+            {
+                return string.Join(" | ", SpawnTimes.OrderBy(horario => horario).Select(horario => horario.ToString(@"hh\:mm")));
+            }
+        }
+    }
+}

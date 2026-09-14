@@ -1,20 +1,24 @@
 ﻿using Emgu.CV;
 using Emgu.CV.CvEnum;
+using Macro.Services.Models;
+using Macro.Views;
+using Macro.Services.Models;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.IO;
-using SDPoint = System.Drawing.Point;
-using static Macro.Services.ScreenCaptureService;
-using Macro.Views;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using static Macro.Services.MovementService;
+using static Macro.Services.ScreenCaptureService;
+using SDPoint = System.Drawing.Point;
 
 namespace Macro.Views
 {
-    /// <summary>
-    /// Interação lógica para FarmingPage.xam
-    /// </summary>
     public partial class FarmingPage : Page
     {
+        private bool _mouseLoopRunning = false;
         public FarmingPage()
         {
             InitializeComponent();
@@ -24,48 +28,52 @@ namespace Macro.Views
         {
             MessageBox.Show("Parado");
         }
-        private void BtnStart_Click(object sender, RoutedEventArgs e)
+        private async void BtnStart_Click(object sender, RoutedEventArgs e)
         {
-            using Mat screen = CaptureScreen();
-            string path = System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "teste.png");
+            var mir42 = new WindowTarget("Mir4G", "Mir4G[2]");
+            var mir40 = new WindowTarget("Mir4S", "Mir4G[0]");
 
-            using Mat template = CvInvoke.Imread(path, ImreadModes.ColorBgr);
-
-            if (template.IsEmpty)
+            await Task.Run(() =>
             {
-                MessageBox.Show("Não foi possível carregar o template.");
-                return;
-            }
+                RemoveEnergySave(mir42);
+                for (int i = 0; i < 3; i++)
+                {
+                    MacroRaids(mir42);
+                }
+                MacroBossRaids(mir42);
+                DailyFavoriteMissions(mir42);
+            });
 
-            using Mat result = new Mat();
+            await Task.Delay(2000);
 
-            CvInvoke.MatchTemplate(screen, template, result, TemplateMatchingType.CcoeffNormed);
-
-            double minVal = 0;
-            double maxVal = 0;
-
-            SDPoint minLoc = new SDPoint();
-            SDPoint maxLoc = new SDPoint();
-
-            CvInvoke.MinMaxLoc(result, ref minVal, ref maxVal, ref minLoc, ref maxLoc);
-
-            if (maxVal >= 0.7)
+            await Task.Run(() =>
             {
-                var messageBox = new CommonMessageBox(
-                    "Imagem encontrada",
-                    $"Confiança: {maxVal:P2}\n" +
-                    $"X: {maxLoc.X}\n" +
-                    $"Y: {maxLoc.Y}");
+                RemoveEnergySave(mir40);
+                for (int i = 0; i < 3; i++)
+                {
+                    MacroRaids(mir40);
+                    Thread.Sleep(TimeSpan.FromMinutes(5));
+                }
+                MacroBossRaids(mir40);
+                DailyFavoriteMissions(mir40);
+            });
+        }
 
-                messageBox.ShowDialog();
+        private void BtnMousePercent_Click(object sender, RoutedEventArgs e)
+        {
+            if (!_mouseLoopRunning)
+            {
+                // Inicia loop contínuo
+                StartMousePercentageLoop();
+                _mouseLoopRunning = true;
+                BtnMousePercent.Content = "Stop MousePercent";
             }
             else
             {
-                var messageBox = new CommonMessageBox(
-                    "Imagem  não encontrada",
-                    $"Confiança: {maxVal:P2}\n");
-
-                messageBox.ShowDialog();
+                // Para loop contínuo
+                StopMousePercentageLoop();
+                _mouseLoopRunning = false;
+                BtnMousePercent.Content = "MousePercent";
             }
         }
     }

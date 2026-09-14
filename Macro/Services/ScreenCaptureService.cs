@@ -1,9 +1,9 @@
-﻿using Emgu.CV;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows;
 using System.IO;
 using static Macro.Utils.ImagesUtils;
+using Emgu.CV;
 namespace Macro.Services
 {
     class ScreenCaptureService
@@ -23,5 +23,6 @@ namespace Macro.Services
 
             return screen;
         }
+
     }
 }

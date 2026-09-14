@@ -1,0 +1,88 @@
+﻿using Macro.Models;
+using Macro.Services;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
+using System.Collections.ObjectModel;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Threading;
+
+namespace Macro.Views
+{
+    public partial class TimerPage : Page
+    {
+        private readonly DispatcherTimer _timer;
+
+        private List<Boss> _bosses = new();
+        private ObservableCollection<Boss> _availableBosses = new();
+
+        public TimerPage()
+        {
+            InitializeComponent();
+
+            _timer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(1)
+            };
+
+            _timer.Tick += Timer_Tick;
+            _timer.Start();
+
+            _ = GetBosses();
+        }
+
+        private async Task GetBosses()
+        {
+            _bosses = await BossService.LoadBossesAsync();
+
+            BossDataGrid.ItemsSource = _bosses;
+
+            // Inicializa a source dos cards de bosses disponíveis (procura controle por nome)
+            var itemsControl = this.FindName("AvailableBossesItemsControl") as ItemsControl;
+            if (itemsControl != null)
+                itemsControl.ItemsSource = _availableBosses;
+
+            UpdateAvailableBosses();
+        }
+        private void Timer_Tick(object? sender, EventArgs e)
+        {
+            // Atualiza os cards de bosses disponíveis a cada tick
+            UpdateAvailableBosses();
+
+            BossDataGrid.Items.Refresh();
+
+            if (_bosses.Any(b => b.TimeRemaining.TotalSeconds <= 0))
+            {
+                RefreshBosses();
+            }
+        }
+
+        private void RefreshBosses()
+        {
+            // Ordena por segundos restantes para evitar problemas com comparações de TimeSpan muito próximas
+            _bosses = _bosses.OrderBy(b => b.TimeRemaining.TotalSeconds).ToList();
+
+            BossDataGrid.ItemsSource = _bosses;
+        }
+
+        private void UpdateAvailableBosses()
+        {
+            if (_bosses == null)
+                return;
+
+            var available = _bosses
+                .Where(b => b.TimeRemaining.TotalSeconds <= 0)
+                .OrderBy(b => b.TimeRemaining.TotalSeconds)
+                .ToList();
+
+            _availableBosses.Clear();
+            foreach (var b in available)
+                _availableBosses.Add(b);
+
+            var panel = this.FindName("AvailablePanel") as FrameworkElement;
+            if (panel != null)
+                panel.Visibility = _availableBosses.Any() ? Visibility.Visible : Visibility.Collapsed;
+        }
+    }
+}

@@ -1,33 +1,42 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <UseWPF>true</UseWPF>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net10.0-windows</TargetFramework>
 
-  <ItemGroup>
-    <Folder Include="Assets\Fonts\" />
-    <Folder Include="Controls\" />
-  </ItemGroup>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UseWPF>true</UseWPF>
 
-<ItemGroup>
-	<Content Include="Assets\teste.png">
-		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	</Content>
-</ItemGroup>
+		<!-- Publicação -->
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<SelfContained>true</SelfContained>
+		<PublishSingleFile>true</PublishSingleFile>
 
-<ItemGroup>
-	<None Update="Data\bosses.json">
-		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	</None>
-</ItemGroup>
+		<!-- Opcional: reduz um pouco o tamanho -->
+		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Emgu.CV" Version="4.13.0.5924" />
-    <PackageReference Include="Emgu.CV.runtime.windows" Version="4.13.0.5924" />
-  </ItemGroup>
+	<!-- Pastas -->
+	<ItemGroup>
+		<Folder Include="Assets\Fonts\" />
+		<Folder Include="Controls\" />
+	</ItemGroup>
+
+	<!-- Recursos -->
+	<ItemGroup>
+		<!-- Imagem usada pelo WPF -->
+		<Resource Include="Assets\teste.png" />
+
+		<!-- JSON embutido no executável -->
+		<!-- JSON copiado para saída para permitir execução fora da pasta de publicação -->
+		<Content Include="Data\bosses.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+	<ItemGroup>
+	  <PackageReference Include="Emgu.CV" Version="4.13.0.5924" />
+	  <PackageReference Include="Emgu.CV.runtime.windows" Version="4.13.0.5924" />
+	</ItemGroup>
 
 </Project>

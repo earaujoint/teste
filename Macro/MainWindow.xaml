@@ -6,8 +6,10 @@
         xmlns:local="clr-namespace:Macro"
         mc:Ignorable="d"
         Title="MainWindow"
-        Height="450"
-        Width="800"
+        Width="1100"
+        Height="500"
+        MinWidth="1100"
+        MinHeight="500"
         Background="#0B0B0B"
         FontFamily="{StaticResource PoppinsFont}">
 
