@@ -3,16 +3,16 @@
   "WorkspaceRootPath": "C:\\Macro\\teste\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\macro\\teste\\macro\\services\\movementservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\services\\movementservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\macro\\teste\\macro\\views\\farmingpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\views\\farmingpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\macro\\teste\\macro\\views\\farmingpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\views\\farmingpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\macro\\teste\\macro\\services\\movementservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\services\\movementservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\macro\\teste\\macro\\services\\models\\mousepercentage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -54,7 +54,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 6,
           "Children": [
             {
               "$type": "Document",
@@ -84,13 +84,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
               "Title": "MovementService.cs",
               "DocumentMoniker": "C:\\Macro\\teste\\Macro\\Services\\MovementService.cs",
               "RelativeDocumentMoniker": "Macro\\Services\\MovementService.cs",
               "ToolTip": "C:\\Macro\\teste\\Macro\\Services\\MovementService.cs",
               "RelativeToolTip": "Macro\\Services\\MovementService.cs",
-              "ViewState": "AgIAAIkBAAAAAAAAAAAmwMQBAAAwAAAAAAAAAA==",
+              "ViewState": "AgIAAH8BAAAAAAAAAAAIwMQBAAAwAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-09-13T16:17:54.322Z",
               "EditorCaption": ""
@@ -105,8 +105,7 @@
               "RelativeToolTip": "Macro\\Services\\Models\\MousePercentage.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-12T21:17:57.389Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-12T21:17:57.389Z"
             },
             {
               "$type": "Document",
@@ -118,12 +117,11 @@
               "RelativeToolTip": "Macro\\Services\\Models\\WindowTarget.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-12T21:17:52.868Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-12T21:17:52.868Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "FarmingPage.xaml",
               "DocumentMoniker": "C:\\Macro\\teste\\Macro\\Views\\FarmingPage.xaml",
               "RelativeDocumentMoniker": "Macro\\Views\\FarmingPage.xaml",
@@ -135,13 +133,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "FarmingPage.xaml.cs",
               "DocumentMoniker": "C:\\Macro\\teste\\Macro\\Views\\FarmingPage.xaml.cs",
               "RelativeDocumentMoniker": "Macro\\Views\\FarmingPage.xaml.cs",
               "ToolTip": "C:\\Macro\\teste\\Macro\\Views\\FarmingPage.xaml.cs",
               "RelativeToolTip": "Macro\\Views\\FarmingPage.xaml.cs",
-              "ViewState": "AgIAABwAAAAAAAAAAAA0wCoAAAAeAAAAAAAAAA==",
+              "ViewState": "AgIAAB8AAAAAAAAAAAAcwDIAAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-08-30T23:28:18.713Z",
               "EditorCaption": ""
