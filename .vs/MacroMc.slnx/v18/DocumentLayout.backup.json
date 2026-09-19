@@ -1,49 +1,45 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Macro\\teste\\",
+  "WorkspaceRootPath": "C:\\Users\\Erik\\Desktop\\teste\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\macro\\teste\\macro\\services\\movementservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\users\\erik\\desktop\\teste\\macro\\services\\movementservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\services\\movementservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\macro\\teste\\macro\\views\\farmingpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\users\\erik\\desktop\\teste\\macro\\views\\farmingpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\views\\farmingpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\macro\\teste\\macro\\views\\farmingpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\views\\farmingpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\macro\\teste\\macro\\services\\models\\mousepercentage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\services\\models\\mousepercentage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\macro\\teste\\macro\\services\\models\\windowtarget.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\users\\erik\\desktop\\teste\\macro\\services\\models\\windowtarget.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\services\\models\\windowtarget.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\macro\\teste\\macro\\services\\screencaptureservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\users\\erik\\desktop\\teste\\macro\\services\\screencaptureservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\services\\screencaptureservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\macro\\teste\\macro\\macro.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\users\\erik\\desktop\\teste\\macro\\services\\models\\mousepercentage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\services\\models\\mousepercentage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\users\\erik\\desktop\\teste\\macro\\macro.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
       "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\macro.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\macro\\teste\\macro\\services\\bossservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\users\\erik\\desktop\\teste\\macro\\services\\bossservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\services\\bossservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\macro\\teste\\macro\\utils\\imagesutils.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\users\\erik\\desktop\\teste\\macro\\utils\\imagesutils.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\utils\\imagesutils.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\macro\\teste\\macro\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\users\\erik\\desktop\\teste\\macro\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\macro\\teste\\macro\\views\\timerpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\users\\erik\\desktop\\teste\\macro\\views\\timerpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\views\\timerpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     }
   ],
@@ -54,15 +50,15 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 6,
               "Title": "BossService.cs",
-              "DocumentMoniker": "C:\\Macro\\teste\\Macro\\Services\\BossService.cs",
+              "DocumentMoniker": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Services\\BossService.cs",
               "RelativeDocumentMoniker": "Macro\\Services\\BossService.cs",
-              "ToolTip": "C:\\Macro\\teste\\Macro\\Services\\BossService.cs",
+              "ToolTip": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Services\\BossService.cs",
               "RelativeToolTip": "Macro\\Services\\BossService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAD8AAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -71,50 +67,51 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 3,
               "Title": "ScreenCaptureService.cs",
-              "DocumentMoniker": "C:\\Macro\\teste\\Macro\\Services\\ScreenCaptureService.cs",
+              "DocumentMoniker": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Services\\ScreenCaptureService.cs",
               "RelativeDocumentMoniker": "Macro\\Services\\ScreenCaptureService.cs",
-              "ToolTip": "C:\\Macro\\teste\\Macro\\Services\\ScreenCaptureService.cs",
+              "ToolTip": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Services\\ScreenCaptureService.cs",
               "RelativeToolTip": "Macro\\Services\\ScreenCaptureService.cs",
-              "ViewState": "AgIAAAIAAAAAAAAAAAAQwBIAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-08-30T23:28:14.939Z",
-              "IsPinned": true
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "FarmingPage.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Views\\FarmingPage.xaml.cs",
+              "RelativeDocumentMoniker": "Macro\\Views\\FarmingPage.xaml.cs",
+              "ToolTip": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Views\\FarmingPage.xaml.cs",
+              "RelativeToolTip": "Macro\\Views\\FarmingPage.xaml.cs",
+              "ViewState": "AgIAACsAAAAAAAAAAAAYwD0AAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-30T23:28:18.713Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "MovementService.cs",
-              "DocumentMoniker": "C:\\Macro\\teste\\Macro\\Services\\MovementService.cs",
+              "DocumentMoniker": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Services\\MovementService.cs",
               "RelativeDocumentMoniker": "Macro\\Services\\MovementService.cs",
-              "ToolTip": "C:\\Macro\\teste\\Macro\\Services\\MovementService.cs",
-              "RelativeToolTip": "Macro\\Services\\MovementService.cs",
-              "ViewState": "AgIAAIkBAAAAAAAAAAAmwMQBAAAwAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Services\\MovementService.cs*",
+              "RelativeToolTip": "Macro\\Services\\MovementService.cs*",
+              "ViewState": "AgIAAMcBAAAAAAAAAAAowNoBAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-09-13T16:17:54.322Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "MousePercentage.cs",
-              "DocumentMoniker": "C:\\Macro\\teste\\Macro\\Services\\Models\\MousePercentage.cs",
-              "RelativeDocumentMoniker": "Macro\\Services\\Models\\MousePercentage.cs",
-              "ToolTip": "C:\\Macro\\teste\\Macro\\Services\\Models\\MousePercentage.cs",
-              "RelativeToolTip": "Macro\\Services\\Models\\MousePercentage.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-12T21:17:57.389Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 2,
               "Title": "WindowTarget.cs",
-              "DocumentMoniker": "C:\\Macro\\teste\\Macro\\Services\\Models\\WindowTarget.cs",
+              "DocumentMoniker": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Services\\Models\\WindowTarget.cs",
               "RelativeDocumentMoniker": "Macro\\Services\\Models\\WindowTarget.cs",
-              "ToolTip": "C:\\Macro\\teste\\Macro\\Services\\Models\\WindowTarget.cs",
+              "ToolTip": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Services\\Models\\WindowTarget.cs",
               "RelativeToolTip": "Macro\\Services\\Models\\WindowTarget.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -123,36 +120,23 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "FarmingPage.xaml",
-              "DocumentMoniker": "C:\\Macro\\teste\\Macro\\Views\\FarmingPage.xaml",
-              "RelativeDocumentMoniker": "Macro\\Views\\FarmingPage.xaml",
-              "ToolTip": "C:\\Macro\\teste\\Macro\\Views\\FarmingPage.xaml",
-              "RelativeToolTip": "Macro\\Views\\FarmingPage.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-09-12T21:01:36.816Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "FarmingPage.xaml.cs",
-              "DocumentMoniker": "C:\\Macro\\teste\\Macro\\Views\\FarmingPage.xaml.cs",
-              "RelativeDocumentMoniker": "Macro\\Views\\FarmingPage.xaml.cs",
-              "ToolTip": "C:\\Macro\\teste\\Macro\\Views\\FarmingPage.xaml.cs",
-              "RelativeToolTip": "Macro\\Views\\FarmingPage.xaml.cs",
-              "ViewState": "AgIAABwAAAAAAAAAAAA0wCoAAAAeAAAAAAAAAA==",
+              "DocumentIndex": 4,
+              "Title": "MousePercentage.cs",
+              "DocumentMoniker": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Services\\Models\\MousePercentage.cs",
+              "RelativeDocumentMoniker": "Macro\\Services\\Models\\MousePercentage.cs",
+              "ToolTip": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Services\\Models\\MousePercentage.cs",
+              "RelativeToolTip": "Macro\\Services\\Models\\MousePercentage.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-30T23:28:18.713Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-12T21:17:57.389Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 5,
               "Title": "Macro.csproj",
-              "DocumentMoniker": "C:\\Macro\\teste\\Macro\\Macro.csproj",
+              "DocumentMoniker": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Macro.csproj",
               "RelativeDocumentMoniker": "Macro\\Macro.csproj",
-              "ToolTip": "C:\\Macro\\teste\\Macro\\Macro.csproj",
+              "ToolTip": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Macro.csproj",
               "RelativeToolTip": "Macro\\Macro.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
@@ -160,11 +144,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 7,
               "Title": "ImagesUtils.cs",
-              "DocumentMoniker": "C:\\Macro\\teste\\Macro\\Utils\\ImagesUtils.cs",
+              "DocumentMoniker": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Utils\\ImagesUtils.cs",
               "RelativeDocumentMoniker": "Macro\\Utils\\ImagesUtils.cs",
-              "ToolTip": "C:\\Macro\\teste\\Macro\\Utils\\ImagesUtils.cs",
+              "ToolTip": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Utils\\ImagesUtils.cs",
               "RelativeToolTip": "Macro\\Utils\\ImagesUtils.cs",
               "ViewState": "AgIAAAIAAAAAAAAAAAAQwBwAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -172,22 +156,22 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 9,
               "Title": "TimerPage.xaml",
-              "DocumentMoniker": "C:\\Macro\\teste\\Macro\\Views\\TimerPage.xaml",
+              "DocumentMoniker": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Views\\TimerPage.xaml",
               "RelativeDocumentMoniker": "Macro\\Views\\TimerPage.xaml",
-              "ToolTip": "C:\\Macro\\teste\\Macro\\Views\\TimerPage.xaml",
+              "ToolTip": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Views\\TimerPage.xaml",
               "RelativeToolTip": "Macro\\Views\\TimerPage.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
               "WhenOpened": "2026-08-30T20:28:39.209Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 8,
               "Title": "MainWindow.xaml",
-              "DocumentMoniker": "C:\\Macro\\teste\\Macro\\MainWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\MainWindow.xaml",
               "RelativeDocumentMoniker": "Macro\\MainWindow.xaml",
-              "ToolTip": "C:\\Macro\\teste\\Macro\\MainWindow.xaml",
+              "ToolTip": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\MainWindow.xaml",
               "RelativeToolTip": "Macro\\MainWindow.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
               "WhenOpened": "2026-08-30T20:26:05.496Z"

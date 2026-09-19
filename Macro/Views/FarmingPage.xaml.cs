@@ -35,23 +35,23 @@ namespace Macro.Views
 
             await Task.Run(() =>
             {
-                for (int i = 0; i < 3; i++)
-                {
-                    RemoveEnergySave(mir42);
-                    MacroRaids(mir42);
+                //for (int i = 0; i < 3; i++)
+                //{
+                //    RemoveEnergySave(mir42);
+                //    MacroRaids(mir42);
 
-                    Task.Delay(2000);
+                //    Task.Delay(2000);
 
-                    RemoveEnergySave(mir40);
-                    MacroRaids(mir40);
+                //    RemoveEnergySave(mir40);
+                //    MacroRaids(mir40);
 
-                    Task.Delay(1000 * 240);
-                }
-                MacroBossRaids(mir42);
+                //    Task.Delay(1000 * 240);
+                //}
+                //MacroBossRaids(mir42);
 
-                Task.Delay(2000);
+                //Task.Delay(2000);
 
-                MacroBossRaids(mir40);
+                //MacroBossRaids(mir40);
 
                 Task.Delay(2000);
 

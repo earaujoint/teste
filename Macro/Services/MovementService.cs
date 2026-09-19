@@ -249,12 +249,12 @@ namespace Macro.Services
 
                 SetCursorPos(x, y);
 
-                Thread.Sleep(5);
+                Thread.Sleep(4);
             }
 
             mouse_event(0x0004, 0, 0, 0, UIntPtr.Zero);
 
-            Thread.Sleep(750);
+            Thread.Sleep(1000);
         }
         private static void DragUpStrong(IntPtr hWnd)
         {
@@ -317,11 +317,14 @@ namespace Macro.Services
 
             if (process == null)
                 return;
-
             IntPtr handle = process.MainWindowHandle;
+            SetForegroundWindow(handle);
+            ShowWindow(handle, SW_MAXIMIZE);
+
             //Drag relative
             DragRelative(handle, 30, 50, 70, 50, 1000);
 
+      
             //Loot menu
             ClickRelative(handle, 55, 83);
         }
@@ -354,8 +357,8 @@ namespace Macro.Services
             //Create Raid 2
             ClickRelative(handle, 49.90, 82.56);
 
-            //Wait for 17 seconds to ensure the raid is FILLED
-            Thread.Sleep(17000);
+            //Wait for 1 minute to ensure the raid is FILLED
+            Thread.Sleep(1000 * 60);
             //Start Raid
             ClickRelative(handle, 76.82, 85.83);
         }
@@ -404,11 +407,13 @@ namespace Macro.Services
             SetForegroundWindow(handle);
             ShowWindow(handle, SW_MAXIMIZE);
 
+            Thread.Sleep(500);
+
             //Menu Missions
             ClickRelative(handle, 85, 5);
 
-            DragUpStrong(handle);
-            Thread.Sleep(100);
+            //Field
+            ClickRelative(handle, 7, 14);
 
             DragUpStrong(handle);
             Thread.Sleep(100);
@@ -416,7 +421,6 @@ namespace Macro.Services
             DragUpStrong(handle);
             Thread.Sleep(100);
 
-            DragUpStrong(handle);
 
             //Take 9 missions
             for (int i = 1; i < 10; i++)
@@ -432,6 +436,8 @@ namespace Macro.Services
 
             //Start missions
             ClickRelative(handle, 80, 86);
+
+            FastTravel(target);
         }
 
         public static void DailyDonates(WindowTarget target)
@@ -457,6 +463,22 @@ namespace Macro.Services
             ClickRelative(handle, 67.66, 67.39);
             ClickRelative(handle, 67.50, 80.97);
             ClickRelative(handle, 56.09, 64.22);
+        }
+
+        public static void FastTravel(WindowTarget target)
+        {
+            var process = FindProcess(target);
+            if (process == null)
+                return;
+            IntPtr handle = process.MainWindowHandle;
+            SetForegroundWindow(handle);
+            ShowWindow(handle, SW_MAXIMIZE);
+
+            ClickRelative(handle, 75, 57);
+
+            Thread.Sleep(200);
+
+            ClickRelative(handle, 54, 74);
         }
     }
 }
