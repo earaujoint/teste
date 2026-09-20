@@ -18,8 +18,12 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 2,
           "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
             {
               "$type": "Document",
               "DocumentIndex": 1,
@@ -28,7 +32,7 @@
               "RelativeDocumentMoniker": "Macro\\Services\\MovementService.cs",
               "ToolTip": "C:\\Macro\\teste\\Macro\\Services\\MovementService.cs",
               "RelativeToolTip": "Macro\\Services\\MovementService.cs",
-              "ViewState": "AgIAALYBAAAAAAAAAAAwwKECAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAH4BAAAAAAAAAAAQwJEBAAAhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-09-19T16:06:11.823Z",
               "EditorCaption": ""
@@ -41,7 +45,7 @@
               "RelativeDocumentMoniker": "Macro\\Views\\FarmingPage.xaml.cs",
               "ToolTip": "C:\\Macro\\teste\\Macro\\Views\\FarmingPage.xaml.cs",
               "RelativeToolTip": "Macro\\Views\\FarmingPage.xaml.cs",
-              "ViewState": "AgIAABsAAAAAAAAAAIA4wEUAAAAaAAAAAAAAAA==",
+              "ViewState": "AgIAAEkAAAAAAAAAAAAawIkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-09-19T15:56:02.51Z",
               "EditorCaption": ""

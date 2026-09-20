@@ -392,23 +392,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\eriks\\.nuget\\packages\\": {},
+    "C:\\Users\\Erik\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Macro\\teste\\Macro\\Macro.csproj",
+      "projectUniqueName": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Macro.csproj",
       "projectName": "Macro",
-      "projectPath": "C:\\Macro\\teste\\Macro\\Macro.csproj",
-      "packagesPath": "C:\\Users\\eriks\\.nuget\\packages\\",
-      "outputPath": "C:\\Macro\\teste\\Macro\\obj\\",
+      "projectPath": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Macro.csproj",
+      "packagesPath": "C:\\Users\\Erik\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\eriks\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Erik\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],

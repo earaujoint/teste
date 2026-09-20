@@ -189,12 +189,12 @@ namespace Macro.Services
 
                 SetCursorPos(x, y);
 
-                Thread.Sleep(5);
+                Thread.Sleep(4);
             }
 
             mouse_event(0x0004, 0, 0, 0, UIntPtr.Zero);
 
-            Thread.Sleep(750);
+            Thread.Sleep(1000);
         }
         private static void DragUpStrong(IntPtr hWnd)
         {
@@ -259,6 +259,7 @@ namespace Macro.Services
             //Drag relative
             input.Drag(30, 50, 70, 50, 1000);
 
+      
             //Loot menu
             input.ClickRelative(55, 83);
 
@@ -455,12 +456,13 @@ namespace Macro.Services
             input.Activate();
             void Click(double x, double y) => input.ClickRelative(x, y);
 
+            Thread.Sleep(500);
+
             //Menu Missions
             Click(85, 5);
 
             input.DragUp();
             Thread.Sleep(100);
-
             //Take 9 missions
             for (int i = 1; i < 10; i++)
             {
@@ -668,6 +670,5 @@ namespace Macro.Services
             // Clique final para iniciar a arena no Target1.
             StartRaid(new InputService(target1));
         }
-
     }
 }
