@@ -16,6 +16,7 @@
                 <Button x:Name="BtnStart" Content="Start" Click="BtnStart_Click" Width="80" Margin="0,0,10,0" />
                 <Button x:Name="BtnStop" Content="Stop" Click="BtnStop_Click" Width="80" />
                 <Button x:Name="BtnMousePercent" Content="MousePercent" Click="BtnMousePercent_Click" Width="120" Margin="10,0,0,0" />
+                <Button x:Name="BtnDoArena" Content="DoArena" Click="BtnDoArena_Click" Width="100" Margin="10,0,0,0" />
             </WrapPanel>
             <Border BorderBrush="Gray" BorderThickness="1" Width="800" Height="450">
                 <Image x:Name="ScreenshotImage" Stretch="Uniform" />

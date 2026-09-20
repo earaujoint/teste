@@ -8,6 +8,8 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("assets/raiddetection/ok.png")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("assets/raiddetection/team-reward.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("data/bosses.json")]
 
 

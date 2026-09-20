@@ -16,7 +16,7 @@ namespace Macro.Utils
 
             try
             {
-                Mat mat = new Mat(bitmap.Height, bitmap.Width, DepthType.Cv8U, 3, data.Scan0, data.Stride);
+                using Mat mat = new Mat(bitmap.Height, bitmap.Width, DepthType.Cv8U, 3, data.Scan0, data.Stride);
 
                 return mat.Clone();
             }

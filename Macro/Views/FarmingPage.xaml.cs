@@ -1,7 +1,6 @@
 ﻿using Emgu.CV;
 using Emgu.CV.CvEnum;
-using Macro.Services.Models;
-using Macro.Views;
+using Macro.Services;
 using Macro.Services.Models;
 using System.IO;
 using System.Threading;
@@ -19,49 +18,93 @@ namespace Macro.Views
     public partial class FarmingPage : Page
     {
         private bool _mouseLoopRunning = false;
+        private CancellationTokenSource? _farmingCts;
+        private CancellationTokenSource? _doArenaCts;
         public FarmingPage()
         {
             InitializeComponent();
         }
 
+        private async void BtnDoArena_Click(object sender, RoutedEventArgs e)
+        {
+            if (_doArenaCts != null) return;
+            var cts = new CancellationTokenSource();
+            _doArenaCts = cts;
+            BtnDoArena.IsEnabled = false;
+
+            try
+            {
+                await Task.Run(() =>
+                {
+                    var token = cts.Token;
+                    var mir41 = new WindowTarget("Mir4G", "Mir4G[1]");
+                    var mir40 = new WindowTarget("Mir4S", "Mir4G[0]");
+                    DoArena(mir41, mir40, token);
+                }, cts.Token);
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "DoArena interrompido", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            finally
+            {
+                _doArenaCts = null;
+                BtnDoArena.IsEnabled = true;
+            }
+        }
+
         private void BtnStop_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Parado");
+            _farmingCts?.Cancel();
         }
         private async void BtnStart_Click(object sender, RoutedEventArgs e)
         {
-            var mir42 = new WindowTarget("Mir4G", "Mir4G[2]");
-            var mir40 = new WindowTarget("Mir4S", "Mir4G[0]");
+            if (_farmingCts != null) return;
+            using var cts = new CancellationTokenSource();
+            _farmingCts = cts;
+            BtnStart.IsEnabled = false;
 
-            await Task.Run(() =>
+            try
             {
-                for (int i = 0; i < 3; i++)
+                await Task.Run(async () =>
                 {
-                    RemoveEnergySave(mir42);
-                    MacroRaids(mir42);
+                    var token = cts.Token;
+                    var mir41 = new WindowTarget("Mir4G", "Mir4G[1]");
+                    var mir42 = new WindowTarget("Mir4G", "Mir4G[2]");
+                    var mir40 = new WindowTarget("Mir4S", "Mir4G[0]");
+                    // Validate assets/native runtime before interacting with the game.
+                    using (var detector = new Macro.Services.RaidRewardDetector()) { }
 
-                    Task.Delay(2000);
+                    //RemoveEnergySave(mir42);
+                    //DailyDonates(mir42);
+                    //RemoveEnergySave(mir40);
+                    //DailyDonates(mir40);
 
-                    RemoveEnergySave(mir40);
-                    MacroRaids(mir40);
+                    //for (int i = 0; i < 3; i++)
+                    //{
+                    //    await RunRaidPairAsync(mir42, mir40, cancellationToken: token);
+                    //}
+                    //await RunBossRaidPairAsync(mir42, mir40, token);
 
-                    Task.Delay(1000 * 240);
-                }
-                MacroBossRaids(mir42);
+                    DoArena(mir41, mir40, token);
+                    //DailyFavoriteMissions(mir42);
 
-                Task.Delay(2000);
+                    //DailyFavoriteMissions(mir40);
 
-                MacroBossRaids(mir40);
-
-                Task.Delay(2000);
-
-                DailyFavoriteMissions(mir42);
-
-                Task.Delay(2000);
-
-                DailyFavoriteMissions(mir40);
-
-            });
+                    //DomiMissions(mir40);
+                }, cts.Token);
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Automação interrompida", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            finally
+            {
+                _farmingCts = null;
+                BtnStart.IsEnabled = true;
+            }
         }
 
         private void BtnMousePercent_Click(object sender, RoutedEventArgs e)

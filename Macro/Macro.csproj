@@ -27,6 +27,10 @@
 	<ItemGroup>
 		<!-- Imagem usada pelo WPF -->
 		<Resource Include="Assets\teste.png" />
+		<Content Include="Assets\RaidDetection\*.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Content>
 
 		<!-- JSON embutido no executável -->
 		<!-- JSON copiado para saída para permitir execução fora da pasta de publicação -->
