@@ -265,22 +265,6 @@ namespace Macro.Services
 
             Thread.Sleep(1500);
         }
-        /// <summary>
-        /// Executa a sequência de cliques para "Macro Raids" no alvo informado. Se target for nulo, usa Mir4G / Mir4G[2].
-        /// </summary>
-        public static async Task MacroRaids(WindowTarget target, CancellationToken cancellationToken = default)
-        {
-            IntPtr handle = await StartRaidAsync(target, false, cancellationToken).ConfigureAwait(false);
-            await RaidRewardMonitor.WaitAndDismissAsync(handle, cancellationToken).ConfigureAwait(false);
-            await Task.Delay(1500, cancellationToken).ConfigureAwait(false);
-        }
-
-        public static async Task MacroBossRaids(WindowTarget target, CancellationToken cancellationToken = default)
-        {
-            IntPtr handle = await StartRaidAsync(target, true, cancellationToken).ConfigureAwait(false);
-            await RaidRewardMonitor.WaitAndDismissAsync(handle, cancellationToken).ConfigureAwait(false);
-            await Task.Delay(1500, cancellationToken).ConfigureAwait(false);
-        }
 
         [DllImport("user32.dll")]
         private static extern IntPtr GetForegroundWindow();
@@ -294,118 +278,11 @@ namespace Macro.Services
                 throw new InvalidOperationException("Não foi possível ativar a janela da raid.");
         }
 
-        private static async Task<IntPtr> StartRaidAsync(WindowTarget target, bool boss, CancellationToken token)
-        {
-            var input = new InputService(target);
-            IntPtr handle = input.Handle;
-            await RaidWindowCoordinator.Gate.WaitAsync(token).ConfigureAwait(false);
-            try
-            {
-                input.Activate();
-                input.ClickRelative(0.97, 0.04);
-                input.ClickRelative(80.63, 57.5);
-                input.ClickRelative(boss ? 80 : 72, 68);
-                input.ClickRelative(86.51, 94.35);
-                input.ClickRelative(49.90, 82.56);
-
-            }
-            finally { RaidWindowCoordinator.Gate.Release(); }
-
-            // Waiting for players does not hold the desktop: the other raid can start/finish.
-            await Task.Delay(boss ? 180000 : 60000, token).ConfigureAwait(false);
-            await RaidWindowCoordinator.Gate.WaitAsync(token).ConfigureAwait(false);
-            try
-            {
-                input.Activate();
-                // Start Raid
-                input.ClickRelative(76.82, 85.83);
-            }
-            finally { RaidWindowCoordinator.Gate.Release(); }
-            return handle;
-        }
-
-        public static async Task RunRaidPairAsync(WindowTarget first, WindowTarget second,
-            bool boss = false, CancellationToken cancellationToken = default)
-        {
-            if (first == second) throw new ArgumentException("Selecione duas janelas diferentes.");
-            using var pairCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            async Task RunOneAsync(WindowTarget target)
-            {
-                try
-                {
-                    if (!boss)
-                    {
-                        await RaidWindowCoordinator.Gate.WaitAsync(pairCts.Token).ConfigureAwait(false);
-                        try
-                        {
-                            using var process = FindProcess(target)
-                                ?? throw new InvalidOperationException($"Janela não encontrada: {target.WindowTitle}");
-                            await FocusRaidAsync(process.MainWindowHandle, pairCts.Token).ConfigureAwait(false);
-                            RemoveEnergySave(target);
-                        }
-                        finally { RaidWindowCoordinator.Gate.Release(); }
-                    }
-
-                    if (boss) await MacroBossRaids(target, pairCts.Token).ConfigureAwait(false);
-                    else await MacroRaids(target, pairCts.Token).ConfigureAwait(false);
-                }
-                catch
-                {
-                    pairCts.Cancel();
-                    throw;
-                }
-            }
-            // Observe both tasks; on a failure, cancel the sibling before leaving this round.
-            await Task.WhenAll(RunOneAsync(first), RunOneAsync(second)).ConfigureAwait(false);
-        }
-
-        public static async Task RunBossRaidPairAsync(WindowTarget primary, WindowTarget secondary,
-            CancellationToken cancellationToken = default)
-        {
-            if (primary == secondary) throw new ArgumentException("Selecione duas janelas diferentes.");
-
-            var primaryInput = new InputService(primary);
-            var secondaryInput = new InputService(secondary);
-
-            await RaidWindowCoordinator.Gate.WaitAsync(cancellationToken).ConfigureAwait(false);
-            try
-            {
-                ClickBossPrimary(primaryInput);
-                AcceptBossInvite(secondaryInput);
-                StartRaid(primaryInput);
-            }
-            finally
-            {
-                RaidWindowCoordinator.Gate.Release();
-            }
-
-            // Dá tempo para a tela da raid iniciar antes de o monitor alternar as janelas.
-            await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken).ConfigureAwait(false);
-
-            using var pairCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            async Task MonitorAsync(IntPtr handle)
-            {
-                try
-                {
-                    await RaidRewardMonitor.WaitAndDismissAsync(handle, pairCts.Token,
-                        checkInterval: TimeSpan.FromSeconds(1)).ConfigureAwait(false);
-                }
-                catch
-                {
-                    pairCts.Cancel();
-                    throw;
-                }
-            }
-
-            await Task.WhenAll(MonitorAsync(primaryInput.Handle), MonitorAsync(secondaryInput.Handle)).ConfigureAwait(false);
-        }
-
-        public static void ClickBossPrimary(InputService input)
+        private static void ClickNormalPrimary(InputService input)
         {
             input.Activate();
             void Click(int number, double x, double y)
             {
-                Debug.WriteLine($"Boss primary: clique {number}/15 em X={x:F2}%, Y={y:F2}%");
                 input.ClickRelative(x, y);
             }
 
@@ -425,6 +302,130 @@ namespace Macro.Services
             Click(13, 45.52, 39.05);
             Click(14, 56.30, 24.28);
             Click(15, 91.35, 15.86);
+        }
+
+        public static void ClickBossPrimary(InputService input)
+        {
+            input.Activate();
+            void Click(int number, double x, double y)
+            {
+                input.ClickRelative(x, y);
+            }
+
+            Click(1, 97.19, 5.25);
+            Click(2, 80.57, 56.39);
+            Click(3, 80.63, 69.18);
+            Click(4, 85.78, 93.46);
+            Click(5, 39.32, 56.89);
+
+            Click(6, 70.05, 56.99);
+            Click(7, 49.53, 59.17);
+            Click(8, 49.53, 59.17);
+            Click(9, 49.53, 59.17);
+            Click(10, 49.53, 59.17);
+            Click(11, 55.36, 84.44);
+            Click(12, 55.31, 84.44);
+            Click(13, 45.52, 39.05);
+            Click(14, 56.30, 24.28);
+            Click(15, 91.35, 15.86);
+        }
+
+        public static void ClickRaidBossPrimary(InputService input)
+        {
+            input.Activate();
+            void Click(double x, double y)
+            {
+                input.ClickRelative(x, y);
+            }
+
+            Click(96.98, 4.86);
+            Click(80.99, 56.89);
+            Click(80.63, 69.08);
+            Click(85.36, 93.16);
+            Click(50.36, 82.76);
+            Click(45.99, 38.55);
+            Click(56.93, 25.07);
+            Click(91.35, 15.76);
+        }
+
+        public static async Task DoNormalRaid(WindowTarget starter, WindowTarget inviter,
+            CancellationToken cancellationToken = default)
+        {
+            if (starter == inviter)
+                throw new ArgumentException("Selecione duas janelas diferentes.");
+
+            var starterInput = new InputService(starter);
+            var inviterInput = new InputService(inviter);
+
+            await RaidWindowCoordinator.Gate.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                ClickNormalPrimary(starterInput);
+                AcceptBossInvite(inviterInput);
+                StartRaid(starterInput);
+            }
+            finally
+            {
+                RaidWindowCoordinator.Gate.Release();
+            }
+
+            await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken).ConfigureAwait(false);
+            starterInput.Activate();
+            starterInput.SendCtrlOne();
+
+            await WaitAndDismissRaidRewardsAsync(
+                starterInput.Handle,
+                inviterInput.Handle,
+                cancellationToken).ConfigureAwait(false);
+        }
+
+        public static async Task DoBossRaid(WindowTarget starter, WindowTarget inviter,
+            CancellationToken cancellationToken = default)
+        {
+            if (starter == inviter)
+                throw new ArgumentException("Selecione duas janelas diferentes.");
+
+            var starterInput = new InputService(starter);
+            var inviterInput = new InputService(inviter);
+
+            await RaidWindowCoordinator.Gate.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                ClickRaidBossPrimary(starterInput);
+                AcceptBossInvite(inviterInput);
+            }
+            finally
+            {
+                RaidWindowCoordinator.Gate.Release();
+            }
+
+            // No boss, a detecção começa assim que os movimentos e o aceite terminam.
+            // Não há espera fixa nem chamada de StartRaid neste fluxo.
+            await WaitAndDismissRaidRewardsAsync(
+                starterInput.Handle,
+                inviterInput.Handle,
+                cancellationToken).ConfigureAwait(false);
+        }
+
+        private static async Task WaitAndDismissRaidRewardsAsync(
+            IntPtr starterHandle,
+            IntPtr inviterHandle,
+            CancellationToken cancellationToken)
+        {
+            using var monitorCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+
+            try
+            {
+                await RaidRewardMonitor.WaitAndDismissLinkedAsync(
+                    starterHandle,
+                    inviterHandle,
+                    monitorCts.Token).ConfigureAwait(false);
+            }
+            catch
+            {
+                monitorCts.Cancel();
+                throw;
+            }
         }
 
         public static void AcceptBossInvite(InputService input)
@@ -461,6 +462,9 @@ namespace Macro.Services
             //Menu Missions
             Click(85, 5);
 
+            //Field
+            Click(5.52, 13.48);
+
             input.DragUp();
             Thread.Sleep(100);
             //Take 9 missions
@@ -478,7 +482,9 @@ namespace Macro.Services
             //Start missions
             Click(80, 86);
 
-            Thread.Sleep(1500);
+            Thread.Sleep(1000);
+
+            FastTravel(target);
         }
 
         public static void DailyDonates(WindowTarget target)
@@ -501,6 +507,10 @@ namespace Macro.Services
             Click(67.66, 67.39);
             Click(67.50, 80.97);
             Click(56.09, 64.22);
+
+            input.SendEscape();
+            input.SendEscape();
+            input.SendEscape();
 
             Thread.Sleep(1500);
         }
@@ -640,6 +650,7 @@ namespace Macro.Services
             Click(56.98, 24.38);
             Click(91.46, 15.56);
 
+
             Thread.Sleep(1000);
 
         }
@@ -660,15 +671,24 @@ namespace Macro.Services
 
             // Volta ao Target2, aguarda a entrada na arena e então retorna ao Target1.
             new InputService(target2).Activate();
-            Thread.Sleep(TimeSpan.FromSeconds(5));
+            Thread.Sleep(TimeSpan.FromSeconds(3));
             cancellationToken.ThrowIfCancellationRequested();
 
-            new InputService(target1).Activate();
+            var finalInput = new InputService(target2);
+            finalInput.Activate();
+            finalInput.ClickRelative(48.39, 90.88);
+
+            Thread.Sleep(TimeSpan.FromSeconds(7));
+            finalInput.ClickRelative(75.36, 20.22);
+
+            finalInput.ClickRelative(55.05, 75.32);
+
+            var input = new InputService(target1);
+            input.Activate();
+            Thread.Sleep(TimeSpan.FromSeconds(8));
+            input.ClickRelative(48.39, 90.88);
             Thread.Sleep(TimeSpan.FromSeconds(5));
             cancellationToken.ThrowIfCancellationRequested();
-
-            // Clique final para iniciar a arena no Target1.
-            StartRaid(new InputService(target1));
         }
     }
 }

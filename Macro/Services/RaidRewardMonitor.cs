@@ -23,8 +23,14 @@ public static class RaidRewardMonitor
     [DllImport("user32.dll")] private static extern void mouse_event(uint flags, uint x, uint y, uint data, UIntPtr extra);
     [DllImport("user32.dll")] private static extern IntPtr SetThreadDpiAwarenessContext(IntPtr context);
 
+    public static Task WaitAndDismissLinkedAsync(IntPtr starterWindow, IntPtr linkedWindow,
+        CancellationToken cancellationToken)
+    {
+        return WaitAndDismissAsync(starterWindow, cancellationToken, linkedWindow: linkedWindow);
+    }
+
     public static async Task WaitAndDismissAsync(IntPtr window, CancellationToken cancellationToken,
-        TimeSpan? timeout = null, TimeSpan? checkInterval = null)
+        TimeSpan? timeout = null, TimeSpan? checkInterval = null, IntPtr? linkedWindow = null)
     {
         using var detector = new RaidRewardDetector();
         var timer = Stopwatch.StartNew();
@@ -78,6 +84,10 @@ public static class RaidRewardMonitor
                             {
                                 mouse_event(0x0002, 0, 0, 0, UIntPtr.Zero);
                                 mouse_event(0x0004, 0, 0, 0, UIntPtr.Zero);
+                                if (linkedWindow is IntPtr otherWindow)
+                                {
+                                    ClickLinkedPosition(otherWindow, bounds, button, cancellationToken);
+                                }
                                 attempts++;
                                 awaitingDismissal = true;
                                 lastClick = timer.Elapsed;
@@ -99,6 +109,25 @@ public static class RaidRewardMonitor
             await Task.Delay(checkInterval ?? TimeSpan.FromMilliseconds(500), cancellationToken).ConfigureAwait(false);
         }
         throw new TimeoutException("A tela de recompensa não foi confirmada em 20 minutos. Automação interrompida.");
+    }
+
+    private static void ClickLinkedPosition(IntPtr window, Rectangle sourceBounds,
+        Rectangle sourceButton, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!TryGetBounds(window, out var targetBounds)) return;
+
+        int x = targetBounds.X + (int)Math.Round(
+            targetBounds.Width * ((sourceButton.X + sourceButton.Width / 2.0) / sourceBounds.Width));
+        int y = targetBounds.Y + (int)Math.Round(
+            targetBounds.Height * ((sourceButton.Y + sourceButton.Height / 2.0) / sourceBounds.Height));
+
+        ShowWindow(window, 9);
+        SetForegroundWindow(window);
+        Thread.Sleep(150);
+        SetCursorPos(x, y);
+        mouse_event(0x0002, 0, 0, 0, UIntPtr.Zero);
+        mouse_event(0x0004, 0, 0, 0, UIntPtr.Zero);
     }
 
     private static bool TryGetBounds(IntPtr window, out Rectangle bounds)

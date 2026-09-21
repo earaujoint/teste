@@ -39,7 +39,12 @@ namespace Macro.Views
                     var token = cts.Token;
                     var mir41 = new WindowTarget("Mir4G", "Mir4G[1]");
                     var mir40 = new WindowTarget("Mir4S", "Mir4G[0]");
-                    DoArena(mir41, mir40, token);
+                    RemoveEnergySave(mir41);
+                    RemoveEnergySave(mir40);
+                    for (int i = 0; i < 10; i++)
+                    {
+                        DoArena(mir41, mir40, token);
+                    }
                 }, cts.Token);
             }
             catch (OperationCanceledException) { }
@@ -70,27 +75,24 @@ namespace Macro.Views
                 await Task.Run(async () =>
                 {
                     var token = cts.Token;
-                    var mir41 = new WindowTarget("Mir4G", "Mir4G[1]");
                     var mir42 = new WindowTarget("Mir4G", "Mir4G[2]");
                     var mir40 = new WindowTarget("Mir4S", "Mir4G[0]");
                     // Validate assets/native runtime before interacting with the game.
                     using (var detector = new Macro.Services.RaidRewardDetector()) { }
 
-                    //RemoveEnergySave(mir42);
-                    //DailyDonates(mir42);
-                    //RemoveEnergySave(mir40);
-                    //DailyDonates(mir40);
+                    RemoveEnergySave(mir42);
+                    RemoveEnergySave(mir40);
+                    DailyDonates(mir42);
+                    DailyDonates(mir40);
 
-                    //for (int i = 0; i < 3; i++)
-                    //{
-                    //    await RunRaidPairAsync(mir42, mir40, cancellationToken: token);
-                    //}
-                    //await RunBossRaidPairAsync(mir42, mir40, token);
+                    for (int i = 0; i < 2; i++)
+                    {
+                        await DoNormalRaid(mir40, mir42, token);
+                    }
+                    await DoBossRaid(mir40, mir42, token);
 
-                    DoArena(mir41, mir40, token);
-                    //DailyFavoriteMissions(mir42);
-
-                    //DailyFavoriteMissions(mir40);
+                    DailyFavoriteMissions(mir42);
+                    DailyFavoriteMissions(mir40);
 
                     //DomiMissions(mir40);
                 }, cts.Token);

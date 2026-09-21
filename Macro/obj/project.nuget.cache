@@ -1,18 +1,18 @@
 {
   "version": 2,
-  "dgSpecHash": "lq0+UIqopik=",
+  "dgSpecHash": "GwQL4aYbUp0=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Macro.csproj",
+  "projectFilePath": "C:\\Macro\\teste\\Macro\\Macro.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\Erik\\.nuget\\packages\\emgu.cv\\4.13.0.5924\\emgu.cv.4.13.0.5924.nupkg.sha512",
-    "C:\\Users\\Erik\\.nuget\\packages\\emgu.cv.runtime.windows\\4.13.0.5924\\emgu.cv.runtime.windows.4.13.0.5924.nupkg.sha512",
-    "C:\\Users\\Erik\\.nuget\\packages\\emgu.runtime.windows.msvc.rt.arm64\\19.44.35224\\emgu.runtime.windows.msvc.rt.arm64.19.44.35224.nupkg.sha512",
-    "C:\\Users\\Erik\\.nuget\\packages\\emgu.runtime.windows.msvc.rt.x64\\19.44.35224\\emgu.runtime.windows.msvc.rt.x64.19.44.35224.nupkg.sha512",
-    "C:\\Users\\Erik\\.nuget\\packages\\emgu.runtime.windows.msvc.rt.x86\\19.44.35224\\emgu.runtime.windows.msvc.rt.x86.19.44.35224.nupkg.sha512",
-    "C:\\Users\\Erik\\.nuget\\packages\\microsoft.net.illink.tasks\\10.0.12\\microsoft.net.illink.tasks.10.0.12.nupkg.sha512",
-    "C:\\Users\\Erik\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\10.0.12\\microsoft.aspnetcore.app.runtime.win-x64.10.0.12.nupkg.sha512",
-    "C:\\Users\\Erik\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\10.0.12\\microsoft.windowsdesktop.app.runtime.win-x64.10.0.12.nupkg.sha512",
-    "C:\\Users\\Erik\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\10.0.12\\microsoft.netcore.app.runtime.win-x64.10.0.12.nupkg.sha512"
+    "C:\\Users\\eriks\\.nuget\\packages\\emgu.cv\\4.13.0.5924\\emgu.cv.4.13.0.5924.nupkg.sha512",
+    "C:\\Users\\eriks\\.nuget\\packages\\emgu.cv.runtime.windows\\4.13.0.5924\\emgu.cv.runtime.windows.4.13.0.5924.nupkg.sha512",
+    "C:\\Users\\eriks\\.nuget\\packages\\emgu.runtime.windows.msvc.rt.arm64\\19.44.35224\\emgu.runtime.windows.msvc.rt.arm64.19.44.35224.nupkg.sha512",
+    "C:\\Users\\eriks\\.nuget\\packages\\emgu.runtime.windows.msvc.rt.x64\\19.44.35224\\emgu.runtime.windows.msvc.rt.x64.19.44.35224.nupkg.sha512",
+    "C:\\Users\\eriks\\.nuget\\packages\\emgu.runtime.windows.msvc.rt.x86\\19.44.35224\\emgu.runtime.windows.msvc.rt.x86.19.44.35224.nupkg.sha512",
+    "C:\\Users\\eriks\\.nuget\\packages\\microsoft.net.illink.tasks\\10.0.12\\microsoft.net.illink.tasks.10.0.12.nupkg.sha512",
+    "C:\\Users\\eriks\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\10.0.12\\microsoft.aspnetcore.app.runtime.win-x64.10.0.12.nupkg.sha512",
+    "C:\\Users\\eriks\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\10.0.12\\microsoft.windowsdesktop.app.runtime.win-x64.10.0.12.nupkg.sha512",
+    "C:\\Users\\eriks\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\10.0.12\\microsoft.netcore.app.runtime.win-x64.10.0.12.nupkg.sha512"
   ],
   "logs": []
 }

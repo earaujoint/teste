@@ -4,22 +4,16 @@
 winexe
 C#
 .cs
-C:\Users\Erik\Desktop\teste\Macro\obj\Debug\net10.0-windows\win-x64\
+C:\Macro\teste\Macro\obj\Debug\net10.0-windows\win-x64\
 Macro
 none
 false
 TRACE;DEBUG;NET;NET10_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NET9_0_OR_GREATER;NET10_0_OR_GREATER;NETCOREAPP1_0_OR_GREATER;NETCOREAPP1_1_OR_GREATER;NETCOREAPP2_0_OR_GREATER;NETCOREAPP2_1_OR_GREATER;NETCOREAPP2_2_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
-C:\Users\Erik\Desktop\teste\Macro\App.xaml
+C:\Macro\teste\Macro\App.xaml
 6-437073787
-<<<<<<< HEAD
 31106347069
 221209015355
 207973062554
-=======
-1-753804482
-171928052125
-207-30680974
->>>>>>> 8305f71e08af6c84b480f5eb33d0441117e61683
 MainWindow.xaml;Styles\SidebarButtonStyle.xaml;Views\CommonMessageBox.xaml;Views\DailyPage.xaml;Views\FarmingPage.xaml;Views\TimerPage.xaml;
 
 False

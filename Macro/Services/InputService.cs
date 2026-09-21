@@ -33,16 +33,16 @@ public sealed class InputService
         IntPtr previousDpiContext = SetThreadDpiAwarenessContext(PerMonitorDpiContext);
         try
         {
-        if (x > 1) x /= 100;
-        if (y > 1) y /= 100;
-        GetClientRect(handle, out var rect);
-        var point = new Point((int)(rect.Right * x), (int)(rect.Bottom * y));
-        ClientToScreen(handle, ref point);
-        MoveMouseSmoothly(point, 180);
-        Thread.Sleep(300);
-        MouseEvent(LeftDown);
-        MouseEvent(LeftUp);
-        Thread.Sleep(750);
+            if (x > 1) x /= 100;
+            if (y > 1) y /= 100;
+            GetClientRect(handle, out var rect);
+            var point = new Point((int)(rect.Right * x), (int)(rect.Bottom * y));
+            ClientToScreen(handle, ref point);
+            MoveMouseSmoothly(point, 180);
+            Thread.Sleep(300);
+            MouseEvent(LeftDown);
+            MouseEvent(LeftUp);
+            Thread.Sleep(450);
         }
         finally
         {
@@ -95,8 +95,24 @@ public sealed class InputService
 
     public void DragUp() => Drag(50, 90, 50, 30, 600);
 
+    public void SendCtrlOne()
+    {
+        KeyEvent(VkControl, 0, KeyDown, UIntPtr.Zero);
+        KeyEvent(VkOne, 0, KeyDown, UIntPtr.Zero);
+        KeyEvent(VkOne, 0, KeyUp, UIntPtr.Zero);
+        KeyEvent(VkControl, 0, KeyUp, UIntPtr.Zero);
+    }
+
+    public void SendEscape()
+    {
+        KeyEvent(VkEscape, 0, KeyDown, UIntPtr.Zero);
+        KeyEvent(VkEscape, 0, KeyUp, UIntPtr.Zero);
+    }
+
     private Point ToScreen(int x, int y) { var p = new Point(x, y); ClientToScreen(handle, ref p); return p; }
     private const uint LeftDown = 0x0002, LeftUp = 0x0004;
+    private const uint KeyDown = 0x0000, KeyUp = 0x0002;
+    private const byte VkControl = 0x11, VkOne = 0x31, VkEscape = 0x1B;
     private static readonly IntPtr PerMonitorDpiContext = new(-4);
     private static void MouseEvent(uint flags) => SendMouseEvent(flags, 0, 0, 0, UIntPtr.Zero);
     [StructLayout(LayoutKind.Sequential)] private struct Rect { public int Left, Top, Right, Bottom; }
@@ -107,6 +123,8 @@ public sealed class InputService
     [DllImport("user32.dll")] private static extern bool ClientToScreen(IntPtr hWnd, ref Point point);
     [DllImport("user32.dll")] private static extern bool SetCursorPos(int x, int y);
     [DllImport("user32.dll")] private static extern bool GetCursorPos(out Point point);
+    [DllImport("user32.dll", EntryPoint = "keybd_event")]
+    private static extern void KeyEvent(byte virtualKey, byte scanCode, uint flags, UIntPtr extraInfo);
     [DllImport("user32.dll")] private static extern IntPtr SetThreadDpiAwarenessContext(IntPtr dpiContext);
     [DllImport("user32.dll", EntryPoint = "mouse_event", SetLastError = true)]
     private static extern void SendMouseEvent(uint flags, uint x, uint y, uint data, UIntPtr extra);
