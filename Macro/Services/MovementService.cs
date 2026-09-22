@@ -301,7 +301,7 @@ namespace Macro.Services
             Click(12, 55.31, 84.44);
             Click(13, 45.52, 39.05);
             Click(14, 56.30, 24.28);
-            Click(15, 91.35, 15.86);
+            Click(15, 94.35, 17.86);
         }
 
         public static void ClickBossPrimary(InputService input)
@@ -646,13 +646,12 @@ namespace Macro.Services
             Click(50.21, 59.96);
             Click(55.73, 85.63);
             Click(55.73, 85.63);
+
+            Thread.Sleep(2000);
             Click(54.74, 51.34);
             Click(56.98, 24.38);
-            Click(91.46, 15.56);
-
-
+            Click(94.17, 16.29);
             Thread.Sleep(1000);
-
         }
 
         public static void DoArena(WindowTarget target1, WindowTarget target2,

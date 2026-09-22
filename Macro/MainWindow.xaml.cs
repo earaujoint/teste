@@ -1,4 +1,4 @@
-﻿using Macro.Views;
+using Macro.Views;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -68,14 +68,16 @@ namespace Macro
 
         private static void ActivateButton(Button botao)
         {
+            botao.Background = new SolidColorBrush(Color.FromRgb(0x49, 0x3E, 0x30));
             botao.BorderThickness = new Thickness(3, 0, 0, 0);
             botao.BorderBrush = new SolidColorBrush(
-                Color.FromRgb(0xEB, 0xEA, 0xDC)
+                Color.FromRgb(0xE4, 0xC1, 0x8A)
             );
         }
 
         private static void DeactivateButton(Button botao)
         {
+            botao.Background = Brushes.Transparent;
             botao.BorderThickness = new Thickness(0);
             botao.BorderBrush = Brushes.Transparent;
         }

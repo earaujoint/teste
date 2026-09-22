@@ -5,7 +5,7 @@
            TargetType="Button">
 
 		<Setter Property="Height"
-                Value="36"/>
+                Value="54"/>
 
 		<Setter Property="Background"
                 Value="Transparent"/>
@@ -20,10 +20,10 @@
                 Value="#EBEADC"/>
 
 		<Setter Property="FontFamily"
-                Value="Arial"/>
+                Value="Segoe UI"/>
 
 		<Setter Property="FontSize"
-                Value="14"/>
+                Value="16"/>
 
 		<Setter Property="FontWeight"
                 Value="SemiBold"/>
@@ -38,7 +38,7 @@
                 Value="Hand"/>
 
 		<Setter Property="Margin"
-                Value="0,2,0,0"/>
+                Value="0,0,0,6"/>
 
 
 		<Setter Property="Template">
@@ -48,7 +48,7 @@
 				<ControlTemplate TargetType="Button">
 
 					<Border x:Name="ButtonBorder"
-                            Background="{TemplateBinding Background}"
+                            CornerRadius="5" Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}">
 
