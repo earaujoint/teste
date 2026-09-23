@@ -7,6 +7,8 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("assets/app-icon.png")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("assets/app.ico")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("assets/raiddetection/ok.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("assets/raiddetection/team-reward.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("assets/energysave/energy-save.png")]

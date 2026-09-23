@@ -7,6 +7,7 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UseWPF>true</UseWPF>
+		<ApplicationIcon>Assets\app-v2.ico</ApplicationIcon>
 
 		<!-- Publicação -->
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
@@ -27,6 +28,9 @@
 	<ItemGroup>
 		<!-- Imagem usada pelo WPF -->
 		<Resource Include="Assets\teste.png" />
+		<Content Include="Assets\app-icon.png" />
+		<Content Include="Assets\app.ico" />
+		<Resource Include="Assets\app-v2.ico" />
 		<Content Include="Assets\RaidDetection\*.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>

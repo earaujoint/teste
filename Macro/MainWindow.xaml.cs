@@ -19,6 +19,8 @@ namespace Macro
         public MainWindow()
         {
             InitializeComponent();
+            Icon = System.Windows.Media.Imaging.BitmapFrame.Create(
+                new Uri("pack://application:,,,/Assets/app-v2.ico", UriKind.Absolute));
 
             _farmingPage = new FarmingPage();
             _dailyPage = new DailyPage();
