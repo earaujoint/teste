@@ -19,6 +19,7 @@ namespace Macro.Views
     public partial class FarmingPage : Page
     {
         private bool _mouseLoopRunning = false;
+        private bool _syncingDailyLaunchers;
         private int _normalRaidImageIndex;
         private int _bossRaidImageIndex;
 
@@ -108,8 +109,33 @@ namespace Macro.Views
             DonateLauncher2.IsChecked = Configuration.DonationLaunchers.Contains("MIR4 Launcher 2");
             DonateSteam.IsChecked = Configuration.DonationLaunchers.Contains("MIR4 Steam");
             DataContext = this;
+            SyncDailyLauncherChoices();
             Log("Pronto. Configure as janelas antes de iniciar.");
         }
+
+        private void SyncDailyLauncherChoices()
+        {
+            _syncingDailyLaunchers = true;
+            try
+            {
+                DailyLauncher1.IsChecked = Configuration.DailyLaunchers.Contains("MIR4 Launcher 1");
+                DailyLauncher2.IsChecked = Configuration.DailyLaunchers.Contains("MIR4 Launcher 2");
+                DailySteam.IsChecked = Configuration.DailyLaunchers.Contains("MIR4 Steam");
+            }
+            finally { _syncingDailyLaunchers = false; }
+        }
+
+        private void UpdateDailyLaunchers()
+        {
+            if (_syncingDailyLaunchers) return;
+            Configuration.DailyLaunchers = new[] { DailyLauncher1, DailyLauncher2, DailySteam }
+                .Where(checkBox => checkBox.IsChecked == true)
+                .Select(checkBox => (string)checkBox.Tag)
+                .ToList();
+        }
+
+        private void DailyLauncher_Checked(object sender, RoutedEventArgs e) => UpdateDailyLaunchers();
+        private void DailyLauncher_Unchecked(object sender, RoutedEventArgs e) => UpdateDailyLaunchers();
 
         private void DonationLauncher_Checked(object sender, RoutedEventArgs e) => UpdateDonationLauncher(sender, true);
         private void DonationLauncher_Unchecked(object sender, RoutedEventArgs e) => UpdateDonationLauncher(sender, false);
@@ -194,7 +220,12 @@ namespace Macro.Views
                     throw new ArgumentException("Selecione pelo menos um launcher para as doações.");
                 if (Configuration.DailyDonation)
                     foreach (var launcher in Configuration.DonationLaunchers) Target(launcher);
-                if (Configuration.DailyFavorites) Target(Configuration.DailyLauncher);
+                if (Configuration.DailyFavorites)
+                {
+                    if (Configuration.DailyLaunchers is null || Configuration.DailyLaunchers.Count == 0)
+                        throw new ArgumentException("Selecione pelo menos um launcher para as missões diárias.");
+                    foreach (var launcher in Configuration.DailyLaunchers) Target(launcher);
+                }
             }
             catch (ArgumentException ex) { Log(ex.Message); return; }
             catch (InvalidOperationException ex) { Log(ex.Message); return; }
@@ -243,9 +274,12 @@ namespace Macro.Views
                         }
                     if (Configuration.DailyFavorites)
                     {
-                        Log("Missões favoritas.");
-                        token.ThrowIfCancellationRequested();
-                        DailyFavoriteMissions(Target(Configuration.DailyLauncher));
+                        foreach (var launcher in Configuration.DailyLaunchers)
+                        {
+                            Log($"Missões favoritas em {launcher}.");
+                            token.ThrowIfCancellationRequested();
+                            DailyFavoriteMissions(Target(launcher));
+                        }
                     }
                 }, cts.Token);
             }

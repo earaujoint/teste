@@ -2,7 +2,7 @@
     <Page.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/Macro;component/Styles/FarmingTemplates.xaml" />
+                <ResourceDictionary Source="/MacroMir4;component/Styles/FarmingTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <Style x:Key="CarouselArrow" TargetType="Button" BasedOn="{StaticResource SecondaryButton}">
                 <Setter Property="Width" Value="34" />
@@ -73,7 +73,7 @@
                             <Border Style="{StaticResource SelectableCard}" DataContext="{Binding Configuration.Normal}" Width="400" HorizontalAlignment="Left">
                                 <StackPanel>
                                     <Grid Height="150" Margin="0,0,0,16" ClipToBounds="True" Background="#242322">
-                                        <Image x:Name="NormalRaidImage" Source="/Macro;component/Assets/raid-slide-1.png" Stretch="UniformToFill" />
+                                        <Image x:Name="NormalRaidImage" Source="/MacroMir4;component/Assets/raid-slide-1.png" Stretch="UniformToFill" />
                                         <Button Style="{StaticResource CarouselArrow}" HorizontalAlignment="Left" Margin="8,0,0,0" Click="PreviousNormalRaidImage_Click" ToolTip="Imagem anterior" AutomationProperties.Name="Imagem anterior da raid normal">
                                             <Path Data="M 8,0 L 0,7 L 8,14" Stroke="#F4F4F4" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
                                         </Button>
@@ -106,7 +106,7 @@
                             <Border Style="{StaticResource SelectableCard}" DataContext="{Binding Configuration.Boss}" Width="400" HorizontalAlignment="Left">
                                 <StackPanel>
                                     <Grid Height="150" Margin="0,0,0,16" ClipToBounds="True" Background="#242322">
-                                        <Image x:Name="BossRaidImage" Source="/Macro;component/Assets/boss-slide-1.png" Stretch="UniformToFill" />
+                                        <Image x:Name="BossRaidImage" Source="/MacroMir4;component/Assets/boss-slide-1.png" Stretch="UniformToFill" />
                                         <Button Style="{StaticResource CarouselArrow}" HorizontalAlignment="Left" Margin="8,0,0,0" Click="PreviousBossRaidImage_Click" ToolTip="Imagem anterior" AutomationProperties.Name="Imagem anterior da raid boss">
                                             <Path Data="M 8,0 L 0,7 L 8,14" Stroke="#F4F4F4" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
                                         </Button>
@@ -131,8 +131,13 @@
                         <StackPanel>
                             <TextBlock Text="Missões Diárias" Style="{StaticResource PageSectionHeading}" />
                             <TextBlock Text="O macro atual executa as missões favoritas selecionadas dentro do jogo." Style="{StaticResource Caption}" />
-                            <CheckBox Content="Executar missões favoritas no launcher selecionado" IsChecked="{Binding Configuration.DailyFavorites}" Margin="0,4,0,20" />
-                            <StackPanel Width="240" Margin="0,0,12,12"><TextBlock Text="Launcher das missões diárias" Margin="0,0,0,7" /><ComboBox ItemsSource="{Binding Launchers}" SelectedItem="{Binding Configuration.DailyLauncher}" AutomationProperties.Name="Launcher das missões diárias" /></StackPanel>
+                            <CheckBox Content="Executar missões favoritas nos launchers selecionados" IsChecked="{Binding Configuration.DailyFavorites}" Margin="0,4,0,12" />
+                            <TextBlock Text="Launchers das missões diárias" FontWeight="SemiBold" Margin="0,0,0,8" />
+                            <WrapPanel Margin="0,0,0,12">
+                                <CheckBox x:Name="DailyLauncher1" Style="{StaticResource DonationChoice}" Content="Launcher 1" Tag="MIR4 Launcher 1" Checked="DailyLauncher_Checked" Unchecked="DailyLauncher_Unchecked" />
+                                <CheckBox x:Name="DailyLauncher2" Style="{StaticResource DonationChoice}" Content="Launcher 2" Tag="MIR4 Launcher 2" Checked="DailyLauncher_Checked" Unchecked="DailyLauncher_Unchecked" />
+                                <CheckBox x:Name="DailySteam" Style="{StaticResource DonationChoice}" Content="Steam" Tag="MIR4 Steam" Checked="DailyLauncher_Checked" Unchecked="DailyLauncher_Unchecked" />
+                            </WrapPanel>
 <ItemsControl ItemsSource="{Binding Configuration.DailyItems}" ItemTemplate="{StaticResource MissionTemplate}" ItemsPanel="{StaticResource CardsPanel}" />
                             <CheckBox Content="Limpar mochila com equipamentos incomuns" IsEnabled="False" Margin="0,8,0,0" />
                             <TextBlock Text="Limpeza de mochila ainda não implementada." Style="{StaticResource Caption}" />

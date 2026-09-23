@@ -20,7 +20,7 @@ Os cards adicionais e os itens de missão estão desabilitados e identificados c
 DoArena mantém os alvos originais (Launcher 1 + Steam), informados no tooltip. MousePercent e a área de captura continuam disponíveis.
 
 ## Verificação
-`dotnet build Macro/Macro.csproj --no-restore`
+`dotnet build Macro/MacroMir4.csproj --no-restore`
 
 `dotnet run --project tests/UiChecks/UiChecks.csproj --no-restore`
 

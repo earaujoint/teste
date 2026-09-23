@@ -9,6 +9,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../Macro/Macro.csproj" />
+    <ProjectReference Include="../../Macro/MacroMir4.csproj" />
   </ItemGroup>
 </Project>

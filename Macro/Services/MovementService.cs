@@ -274,6 +274,8 @@ namespace Macro.Services
         {
             var input = new InputService(target);
             input.Activate();
+            input.SendEscape();
+            input.SendEscape();
             GetClientRect(input.Handle, out RECT client);
             var origin = new POINT();
             if (!ClientToScreen(input.Handle, ref origin) || client.Right <= 0 || client.Bottom <= 0) return;
@@ -323,7 +325,8 @@ namespace Macro.Services
             Click(12, 55.31, 84.44);
             Click(13, 45.52, 39.05);
             Click(14, 56.30, 24.28);
-            Click(15, 90.36, 15.64);
+
+            input.SendEscape();
         }
 
         public static void ClickRaidBossPrimary(InputService input)
@@ -341,7 +344,8 @@ namespace Macro.Services
             Click(50.36, 82.76);
             Click(45.99, 38.55);
             Click(56.93, 25.07);
-            Click(90.36, 15.64);
+
+            input.SendEscape();
         }
 
         public static Task DoNormalRaid(WindowTarget starter, WindowTarget inviter,
@@ -672,7 +676,7 @@ namespace Macro.Services
             Thread.Sleep(2000);
             Click(54.74, 51.34);
             Click(56.98, 24.38);
-            Click(90.36, 15.64);
+            input.SendEscape();
             Thread.Sleep(1000);
         }
 

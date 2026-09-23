@@ -40,6 +40,8 @@ public class FarmingConfiguration
     public string ArenaInviter { get; set; } = "MIR4 Launcher 1";
     public string DonationLauncher { get; set; } = "MIR4 Steam";
     public List<string> DonationLaunchers { get; set; } = ["MIR4 Launcher 1", "MIR4 Launcher 2", "MIR4 Steam"];
+    public List<string> DailyLaunchers { get; set; } = ["MIR4 Launcher 2"];
+    [System.Text.Json.Serialization.JsonIgnore]
     public string DailyLauncher { get; set; } = "MIR4 Launcher 2";
     public bool DailyDonation { get; set; } = true;
     public bool DailyFavorites { get; set; } = true;

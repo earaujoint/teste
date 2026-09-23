@@ -8,9 +8,14 @@ public static class FarmingConfigurationService
     public static FarmingConfiguration Load()
     {
         if (!File.Exists(ConfigPath)) return new();
-        var result = JsonSerializer.Deserialize<FarmingConfiguration>(File.ReadAllText(ConfigPath)) ?? throw new InvalidDataException("Configuração vazia.");
+        string json = File.ReadAllText(ConfigPath);
+        var result = JsonSerializer.Deserialize<FarmingConfiguration>(json) ?? throw new InvalidDataException("Configuração vazia.");
         if (result.Normal is null || result.Boss is null || result.DailyItems is null || result.DominationItems is null) throw new InvalidDataException("Configuração incompleta.");
-        using var document = JsonDocument.Parse(File.ReadAllText(ConfigPath));
+        using var document = JsonDocument.Parse(json);
+        if (!document.RootElement.TryGetProperty(nameof(FarmingConfiguration.DailyLaunchers), out _) &&
+            document.RootElement.TryGetProperty(nameof(FarmingConfiguration.DailyLauncher), out var legacyLauncher) &&
+            legacyLauncher.ValueKind == JsonValueKind.String && legacyLauncher.GetString() is string launcher)
+            result.DailyLaunchers = [launcher];
         if (!document.RootElement.TryGetProperty(nameof(FarmingConfiguration.NormalLaunchers), out _))
             result.NormalLaunchers = new() { Starter = result.Starter, Guest1 = result.Partner };
         if (!document.RootElement.TryGetProperty(nameof(FarmingConfiguration.BossLaunchers), out _))
