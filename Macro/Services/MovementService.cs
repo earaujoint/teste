@@ -344,23 +344,32 @@ namespace Macro.Services
             Click(90.36, 15.64);
         }
 
-        public static async Task DoNormalRaid(WindowTarget starter, WindowTarget inviter,
+        public static Task DoNormalRaid(WindowTarget starter, WindowTarget inviter,
+            CancellationToken cancellationToken = default) =>
+            DoNormalRaid(starter, new[] { inviter }, cancellationToken);
+
+        public static async Task DoNormalRaid(WindowTarget starter, IReadOnlyList<WindowTarget> inviters,
             CancellationToken cancellationToken = default)
         {
-            if (starter == inviter)
-                throw new ArgumentException("Selecione duas janelas diferentes.");
+            var guests = inviters.ToArray();
+            if (guests.Length > 2 || guests.Contains(starter) || guests.Distinct().Count() != guests.Length)
+                throw new ArgumentException("Selecione até dois convidados diferentes do starter e entre si.");
 
             EnsureEnergySaveRemoved(starter);
-            EnsureEnergySaveRemoved(inviter);
+            foreach (var guest in guests) EnsureEnergySaveRemoved(guest);
 
             var starterInput = new InputService(starter);
-            var inviterInput = new InputService(inviter);
+            var inviterInputs = guests.Select(guest => new InputService(guest)).ToArray();
 
             await RaidWindowCoordinator.Gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 ClickNormalPrimary(starterInput);
-                AcceptBossInvite(inviterInput);
+                foreach (var input in inviterInputs)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    AcceptBossInvite(input);
+                }
                 StartRaid(starterInput);
             }
             finally
@@ -374,27 +383,36 @@ namespace Macro.Services
 
             await WaitAndDismissRaidRewardsAsync(
                 starterInput.Handle,
-                inviterInput.Handle,
+                inviterInputs.Select(input => input.Handle).ToArray(),
                 cancellationToken).ConfigureAwait(false);
         }
 
-        public static async Task DoBossRaid(WindowTarget starter, WindowTarget inviter,
+        public static Task DoBossRaid(WindowTarget starter, WindowTarget inviter,
+            CancellationToken cancellationToken = default) =>
+            DoBossRaid(starter, new[] { inviter }, cancellationToken);
+
+        public static async Task DoBossRaid(WindowTarget starter, IReadOnlyList<WindowTarget> inviters,
             CancellationToken cancellationToken = default)
         {
-            if (starter == inviter)
-                throw new ArgumentException("Selecione duas janelas diferentes.");
+            var guests = inviters.ToArray();
+            if (guests.Length > 2 || guests.Contains(starter) || guests.Distinct().Count() != guests.Length)
+                throw new ArgumentException("Selecione até dois convidados diferentes do starter e entre si.");
 
             EnsureEnergySaveRemoved(starter);
-            EnsureEnergySaveRemoved(inviter);
+            foreach (var guest in guests) EnsureEnergySaveRemoved(guest);
 
             var starterInput = new InputService(starter);
-            var inviterInput = new InputService(inviter);
+            var inviterInputs = guests.Select(guest => new InputService(guest)).ToArray();
 
             await RaidWindowCoordinator.Gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 ClickRaidBossPrimary(starterInput);
-                AcceptBossInvite(inviterInput);
+                foreach (var input in inviterInputs)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    AcceptBossInvite(input);
+                }
             }
             finally
             {
@@ -405,13 +423,13 @@ namespace Macro.Services
             // Não há espera fixa nem chamada de StartRaid neste fluxo.
             await WaitAndDismissRaidRewardsAsync(
                 starterInput.Handle,
-                inviterInput.Handle,
+                inviterInputs.Select(input => input.Handle).ToArray(),
                 cancellationToken).ConfigureAwait(false);
         }
 
         private static async Task WaitAndDismissRaidRewardsAsync(
             IntPtr starterHandle,
-            IntPtr inviterHandle,
+            IReadOnlyList<IntPtr> inviterHandle,
             CancellationToken cancellationToken)
         {
             using var monitorCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);

@@ -34,6 +34,13 @@ public class MissionItemConfiguration
 }
 public class FarmingConfiguration
 {
+    public LauncherGroup NormalLaunchers { get; set; } = new();
+    public LauncherGroup BossLaunchers { get; set; } = new();
+    public string ArenaStarter { get; set; } = "MIR4 Steam";
+    public string ArenaInviter { get; set; } = "MIR4 Launcher 1";
+    public string DonationLauncher { get; set; } = "MIR4 Steam";
+    public List<string> DonationLaunchers { get; set; } = ["MIR4 Launcher 1", "MIR4 Launcher 2", "MIR4 Steam"];
+    public string DailyLauncher { get; set; } = "MIR4 Launcher 2";
     public bool DailyDonation { get; set; } = true;
     public bool DailyFavorites { get; set; } = true;
     public string Starter { get; set; } = "MIR4 Steam";
@@ -43,5 +50,12 @@ public class FarmingConfiguration
     public List<MissionItemConfiguration> DailyItems { get; set; } = CreateItems();
     public List<MissionItemConfiguration> DominationItems { get; set; } = CreateItems();
     private static List<MissionItemConfiguration> CreateItems() => [new() { Name = "Minério Escuro" }, new() { Name = "Barra de Ferro" }, new() { Name = "Elixir de Vida" }];
+}
+
+public class LauncherGroup
+{
+    public string Starter { get; set; } = "MIR4 Steam";
+    public string Guest1 { get; set; } = "MIR4 Launcher 2";
+    public string Guest2 { get; set; } = "Não utilizar";
 }
 

@@ -13,7 +13,7 @@
                 <StackPanel IsEnabled="{Binding IsAvailable}">
                     <TextBlock Text="Quantidade de vezes" Margin="0,0,0,7" />
                     <TextBox Text="{Binding RepeatCountText, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" IsEnabled="{Binding IsEnabled}" AutomationProperties.Name="Quantidade de repetições" />
-                    <TextBlock Text="Executada nas duas janelas selecionadas acima." Style="{StaticResource Caption}" Margin="0,12,0,0" />
+                    <TextBlock Text="Executada no starter e nos convidados selecionados." Style="{StaticResource Caption}" Margin="0,12,0,0" />
                 </StackPanel>
             </StackPanel>
         </Border>

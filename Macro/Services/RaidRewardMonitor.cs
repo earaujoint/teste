@@ -29,8 +29,15 @@ public static class RaidRewardMonitor
         return WaitAndDismissAsync(starterWindow, cancellationToken, linkedWindow: linkedWindow);
     }
 
+    public static Task WaitAndDismissLinkedAsync(IntPtr starterWindow, IReadOnlyList<IntPtr> linkedWindows,
+        CancellationToken cancellationToken)
+    {
+        return WaitAndDismissAsync(starterWindow, cancellationToken, linkedWindows: linkedWindows);
+    }
+
     public static async Task WaitAndDismissAsync(IntPtr window, CancellationToken cancellationToken,
-        TimeSpan? timeout = null, TimeSpan? checkInterval = null, IntPtr? linkedWindow = null)
+        TimeSpan? timeout = null, TimeSpan? checkInterval = null, IntPtr? linkedWindow = null,
+        IReadOnlyList<IntPtr>? linkedWindows = null)
     {
         using var detector = new RaidRewardDetector();
         var timer = Stopwatch.StartNew();
@@ -86,6 +93,9 @@ public static class RaidRewardMonitor
                                 mouse_event(0x0004, 0, 0, 0, UIntPtr.Zero);
                                 if (linkedWindow is IntPtr otherWindow)
                                     ClickLinkedPosition(window, otherWindow, button, cancellationToken);
+                                if (linkedWindows is not null && !awaitingDismissal)
+                                    foreach (var guestWindow in linkedWindows)
+                                        ClickLinkedPosition(window, guestWindow, button, cancellationToken);
                                 attempts++;
                                 awaitingDismissal = true;
                                 lastClick = timer.Elapsed;

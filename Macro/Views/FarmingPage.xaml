@@ -4,6 +4,21 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Macro;component/Styles/FarmingTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <Style x:Key="CarouselArrow" TargetType="Button" BasedOn="{StaticResource SecondaryButton}">
+                <Setter Property="Width" Value="34" />
+                <Setter Property="Height" Value="34" />
+                <Setter Property="MinHeight" Value="34" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Background" Value="#D9111214" />
+                <Setter Property="BorderBrush" Value="#668F8069" />
+            </Style>
+            <Style x:Key="DonationChoice" TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+                <Setter Property="Padding" Value="12,10" />
+                <Setter Property="Background" Value="#242422" />
+                <Setter Property="Margin" Value="0,0,10,8" />
+            </Style>
             <ItemsPanelTemplate x:Key="CardsPanel">
                 <WrapPanel />
             </ItemsPanelTemplate>
@@ -23,66 +38,123 @@
                 </StackPanel>
             </Grid>
             <StackPanel x:Name="ConfigurationPanel">
-                <Border Style="{StaticResource Card}" Margin="0,8,0,16">
-                    <WrapPanel>
-                        <StackPanel Width="340">
-                            <TextBlock Text="Doação diária" FontSize="18" FontWeight="SemiBold" />
-                            <TextBlock Text="Executa antes das raids nas janelas selecionadas." Style="{StaticResource Caption}" Margin="0,4,0,0" />
-                        </StackPanel>
-                        <CheckBox Style="{StaticResource Toggle}" Content="Ativar doação diária" IsChecked="{Binding Configuration.DailyDonation}" VerticalAlignment="Center" />
-                    </WrapPanel>
+                <Border Style="{StaticResource Card}" Margin="0,8,0,20" CornerRadius="12" Padding="20">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="42" Height="42" CornerRadius="12" Background="#332C22" Margin="0,0,12,0">
+                                    <TextBlock Text="✦" FontSize="24" Foreground="{StaticResource AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="Doação diária" FontSize="18" FontWeight="SemiBold" />
+                                    <TextBlock Text="Preparação antes das raids" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,3,0,0" />
+                                </StackPanel>
+                            </StackPanel>
+                            <CheckBox Grid.Column="1" Style="{StaticResource Toggle}" IsChecked="{Binding Configuration.DailyDonation}" VerticalAlignment="Center" ToolTip="Ativar doação diária" AutomationProperties.Name="Ativar doação diária" />
+                        </Grid>
+                        <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,16" />
+                        <TextBlock Text="Selecione os launchers para doar" FontWeight="SemiBold" Margin="0,0,0,10" />
+                        <WrapPanel>
+                            <CheckBox x:Name="DonateLauncher1" Style="{StaticResource DonationChoice}" Content="Launcher 1" Tag="MIR4 Launcher 1" Checked="DonationLauncher_Checked" Unchecked="DonationLauncher_Unchecked" />
+                            <CheckBox x:Name="DonateLauncher2" Style="{StaticResource DonationChoice}" Content="Launcher 2" Tag="MIR4 Launcher 2" Checked="DonationLauncher_Checked" Unchecked="DonationLauncher_Unchecked" />
+                            <CheckBox x:Name="DonateSteam" Style="{StaticResource DonationChoice}" Content="Steam" Tag="MIR4 Steam" Checked="DonationLauncher_Checked" Unchecked="DonationLauncher_Unchecked" />
+                        </WrapPanel>
+                        <TextBlock Text="Você pode selecionar os três launchers." Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,2,0,0" />
+                    </StackPanel>
                 </Border>
-                <WrapPanel Margin="0,0,0,18">
-                    <StackPanel Width="280" Margin="0,0,16,8">
-                        <TextBlock Text="Launcher principal" Margin="0,0,0,7" />
-                        <ComboBox ItemsSource="{Binding Launchers}" SelectedItem="{Binding Configuration.Starter}" AutomationProperties.Name="Launcher principal" />
-                    </StackPanel>
-                    <StackPanel Width="280" Margin="0,0,0,8">
-                        <TextBlock Text="Launcher convidado" Margin="0,0,0,7" />
-                        <ComboBox ItemsSource="{Binding Launchers}" SelectedItem="{Binding Configuration.Partner}" AutomationProperties.Name="Launcher convidado" />
-                    </StackPanel>
-                </WrapPanel>
+
                 <TabControl>
-                    <TabItem Header="Raids Normais">
+                    <TabItem><TabItem.Header><StackPanel Orientation="Horizontal"><TextBlock Text="⚔" Foreground="{StaticResource AccentBrush}" Margin="0,0,8,0" /><TextBlock Text="Raids Normais" /></StackPanel></TabItem.Header>
                         <StackPanel>
-                            <TextBlock Text="Raids Normais" FontSize="21" FontWeight="SemiBold" />
+                            <TextBlock Text="Raids Normais" Style="{StaticResource PageSectionHeading}" />
+<WrapPanel Margin="0,12,0,0"><StackPanel Width="240" Margin="0,0,12,12"><TextBlock Text="Starter" Margin="0,0,0,7" /><ComboBox ItemsSource="{Binding Launchers}" SelectedItem="{Binding Configuration.NormalLaunchers.Starter}" AutomationProperties.Name="Starter" /></StackPanel><StackPanel Width="240" Margin="0,0,12,12"><TextBlock Text="Convidado 1" Margin="0,0,0,7" /><ComboBox ItemsSource="{Binding GuestLaunchers}" SelectedItem="{Binding Configuration.NormalLaunchers.Guest1}" AutomationProperties.Name="Convidado 1" /></StackPanel><StackPanel Width="240" Margin="0,0,12,12"><TextBlock Text="Convidado 2" Margin="0,0,0,7" /><ComboBox ItemsSource="{Binding GuestLaunchers}" SelectedItem="{Binding Configuration.NormalLaunchers.Guest2}" AutomationProperties.Name="Convidado 2" /></StackPanel></WrapPanel>
                             <TextBlock Text="Selecione a raide e a quantidade de vezes. A ordem de execução do macro é mantida." Style="{StaticResource Caption}" />
-                            <ItemsControl ItemsSource="{Binding NormalRaids}" ItemTemplate="{StaticResource RaidTemplate}" ItemsPanel="{StaticResource CardsPanel}" />
+                            <Border Style="{StaticResource SelectableCard}" DataContext="{Binding Configuration.Normal}" Width="400" HorizontalAlignment="Left">
+                                <StackPanel>
+                                    <Grid Height="150" Margin="0,0,0,16" ClipToBounds="True" Background="#242322">
+                                        <Image x:Name="NormalRaidImage" Source="/Macro;component/Assets/raid-slide-1.png" Stretch="UniformToFill" />
+                                        <Button Style="{StaticResource CarouselArrow}" HorizontalAlignment="Left" Margin="8,0,0,0" Click="PreviousNormalRaidImage_Click" ToolTip="Imagem anterior" AutomationProperties.Name="Imagem anterior da raid normal">
+                                            <Path Data="M 8,0 L 0,7 L 8,14" Stroke="#F4F4F4" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                                        </Button>
+                                        <Button Style="{StaticResource CarouselArrow}" HorizontalAlignment="Right" Margin="0,0,8,0" Click="NextNormalRaidImage_Click" ToolTip="Próxima imagem" AutomationProperties.Name="Próxima imagem da raid normal">
+                                            <Path Data="M 0,0 L 8,7 L 0,14" Stroke="#F4F4F4" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                                        </Button>
+                                        <Border Background="#D9111214" CornerRadius="10" Padding="10,3" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,8">
+                                            <TextBlock x:Name="NormalRaidImageCounter" Text="1 / 2" FontSize="11" />
+                                        </Border>
+                                        <CheckBox IsChecked="{Binding IsEnabled}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="6" Padding="5" Background="#D9111214" ToolTip="Ativar ou desativar raid normal" AutomationProperties.Name="Ativar raid normal" />
+                                    </Grid>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="72" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Quantidade de vezes" VerticalAlignment="Center" />
+                                        <TextBox Grid.Column="1" Text="{Binding RepeatCountText, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" IsEnabled="{Binding IsEnabled}" AutomationProperties.Name="Quantidade de repetições da raid normal" />
+                                    </Grid>
+                                    <TextBlock Text="Executada no starter e nos convidados selecionados." Style="{StaticResource Caption}" Margin="0,12,0,0" />
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
                     </TabItem>
-                    <TabItem Header="Raids Boss">
+                    <TabItem><TabItem.Header><StackPanel Orientation="Horizontal"><TextBlock Text="♛" Foreground="{StaticResource AccentBrush}" Margin="0,0,8,0" /><TextBlock Text="Raids Boss" /></StackPanel></TabItem.Header>
                         <StackPanel>
-                            <TextBlock Text="Raids Boss" FontSize="21" FontWeight="SemiBold" />
-                            <TextBlock Text="Executadas depois das raids normais, nas mesmas duas janelas." Style="{StaticResource Caption}" />
-                            <ItemsControl ItemsSource="{Binding BossRaids}" ItemTemplate="{StaticResource RaidTemplate}" ItemsPanel="{StaticResource CardsPanel}" />
+                            <TextBlock Text="Raids Boss" Style="{StaticResource PageSectionHeading}" />
+<WrapPanel Margin="0,12,0,0"><StackPanel Width="240" Margin="0,0,12,12"><TextBlock Text="Starter" Margin="0,0,0,7" /><ComboBox ItemsSource="{Binding Launchers}" SelectedItem="{Binding Configuration.BossLaunchers.Starter}" AutomationProperties.Name="Starter" /></StackPanel><StackPanel Width="240" Margin="0,0,12,12"><TextBlock Text="Convidado 1" Margin="0,0,0,7" /><ComboBox ItemsSource="{Binding GuestLaunchers}" SelectedItem="{Binding Configuration.BossLaunchers.Guest1}" AutomationProperties.Name="Convidado 1" /></StackPanel><StackPanel Width="240" Margin="0,0,12,12"><TextBlock Text="Convidado 2" Margin="0,0,0,7" /><ComboBox ItemsSource="{Binding GuestLaunchers}" SelectedItem="{Binding Configuration.BossLaunchers.Guest2}" AutomationProperties.Name="Convidado 2" /></StackPanel></WrapPanel>
+                            <TextBlock Text="Executadas depois das raids normais, com os launchers escolhidos nesta aba." Style="{StaticResource Caption}" />
+                            <Border Style="{StaticResource SelectableCard}" DataContext="{Binding Configuration.Boss}" Width="400" HorizontalAlignment="Left">
+                                <StackPanel>
+                                    <Grid Height="150" Margin="0,0,0,16" ClipToBounds="True" Background="#242322">
+                                        <Image x:Name="BossRaidImage" Source="/Macro;component/Assets/boss-slide-1.png" Stretch="UniformToFill" />
+                                        <Button Style="{StaticResource CarouselArrow}" HorizontalAlignment="Left" Margin="8,0,0,0" Click="PreviousBossRaidImage_Click" ToolTip="Imagem anterior" AutomationProperties.Name="Imagem anterior da raid boss">
+                                            <Path Data="M 8,0 L 0,7 L 8,14" Stroke="#F4F4F4" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                                        </Button>
+                                        <Button Style="{StaticResource CarouselArrow}" HorizontalAlignment="Right" Margin="0,0,8,0" Click="NextBossRaidImage_Click" ToolTip="Próxima imagem" AutomationProperties.Name="Próxima imagem da raid boss">
+                                            <Path Data="M 0,0 L 8,7 L 0,14" Stroke="#F4F4F4" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                                        </Button>
+                                        <Border Background="#D9111214" CornerRadius="10" Padding="10,3" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,8">
+                                            <TextBlock x:Name="BossRaidImageCounter" Text="1 / 2" FontSize="11" />
+                                        </Border>
+                                        <CheckBox IsChecked="{Binding IsEnabled}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="6" Padding="5" Background="#D9111214" ToolTip="Ativar ou desativar raid boss" AutomationProperties.Name="Ativar raid boss" />
+                                    </Grid>
+                                    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="72" /></Grid.ColumnDefinitions>
+                                        <TextBlock Text="Quantidade de vezes" VerticalAlignment="Center" />
+                                        <TextBox Grid.Column="1" Text="{Binding RepeatCountText, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" IsEnabled="{Binding IsEnabled}" AutomationProperties.Name="Quantidade de repetições da raid boss" />
+                                    </Grid>
+                                    <TextBlock Text="Executada no starter e nos convidados selecionados." Style="{StaticResource Caption}" Margin="0,12,0,0" />
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
                     </TabItem>
-                    <TabItem Header="Missões Diárias">
+                    <TabItem><TabItem.Header><StackPanel Orientation="Horizontal"><TextBlock Text="▣" Foreground="{StaticResource AccentBrush}" Margin="0,0,8,0" /><TextBlock Text="Missões Diárias" /></StackPanel></TabItem.Header>
                         <StackPanel>
-                            <TextBlock Text="Missões Diárias" FontSize="21" FontWeight="SemiBold" />
+                            <TextBlock Text="Missões Diárias" Style="{StaticResource PageSectionHeading}" />
                             <TextBlock Text="O macro atual executa as missões favoritas selecionadas dentro do jogo." Style="{StaticResource Caption}" />
-                            <CheckBox Content="Executar missões favoritas nas duas janelas" IsChecked="{Binding Configuration.DailyFavorites}" Margin="0,4,0,20" />
-                            <ItemsControl ItemsSource="{Binding Configuration.DailyItems}" ItemTemplate="{StaticResource MissionTemplate}" ItemsPanel="{StaticResource CardsPanel}" />
+                            <CheckBox Content="Executar missões favoritas no launcher selecionado" IsChecked="{Binding Configuration.DailyFavorites}" Margin="0,4,0,20" />
+                            <StackPanel Width="240" Margin="0,0,12,12"><TextBlock Text="Launcher das missões diárias" Margin="0,0,0,7" /><ComboBox ItemsSource="{Binding Launchers}" SelectedItem="{Binding Configuration.DailyLauncher}" AutomationProperties.Name="Launcher das missões diárias" /></StackPanel>
+<ItemsControl ItemsSource="{Binding Configuration.DailyItems}" ItemTemplate="{StaticResource MissionTemplate}" ItemsPanel="{StaticResource CardsPanel}" />
                             <CheckBox Content="Limpar mochila com equipamentos incomuns" IsEnabled="False" Margin="0,8,0,0" />
                             <TextBlock Text="Limpeza de mochila ainda não implementada." Style="{StaticResource Caption}" />
                         </StackPanel>
                     </TabItem>
-                    <TabItem Header="Missões da Dominação">
+                    <TabItem><TabItem.Header><StackPanel Orientation="Horizontal"><TextBlock Text="✦" Foreground="{StaticResource AccentBrush}" Margin="0,0,8,0" /><TextBlock Text="Missões da Dominação" /></StackPanel></TabItem.Header>
                         <StackPanel>
-                            <TextBlock Text="Missões da Dominação" FontSize="21" FontWeight="SemiBold" />
+                            <TextBlock Text="Missões da Dominação" Style="{StaticResource PageSectionHeading}" />
                             <TextBlock Text="A rotina de Dominação ainda não está habilitada no fluxo atual. As configurações são independentes das missões diárias." Style="{StaticResource Caption}" />
                             <ItemsControl ItemsSource="{Binding Configuration.DominationItems}" ItemTemplate="{StaticResource MissionTemplate}" ItemsPanel="{StaticResource CardsPanel}" />
                             <CheckBox Content="Limpar mochila com equipamentos incomuns" IsEnabled="False" Margin="0,8,0,0" />
                             <TextBlock Text="Seleção de mapas e limpeza de mochila aguardam integração." Style="{StaticResource Caption}" />
                         </StackPanel>
                     </TabItem>
+                    <TabItem><TabItem.Header><StackPanel Orientation="Horizontal"><TextBlock Text="⚔" Foreground="{StaticResource AccentBrush}" Margin="0,0,8,0" /><TextBlock Text="Arena" /></StackPanel></TabItem.Header><StackPanel><TextBlock Text="Arena" Style="{StaticResource PageSectionHeading}" /><TextBlock Text="O starter começa os movimentos; o convidado aceita e termina a sequência. Use DoArena para executar." Style="{StaticResource Caption}" /><WrapPanel><StackPanel Width="240" Margin="0,0,12,12"><TextBlock Text="Starter da arena" Margin="0,0,0,7" /><ComboBox ItemsSource="{Binding Launchers}" SelectedItem="{Binding Configuration.ArenaStarter}" AutomationProperties.Name="Starter da arena" /></StackPanel><StackPanel Width="240" Margin="0,0,12,12"><TextBlock Text="Convidado da arena" Margin="0,0,0,7" /><ComboBox ItemsSource="{Binding Launchers}" SelectedItem="{Binding Configuration.ArenaInviter}" AutomationProperties.Name="Convidado da arena" /></StackPanel></WrapPanel></StackPanel></TabItem>
                 </TabControl>
             </StackPanel>
             <UniformGrid Columns="4" Margin="0,18,0,14">
                 <Button x:Name="BtnStart" Content="▶   Start" Style="{StaticResource PrimaryButton}" Click="BtnStart_Click" Margin="0,0,10,0" />
                 <Button x:Name="BtnStop" Content="■   Stop" Click="BtnStop_Click" Margin="0,0,10,0" />
                 <Button x:Name="BtnMousePercent" Content="MousePercent" Click="BtnMousePercent_Click" Margin="0,0,10,0" />
-                <Button ToolTip="Executa a rotina de arena existente no Launcher 1 e Steam." x:Name="BtnDoArena" Content="⚔   DoArena" Click="BtnDoArena_Click" />
+                <Button ToolTip="Executa a arena com os launchers definidos na aba Arena." x:Name="BtnDoArena" Content="⚔   DoArena" Click="BtnDoArena_Click" />
             </UniformGrid>
             <Border Style="{StaticResource Card}">
                 <StackPanel>

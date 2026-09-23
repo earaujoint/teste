@@ -28,6 +28,10 @@
 	<ItemGroup>
 		<!-- Imagem usada pelo WPF -->
 		<Resource Include="Assets\teste.png" />
+		<Resource Include="Assets\raid-slide-1.png" />
+		<Resource Include="Assets\raid-slide-2.png" />
+		<Resource Include="Assets\boss-slide-1.png" />
+		<Resource Include="Assets\boss-slide-2.png" />
 		<Content Include="Assets\app-icon.png" />
 		<Content Include="Assets\app.ico" />
 		<Resource Include="Assets\app-v2.ico" />
