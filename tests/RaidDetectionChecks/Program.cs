@@ -6,7 +6,9 @@ using System.Drawing;
 
 if (args.Length != 1) throw new ArgumentException("Informe o caminho da captura de referência.");
 using var screenshot = CvInvoke.Imread(args[0]);
-using var client = new Mat(screenshot, new Rectangle(0, 23, 1919, 1009));
+// Captures may include or omit the window chrome. The detector receives the client
+// image in production, so use the supplied frame as-is for this diagnostic.
+using var client = screenshot.Clone();
 using var detector = new RaidRewardDetector();
 int checks = 0;
 void Check(string name, Mat frame, bool expected, Point? expectedCenter = null)

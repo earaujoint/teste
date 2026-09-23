@@ -129,10 +129,12 @@ namespace Macro.Views
                     // Validate assets/native runtime before interacting with the game.
                     using (var detector = new Macro.Services.RaidRewardDetector()) { }
 
-                    RemoveEnergySave(mir42);
-                    RemoveEnergySave(mir40);
-                    DailyDonates(mir42);
-                    DailyDonates(mir40);
+                    if (Configuration.DailyDonation)
+                    {
+                        Log("Doação diária.");
+                        DailyDonates(mir42);
+                        DailyDonates(mir40);
+                    }
                     if (Configuration.Normal.IsEnabled)
                         for (int i = 0; i < Configuration.Normal.RepeatCount; i++)
                         {

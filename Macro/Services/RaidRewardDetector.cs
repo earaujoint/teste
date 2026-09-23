@@ -8,7 +8,10 @@ namespace Macro.Services;
 /// <summary>Matches both reward buttons at a common scale in client-area pixels.</summary>
 public sealed class RaidRewardDetector : IDisposable
 {
-    public const double MinimumConfidence = 0.90;
+    // Each button is checked independently. Requiring both prevents an unrelated
+    // OK prompt (or a blue button elsewhere) from being dismissed.
+    public const double MinimumConfidence = 0.84;
+    private const double ButtonOffsetX = 406;
     private readonly Mat team;
     private readonly Mat ok;
 
@@ -53,15 +56,26 @@ public sealed class RaidRewardDetector : IDisposable
             CvInvoke.Resize(ok, okScaled, size, 0, 0, Inter.Linear);
             CvInvoke.GaussianBlur(teamScaled, teamScaled, new Size(3, 3), .8);
             CvInvoke.GaussianBlur(okScaled, okScaled, new Size(3, 3), .8);
+            // Locate the blue Party Rewards button first. Then search for OK only
+            // in the nearby position used by the reward dialog. Looking for both
+            // templates globally could combine two unrelated UI elements.
             var left = Match(search, teamScaled);
-            var right = Match(search, okScaled);
-            double score = Math.Min(left.Score, right.Score);
-            // Both controls must have the spacing and alignment of the reference dialog.
-            if (Math.Abs(right.Point.Y - left.Point.Y) > 8 * scale ||
-                Math.Abs((right.Point.X - left.Point.X) - 406 * scale) > 20 * scale) continue;
+            int toleranceX = Math.Max(24, (int)Math.Round(55 * scale));
+            int toleranceY = Math.Max(16, (int)Math.Round(35 * scale));
+            int expectedOkX = left.Point.X + (int)Math.Round(ButtonOffsetX * scale);
+            var okArea = Rectangle.Intersect(
+                new Rectangle(expectedOkX - toleranceX, left.Point.Y - toleranceY,
+                    okScaled.Width + toleranceX * 2, okScaled.Height + toleranceY * 2),
+                new Rectangle(Point.Empty, search.Size));
+            if (okArea.Width < okScaled.Width || okArea.Height < okScaled.Height) continue;
+
+            using var okSearch = new Mat(search, okArea);
+            var localOk = Match(okSearch, okScaled);
+            Point okPoint = new(localOk.Point.X + okArea.X, localOk.Point.Y + okArea.Y);
+            double score = Math.Min(left.Score, localOk.Score);
             if (score <= confidence) continue;
             confidence = score;
-            best = new Rectangle(right.Point.X + searchArea.X, right.Point.Y + searchArea.Y, size.Width, size.Height);
+            best = new Rectangle(okPoint.X + searchArea.X, okPoint.Y + searchArea.Y, size.Width, size.Height);
         }
         return confidence >= MinimumConfidence ? best : null;
     }

@@ -955,3 +955,13 @@ C:\Users\Erik\Desktop\teste\.revert-verify\Macro.deps.json
 C:\Users\Erik\Desktop\teste\.revert-verify\Macro.runtimeconfig.json
 C:\Users\Erik\Desktop\teste\.revert-verify\Macro.dll
 C:\Users\Erik\Desktop\teste\.revert-verify\Macro.pdb
+C:\Users\Erik\Desktop\teste\Macro\bin\Debug\net10.0-windows\win-x64\Assets\EnergySave\energy-save.png
+C:\Users\Erik\Desktop\teste\.verify-reward\Assets\RaidDetection\ok.png
+C:\Users\Erik\Desktop\teste\.verify-reward\Assets\RaidDetection\team-reward.png
+C:\Users\Erik\Desktop\teste\.verify-reward\Assets\EnergySave\energy-save.png
+C:\Users\Erik\Desktop\teste\.verify-reward\Data\bosses.json
+C:\Users\Erik\Desktop\teste\.verify-reward\Macro.exe
+C:\Users\Erik\Desktop\teste\.verify-reward\Macro.deps.json
+C:\Users\Erik\Desktop\teste\.verify-reward\Macro.runtimeconfig.json
+C:\Users\Erik\Desktop\teste\.verify-reward\Macro.dll
+C:\Users\Erik\Desktop\teste\.verify-reward\Macro.pdb

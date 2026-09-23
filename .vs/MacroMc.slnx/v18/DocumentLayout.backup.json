@@ -7,6 +7,9 @@
       "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\services\\movementservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\users\\erik\\desktop\\teste\\macro\\views\\farmingpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\views\\farmingpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -17,9 +20,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|c:\\users\\erik\\desktop\\teste\\macro\\services\\inputservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7AAAA11C-C2AF-1C96-FDFA-515C02194F89}|Macro\\Macro.csproj|solutionrelative:macro\\services\\inputservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     }
   ],
   "DocumentGroupContainers": [
@@ -33,7 +33,7 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "InputService.cs",
               "DocumentMoniker": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Services\\InputService.cs",
               "RelativeDocumentMoniker": "Macro\\Services\\InputService.cs",
@@ -45,15 +45,16 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 1,
               "Title": "Microsoft.Common.CurrentVersion.targets",
               "DocumentMoniker": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
               "RelativeDocumentMoniker": "..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
               "ToolTip": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
               "RelativeToolTip": "..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
-              "ViewState": "AgIAADQWAAAAAAAAAAAuwEoWAABjAAAAAAAAAA==",
+              "ViewState": "AgIAADAQAAAAAAAAAAAawDUWAAAHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
-              "WhenOpened": "2026-09-20T15:58:27.331Z"
+              "WhenOpened": "2026-09-20T15:58:27.331Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -61,16 +62,16 @@
               "Title": "MovementService.cs",
               "DocumentMoniker": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Services\\MovementService.cs",
               "RelativeDocumentMoniker": "Macro\\Services\\MovementService.cs",
-              "ToolTip": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Services\\MovementService.cs",
-              "RelativeToolTip": "Macro\\Services\\MovementService.cs",
-              "ViewState": "AgIAAHgCAAAAAAAAAAAmwIQCAAAgAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Services\\MovementService.cs*",
+              "RelativeToolTip": "Macro\\Services\\MovementService.cs*",
+              "ViewState": "AgIAAEkBAAAAAAAAAAAAwFQBAAAgAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-09-19T16:06:11.823Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "FarmingPage.xaml.cs",
               "DocumentMoniker": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Views\\FarmingPage.xaml.cs",
               "RelativeDocumentMoniker": "Macro\\Views\\FarmingPage.xaml.cs",
@@ -82,7 +83,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "FarmingPage.xaml",
               "DocumentMoniker": "C:\\Users\\Erik\\Desktop\\teste\\Macro\\Views\\FarmingPage.xaml",
               "RelativeDocumentMoniker": "Macro\\Views\\FarmingPage.xaml",

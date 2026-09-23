@@ -9,6 +9,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Drawing;
+using System.Drawing.Imaging;
+using Macro.Utils;
 
 namespace Macro.Services
 {
@@ -257,13 +260,32 @@ namespace Macro.Services
             input.Activate();
 
             //Drag relative
-            input.Drag(30, 50, 70, 50, 1000);
+            input.Drag(30, 50, 70, 50);
 
       
             //Loot menu
             input.ClickRelative(55, 83);
 
             Thread.Sleep(1500);
+        }
+
+        /// <summary>Wakes the game only when its EnergySave screen is visible.</summary>
+        public static void EnsureEnergySaveRemoved(WindowTarget target)
+        {
+            var input = new InputService(target);
+            input.Activate();
+            GetClientRect(input.Handle, out RECT client);
+            var origin = new POINT();
+            if (!ClientToScreen(input.Handle, ref origin) || client.Right <= 0 || client.Bottom <= 0) return;
+
+            using var screenshot = new Bitmap(client.Right, client.Bottom, PixelFormat.Format24bppRgb);
+            using (var graphics = Graphics.FromImage(screenshot))
+                graphics.CopyFromScreen(origin.X, origin.Y, 0, 0, screenshot.Size);
+            using var frame = ImagesUtils.BitmapToMat(screenshot);
+            using var detector = new EnergySaveDetector();
+            bool energySaveVisible = detector.Detect(frame, out double confidence);
+            Debug.WriteLine($"EnergySave: confiança={confidence:F3}, detectado={energySaveVisible}");
+            if (energySaveVisible) RemoveEnergySave(target);
         }
 
         [DllImport("user32.dll")]
@@ -301,33 +323,7 @@ namespace Macro.Services
             Click(12, 55.31, 84.44);
             Click(13, 45.52, 39.05);
             Click(14, 56.30, 24.28);
-            Click(15, 94.35, 17.86);
-        }
-
-        public static void ClickBossPrimary(InputService input)
-        {
-            input.Activate();
-            void Click(int number, double x, double y)
-            {
-                input.ClickRelative(x, y);
-            }
-
-            Click(1, 97.19, 5.25);
-            Click(2, 80.57, 56.39);
-            Click(3, 80.63, 69.18);
-            Click(4, 85.78, 93.46);
-            Click(5, 39.32, 56.89);
-
-            Click(6, 70.05, 56.99);
-            Click(7, 49.53, 59.17);
-            Click(8, 49.53, 59.17);
-            Click(9, 49.53, 59.17);
-            Click(10, 49.53, 59.17);
-            Click(11, 55.36, 84.44);
-            Click(12, 55.31, 84.44);
-            Click(13, 45.52, 39.05);
-            Click(14, 56.30, 24.28);
-            Click(15, 91.35, 15.86);
+            Click(15, 90.36, 15.64);
         }
 
         public static void ClickRaidBossPrimary(InputService input)
@@ -345,7 +341,7 @@ namespace Macro.Services
             Click(50.36, 82.76);
             Click(45.99, 38.55);
             Click(56.93, 25.07);
-            Click(91.35, 15.76);
+            Click(90.36, 15.64);
         }
 
         public static async Task DoNormalRaid(WindowTarget starter, WindowTarget inviter,
@@ -353,6 +349,9 @@ namespace Macro.Services
         {
             if (starter == inviter)
                 throw new ArgumentException("Selecione duas janelas diferentes.");
+
+            EnsureEnergySaveRemoved(starter);
+            EnsureEnergySaveRemoved(inviter);
 
             var starterInput = new InputService(starter);
             var inviterInput = new InputService(inviter);
@@ -384,6 +383,9 @@ namespace Macro.Services
         {
             if (starter == inviter)
                 throw new ArgumentException("Selecione duas janelas diferentes.");
+
+            EnsureEnergySaveRemoved(starter);
+            EnsureEnergySaveRemoved(inviter);
 
             var starterInput = new InputService(starter);
             var inviterInput = new InputService(inviter);
@@ -453,6 +455,7 @@ namespace Macro.Services
 
         public static void DailyFavoriteMissions(WindowTarget target)
         {
+            EnsureEnergySaveRemoved(target);
             var input = new InputService(target);
             input.Activate();
             void Click(double x, double y) => input.ClickRelative(x, y);
@@ -477,7 +480,7 @@ namespace Macro.Services
             Click(78, 23);
 
             //Select all
-            Click(16, 20);
+            Click(13.70, 21.51);
 
             //Start missions
             Click(80, 86);
@@ -489,6 +492,7 @@ namespace Macro.Services
 
         public static void DailyDonates(WindowTarget target)
         {
+            EnsureEnergySaveRemoved(target);
             var input = new InputService(target);
             input.Activate();
             void Click(double x, double y) => input.ClickRelative(x, y);
@@ -650,7 +654,7 @@ namespace Macro.Services
             Thread.Sleep(2000);
             Click(54.74, 51.34);
             Click(56.98, 24.38);
-            Click(94.17, 16.29);
+            Click(90.36, 15.64);
             Thread.Sleep(1000);
         }
 
@@ -659,6 +663,9 @@ namespace Macro.Services
         {
             if (target1 == target2)
                 throw new ArgumentException("Selecione duas janelas diferentes.");
+
+            EnsureEnergySaveRemoved(target1);
+            EnsureEnergySaveRemoved(target2);
 
             // Target2 cria a arena e envia o convite.
             CreateArena(target2);

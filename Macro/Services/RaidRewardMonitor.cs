@@ -85,9 +85,7 @@ public static class RaidRewardMonitor
                                 mouse_event(0x0002, 0, 0, 0, UIntPtr.Zero);
                                 mouse_event(0x0004, 0, 0, 0, UIntPtr.Zero);
                                 if (linkedWindow is IntPtr otherWindow)
-                                {
-                                    ClickLinkedPosition(otherWindow, bounds, button, cancellationToken);
-                                }
+                                    ClickLinkedPosition(window, otherWindow, button, cancellationToken);
                                 attempts++;
                                 awaitingDismissal = true;
                                 lastClick = timer.Elapsed;
@@ -111,23 +109,67 @@ public static class RaidRewardMonitor
         throw new TimeoutException("A tela de recompensa não foi confirmada em 20 minutos. Automação interrompida.");
     }
 
-    private static void ClickLinkedPosition(IntPtr window, Rectangle sourceBounds,
-        Rectangle sourceButton, CancellationToken cancellationToken)
+    private static void ClickLinkedPosition(IntPtr sourceWindow, IntPtr window, Rectangle sourceButton,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            FocusRewardWindow(window, cancellationToken);
+            // Read geometry only after restoration/activation has finished.
+            if (!TryGetBounds(window, out var targetBounds))
+                throw new InvalidOperationException("Não foi possível obter a área da segunda janela para clicar em OK.");
+
+            Point point = new(targetBounds.X + sourceButton.X + sourceButton.Width / 2,
+                targetBounds.Y + sourceButton.Y + sourceButton.Height / 2);
+            if (!targetBounds.Contains(point) || !SetCursorPos(point.X, point.Y))
+                throw new InvalidOperationException("Não foi possível posicionar o mouse no OK da segunda janela.");
+
+            WaitForInput(300, cancellationToken);
+            if (GetForegroundWindow() != window ||
+                !TryGetBounds(window, out var currentBounds) || currentBounds != targetBounds ||
+                GetAncestor(WindowFromPoint(point), 2) != window)
+                throw new InvalidOperationException("A segunda janela perdeu o foco ou o botão OK está encoberto. Clique interrompido.");
+
+            mouse_event(0x0002, 0, 0, 0, UIntPtr.Zero);
+            try { Thread.Sleep(100); }
+            finally { mouse_event(0x0004, 0, 0, 0, UIntPtr.Zero); }
+            Debug.WriteLine($"Raid recompensa: clique enviado à segunda janela em {point}.");
+            WaitForInput(700, cancellationToken);
+        }
+        finally
+        {
+            // Return even when the second click fails; do not hide that failure.
+            if (IsWindow(sourceWindow))
+            {
+                if (IsIconic(sourceWindow)) ShowWindow(sourceWindow, 9);
+                SetForegroundWindow(sourceWindow);
+                Thread.Sleep(350);
+            }
+        }
+    }
+
+    private static void FocusRewardWindow(IntPtr window, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (!TryGetBounds(window, out var targetBounds)) return;
+        if (!IsWindow(window)) throw new InvalidOperationException("A segunda janela da raid foi fechada.");
+        // SW_RESTORE on an already maximized window can change its geometry.
+        if (IsIconic(window)) ShowWindow(window, 9);
+        for (int attempt = 0; attempt < 3; attempt++)
+        {
+            SetForegroundWindow(window);
+            WaitForInput(500, cancellationToken);
+            if (GetForegroundWindow() != window) continue;
+            WaitForInput(500, cancellationToken);
+            if (GetForegroundWindow() == window) return;
+        }
+        throw new InvalidOperationException("Não foi possível ativar a segunda janela para clicar em OK.");
+    }
 
-        int x = targetBounds.X + (int)Math.Round(
-            targetBounds.Width * ((sourceButton.X + sourceButton.Width / 2.0) / sourceBounds.Width));
-        int y = targetBounds.Y + (int)Math.Round(
-            targetBounds.Height * ((sourceButton.Y + sourceButton.Height / 2.0) / sourceBounds.Height));
-
-        ShowWindow(window, 9);
-        SetForegroundWindow(window);
-        Thread.Sleep(150);
-        SetCursorPos(x, y);
-        mouse_event(0x0002, 0, 0, 0, UIntPtr.Zero);
-        mouse_event(0x0004, 0, 0, 0, UIntPtr.Zero);
+    // Stay on the same OS thread while the caller's DPI context is active.
+    private static void WaitForInput(int milliseconds, CancellationToken cancellationToken)
+    {
+        if (cancellationToken.WaitHandle.WaitOne(milliseconds))
+            cancellationToken.ThrowIfCancellationRequested();
     }
 
     private static bool TryGetBounds(IntPtr window, out Rectangle bounds)
