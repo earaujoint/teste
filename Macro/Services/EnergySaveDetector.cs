@@ -8,7 +8,8 @@ namespace Macro.Services;
 /// <summary>Detects the EnergySave dragon screen without relying on localized text.</summary>
 public sealed class EnergySaveDetector : IDisposable
 {
-    public const double MinimumConfidence = 0.62;
+    // Keep the match strict: a loose threshold can mistake similar dark-blue game screens for EnergySave.
+    public const double MinimumConfidence = 0.82;
     private readonly Mat template;
 
     public EnergySaveDetector()

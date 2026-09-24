@@ -212,13 +212,25 @@ namespace Macro.Views
         {
             if (_farmingCts != null || _doArenaCts != null) return;
             if (HasErrors(ConfigurationPanel) || !Configuration.Normal.HasValidCount || !Configuration.Boss.HasValidCount) { Log("Corrija a quantidade: use um número inteiro de 1 a 99."); return; }
+            DateTime? scheduledStart = null;
+            if (!string.IsNullOrWhiteSpace(Configuration.StartTime))
+            {
+                if (!DateTime.TryParseExact(Configuration.StartTime.Trim(), "HH:mm", System.Globalization.CultureInfo.InvariantCulture,
+                        System.Globalization.DateTimeStyles.None, out var startTime))
+                {
+                    Log("Informe o horário no formato 24h HH:mm, por exemplo 21:30.");
+                    return;
+                }
+                scheduledStart = DateTime.Today.Add(startTime.TimeOfDay);
+                if (scheduledStart <= DateTime.Now) scheduledStart = scheduledStart.Value.AddDays(1);
+            }
             try
             {
                 if (Configuration.Normal.IsEnabled) ValidateGroup(Configuration.NormalLaunchers);
                 if (Configuration.Boss.IsEnabled) ValidateGroup(Configuration.BossLaunchers);
-                if (Configuration.DailyDonation && (Configuration.DonationLaunchers is null || Configuration.DonationLaunchers.Count == 0))
-                    throw new ArgumentException("Selecione pelo menos um launcher para as doações.");
-                if (Configuration.DailyDonation)
+                if ((Configuration.DailyDonation || Configuration.BuyDailyScroll) && (Configuration.DonationLaunchers is null || Configuration.DonationLaunchers.Count == 0))
+                    throw new ArgumentException("Selecione pelo menos um launcher para as rotinas diárias.");
+                if (Configuration.DailyDonation || Configuration.BuyDailyScroll)
                     foreach (var launcher in Configuration.DonationLaunchers) Target(launcher);
                 if (Configuration.DailyFavorites)
                 {
@@ -237,13 +249,27 @@ namespace Macro.Views
             BtnDoArena.IsEnabled = false;
             ConfigurationPanel.IsEnabled = false;
             StatusText.Text = "Em execução";
-            Log("Macro iniciado.");
+            if (scheduledStart is DateTime plannedStart)
+            {
+                StatusText.Text = "Agendado";
+                Log($"Macro agendado para {plannedStart:dd/MM HH:mm}. Aguardando horário.");
+            }
+            else
+                Log("Macro iniciado.");
 
             try
             {
                 await Task.Run(async () =>
                 {
                     var token = cts.Token;
+                    if (scheduledStart is DateTime runAt)
+                    {
+                        var delay = runAt - DateTime.Now;
+                        if (delay > TimeSpan.Zero) await Task.Delay(delay, token);
+                        token.ThrowIfCancellationRequested();
+                        Dispatcher.Invoke(() => StatusText.Text = "Em execução");
+                        Log("Horário atingido. Iniciando macro.");
+                    }
                     // Validate assets/native runtime before interacting with the game.
                     if (Configuration.Normal.IsEnabled || Configuration.Boss.IsEnabled)
                         using (var detector = new Macro.Services.RaidRewardDetector()) { }
@@ -256,6 +282,16 @@ namespace Macro.Views
                             token.ThrowIfCancellationRequested();
                             Log($"Doação em {launcher}.");
                             DailyDonates(Target(launcher));
+                        }
+                    }
+                    if (Configuration.BuyDailyScroll)
+                    {
+                        Log("Compra de pergaminho diário.");
+                        foreach (var launcher in Configuration.DonationLaunchers)
+                        {
+                            token.ThrowIfCancellationRequested();
+                            Log($"Compra de pergaminho em {launcher}.");
+                            BuyDailyScroll(Target(launcher));
                         }
                     }
                     if (Configuration.Normal.IsEnabled)

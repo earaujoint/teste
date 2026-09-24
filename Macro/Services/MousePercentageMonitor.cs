@@ -50,23 +50,33 @@ public static class MousePercentageMonitor
 
     private static MousePercentage? GetPercentage(Point screenPoint)
     {
-        IntPtr clickedWindow = GetAncestor(WindowFromPoint(screenPoint), GaRoot);
-        if (clickedWindow == IntPtr.Zero || !GetClientRect(clickedWindow, out var client))
-            return null;
+        IntPtr oldDpiContext = SetThreadDpiAwarenessContext(PerMonitorDpiContext);
+        try
+        {
+            IntPtr clickedWindow = GetAncestor(WindowFromPoint(screenPoint), GaRoot);
+            if (clickedWindow == IntPtr.Zero || !GetClientRect(clickedWindow, out var client))
+                return null;
 
-        var topLeft = new Point();
-        if (!ClientToScreen(clickedWindow, ref topLeft)) return null;
-        int width = client.Right - client.Left;
-        int height = client.Bottom - client.Top;
-        if (width <= 0 || height <= 0) return null;
+            var topLeft = new Point();
+            if (!ClientToScreen(clickedWindow, ref topLeft)) return null;
+            int width = client.Right - client.Left;
+            int height = client.Bottom - client.Top;
+            if (width <= 0 || height <= 0) return null;
 
-        double x = (double)(screenPoint.X - topLeft.X) / width;
-        double y = (double)(screenPoint.Y - topLeft.Y) / height;
-        // Clicks on borders/title bars do not belong to the client's percentage area.
-        return x is >= 0 and <= 1 && y is >= 0 and <= 1 ? new MousePercentage(x, y) : null;
+            double x = (double)(screenPoint.X - topLeft.X) / width;
+            double y = (double)(screenPoint.Y - topLeft.Y) / height;
+            // Use the same per-monitor DPI coordinate space as automated clicks.
+            return x is >= 0 and <= 1 && y is >= 0 and <= 1 ? new MousePercentage(x, y) : null;
+        }
+        finally
+        {
+            if (oldDpiContext != IntPtr.Zero)
+                SetThreadDpiAwarenessContext(oldDpiContext);
+        }
     }
 
     private delegate IntPtr HookProcedure(int code, IntPtr message, IntPtr data);
+    private static readonly IntPtr PerMonitorDpiContext = new(-4);
     [StructLayout(LayoutKind.Sequential)] private struct Point { public int X, Y; }
     [StructLayout(LayoutKind.Sequential)] private struct Rect { public int Left, Top, Right, Bottom; }
     [StructLayout(LayoutKind.Sequential)] private struct LowLevelMouseInfo { public Point Point; public uint MouseData, Flags, Time; public IntPtr ExtraInfo; }
@@ -78,4 +88,5 @@ public static class MousePercentageMonitor
     [DllImport("user32.dll")] private static extern IntPtr GetAncestor(IntPtr window, uint flags);
     [DllImport("user32.dll")] private static extern bool GetClientRect(IntPtr window, out Rect rect);
     [DllImport("user32.dll")] private static extern bool ClientToScreen(IntPtr window, ref Point point);
+    [DllImport("user32.dll")] private static extern IntPtr SetThreadDpiAwarenessContext(IntPtr context);
 }

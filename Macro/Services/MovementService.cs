@@ -199,8 +199,11 @@ namespace Macro.Services
 
             Thread.Sleep(1000);
         }
-        private static void DragUpStrong(IntPtr hWnd)
+        private static void DragUpStrong(IntPtr hWnd, double startXPercent, double startYPercent, double endYPercent = 30)
         {
+            if (startXPercent > 1) startXPercent /= 100;
+            if (startYPercent > 1) startYPercent /= 100;
+            if (endYPercent > 1) endYPercent /= 100;
             GetClientRect(hWnd, out RECT rect);
 
             int width = rect.Right - rect.Left;
@@ -208,14 +211,14 @@ namespace Macro.Services
 
             POINT start = new POINT
             {
-                X = width / 2,
-                Y = (int)(height * 0.90)
+                X = (int)(width * startXPercent),
+                Y = (int)(height * startYPercent)
             };
 
             POINT end = new POINT
             {
-                X = width / 2,
-                Y = (int)(height * 0.30)
+                X = start.X,
+                Y = (int)(height * endYPercent)
             };
 
             ClientToScreen(hWnd, ref start);
@@ -502,7 +505,7 @@ namespace Macro.Services
             Click(78, 23);
 
             //Select all
-            Click(13.70, 21.51);
+            Click(15.42, 20.24);
 
             //Start missions
             Click(80, 86);
@@ -510,6 +513,9 @@ namespace Macro.Services
             Thread.Sleep(1000);
 
             FastTravel(target);
+            Click(97.08, 4.23);
+            Click(20.94, 71.02);
+            input.ResizeToMinimumAllowed();
         }
 
         public static void DailyDonates(WindowTarget target)
@@ -717,6 +723,44 @@ namespace Macro.Services
             input.ClickRelative(48.39, 90.88);
             Thread.Sleep(TimeSpan.FromSeconds(5));
             cancellationToken.ThrowIfCancellationRequested();
+        }
+
+        public static void BuyDailyScroll(WindowTarget target)
+        {
+            EnsureEnergySaveRemoved(target);
+            var input = new InputService(target);
+            input.Activate();
+
+            void Click(double x, double y) => input.ClickRelative(x, y);
+
+            Click(87.19, 13.50);
+            Click(64.06, 21.69);
+            Click(64.06, 21.69);
+            Click(41.98, 89.56);
+            Thread.Sleep(7000);
+            Click(43.44, 50.32);
+            DragUpStrong(input.Handle, 76.61, 62.74);
+            DragUpStrong(input.Handle, 76.61, 62.74);
+            Click(76.51, 56.17);
+            Click(61.72, 55.09);
+            Click(59.95, 69.04);
+            input.SendEscape();
+        }
+
+        public static void BuyDailySummons(WindowTarget target)
+        {
+            var input = new InputService(target);
+            input.Activate();
+
+            void Click(double x, double y) => input.ClickRelative(x, y);
+        }
+
+        public static void BuyDailyStepUp(WindowTarget target)
+        {
+            var input = new InputService(target);
+            input.Activate();
+
+            void Click(double x, double y) => input.ClickRelative(x, y);
         }
     }
 }

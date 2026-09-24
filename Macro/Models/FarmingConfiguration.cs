@@ -44,7 +44,9 @@ public class FarmingConfiguration
     [System.Text.Json.Serialization.JsonIgnore]
     public string DailyLauncher { get; set; } = "MIR4 Launcher 2";
     public bool DailyDonation { get; set; } = true;
+    public bool BuyDailyScroll { get; set; }
     public bool DailyFavorites { get; set; } = true;
+    public string StartTime { get; set; } = "";
     public string Starter { get; set; } = "MIR4 Steam";
     public string Partner { get; set; } = "MIR4 Launcher 2";
     public RaidConfiguration Normal { get; set; } = new() { Name = "Raide 1", Description = "Raide normal configurada no macro", IsEnabled = true, RepeatCount = 2 };
