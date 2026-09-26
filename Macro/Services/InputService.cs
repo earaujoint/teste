@@ -23,9 +23,16 @@ public sealed class InputService
 
     public void Activate()
     {
+        if (!IsWindow(handle))
+            throw new InvalidOperationException("A janela do jogo foi fechada.");
         ShowWindow(handle, ShowMaximized);
-        SetForegroundWindow(handle);
-        Thread.Sleep(150);
+        for (int attempt = 0; attempt < 3; attempt++)
+        {
+            SetForegroundWindow(handle);
+            Thread.Sleep(350);
+            if (GetForegroundWindow() == handle) return;
+        }
+        throw new InvalidOperationException("Não foi possível colocar a janela do jogo em primeiro plano; rotina interrompida antes dos cliques.");
     }
 
     public void ResizeToMinimumAllowed()

@@ -58,6 +58,7 @@ namespace Macro.Views
 
         private CancellationTokenSource? _farmingCts;
         private CancellationTokenSource? _doArenaCts;
+        public event Action<bool>? MacroRunStateChanged;
         public FarmingConfiguration Configuration { get; private set; } = new();
         public string[] Launchers { get; } = ["MIR4 Launcher 1", "MIR4 Launcher 2", "MIR4 Steam"];
         public string[] GuestLaunchers { get; } = ["Não utilizar", "MIR4 Launcher 1", "MIR4 Launcher 2", "MIR4 Steam"];
@@ -164,6 +165,7 @@ namespace Macro.Views
             catch (Exception ex) { Log(ex.Message); return; }
             using var cts = new CancellationTokenSource();
             _doArenaCts = cts;
+            MacroRunStateChanged?.Invoke(true);
             BtnDoArena.IsEnabled = false;
             BtnStart.IsEnabled = false;
             ConfigurationPanel.IsEnabled = false;
@@ -194,6 +196,7 @@ namespace Macro.Views
             finally
             {
                 _doArenaCts = null;
+                MacroRunStateChanged?.Invoke(false);
                 ConfigurationPanel.IsEnabled = true;
                 BtnDoArena.IsEnabled = true;
                 BtnStart.IsEnabled = true;
@@ -204,6 +207,12 @@ namespace Macro.Views
 
         private void BtnStop_Click(object sender, RoutedEventArgs e)
         {
+            StopCurrentRoutine();
+        }
+
+        public void StopCurrentRoutine()
+        {
+            if (_farmingCts is null && _doArenaCts is null) return;
             _farmingCts?.Cancel();
             _doArenaCts?.Cancel();
             Log("Parada solicitada. Aguardando a rotina atual liberar o controle.");
@@ -245,6 +254,7 @@ namespace Macro.Views
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Log("Não foi possível salvar: " + ex.Message); return; }
             using var cts = new CancellationTokenSource();
             _farmingCts = cts;
+            MacroRunStateChanged?.Invoke(true);
             BtnStart.IsEnabled = false;
             BtnDoArena.IsEnabled = false;
             ConfigurationPanel.IsEnabled = false;
@@ -328,6 +338,7 @@ namespace Macro.Views
             finally
             {
                 _farmingCts = null;
+                MacroRunStateChanged?.Invoke(false);
                 ConfigurationPanel.IsEnabled = true;
                 BtnDoArena.IsEnabled = true;
                 StatusText.Text = "Pronto";

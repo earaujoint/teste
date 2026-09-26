@@ -40,20 +40,32 @@ public sealed class RaidRewardDetector : IDisposable
         CvInvoke.GaussianBlur(gray, gray, new Size(3, 3), .8);
         // The reference client is 1919 x 1009 (without title/task bars).
         double baseScale = Math.Min(client.Width / 1919.0, client.Height / 1009.0);
-        var searchArea = new Rectangle((int)(client.Width * .15), (int)(client.Height * .72),
-            (int)(client.Width * .70), (int)(client.Height * .27));
+        var searchArea = new Rectangle(0, (int)(client.Height * .65),
+            client.Width, client.Height - (int)(client.Height * .65));
         if (searchArea.Width < 20 || searchArea.Height < 20) return null;
         using var search = new Mat(gray, searchArea);
         Rectangle? best = null;
-        for (int step = -6; step <= 6; step++)
+        double bestScale = baseScale;
+        IEnumerable<double> CandidateScales()
         {
-            double scale = baseScale * (1 + step * .025);
+            for (int step = -10; step <= 20; step++)
+                yield return baseScale * (1 + step * .025);
+            // Refine the strongest coarse match; at higher resolutions a small
+            // scale error shifts the text/borders enough to miss the threshold.
+            double coarseBest = bestScale;
+            for (int step = -4; step <= 4; step++)
+                if (step != 0) yield return coarseBest + baseScale * step * .005;
+        }
+        // Virtual monitors can change the client aspect ratio and game UI scale.
+        foreach (double scale in CandidateScales())
+        {
             var size = new Size((int)Math.Round(team.Width * scale), (int)Math.Round(team.Height * scale));
+            var okSize = new Size((int)Math.Round(ok.Width * scale), (int)Math.Round(ok.Height * scale));
             if (size.Width < 20 || size.Height < 8 || size.Width > search.Width || size.Height > search.Height) continue;
             using var teamScaled = new Mat();
             using var okScaled = new Mat();
             CvInvoke.Resize(team, teamScaled, size, 0, 0, Inter.Linear);
-            CvInvoke.Resize(ok, okScaled, size, 0, 0, Inter.Linear);
+            CvInvoke.Resize(ok, okScaled, okSize, 0, 0, Inter.Linear);
             CvInvoke.GaussianBlur(teamScaled, teamScaled, new Size(3, 3), .8);
             CvInvoke.GaussianBlur(okScaled, okScaled, new Size(3, 3), .8);
             // Locate the blue Party Rewards button first. Then search for OK only
@@ -75,7 +87,8 @@ public sealed class RaidRewardDetector : IDisposable
             double score = Math.Min(left.Score, localOk.Score);
             if (score <= confidence) continue;
             confidence = score;
-            best = new Rectangle(okPoint.X + searchArea.X, okPoint.Y + searchArea.Y, size.Width, size.Height);
+            bestScale = scale;
+            best = new Rectangle(okPoint.X + searchArea.X, okPoint.Y + searchArea.Y, okSize.Width, okSize.Height);
         }
         return confidence >= MinimumConfidence ? best : null;
     }
