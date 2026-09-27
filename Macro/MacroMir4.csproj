@@ -24,6 +24,7 @@
 	<ItemGroup>
 		<Folder Include="Assets\Fonts\" />
 		<Folder Include="Controls\" />
+		<Folder Include="Services\Models\" />
 	</ItemGroup>
 
 	<!-- Recursos -->
@@ -36,25 +37,38 @@
 		<Resource Include="Assets\boss-slide-2.png" />
 		<Content Include="Assets\app-icon.png" />
 		<Content Include="Assets\app.ico" />
+		<Content Include="Assets\Templates\daily-donate.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Assets\Templates\daily-donate-warehouse.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Assets\Templates\daily-donate-button.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Assets\Templates\daily-step-*.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Assets\Templates\daily-flow-*.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Assets\Templates\daily-scroll-*.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Assets\Templates\daily-favorite-*.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Assets\Templates\daily-raid-*.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
 		<Resource Include="Assets\app-v2.ico" />
-		<Content Include="Assets\RaidDetection\*.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-		</Content>
-		<Content Include="Assets\EnergySave\*.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-		</Content>
-
-		<!-- JSON embutido no executável -->
-		<!-- JSON copiado para saída para permitir execução fora da pasta de publicação -->
 		<Content Include="Data\bosses.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
 	<ItemGroup>
-	  <PackageReference Include="Emgu.CV" Version="4.13.0.5924" />
-	  <PackageReference Include="Emgu.CV.runtime.windows" Version="4.13.0.5924" />
+	  <PackageReference Include="OpenCvSharp4" Version="4.11.0.20250507" />
+	  <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.11.0.20250507" />
 	</ItemGroup>
 
 </Project>

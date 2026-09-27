@@ -24,7 +24,7 @@
             </ItemsPanelTemplate>
         </ResourceDictionary>
     </Page.Resources>
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <ScrollViewer x:Name="FarmingScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="28,24">
             <Grid>
                 <StackPanel>
@@ -51,16 +51,16 @@
                                     <TextBlock Text="Preparação antes das raids" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,3,0,0" />
                                 </StackPanel>
                             </StackPanel>
-                            <CheckBox Grid.Column="1" Style="{StaticResource Toggle}" IsChecked="{Binding Configuration.DailyDonation}" VerticalAlignment="Center" ToolTip="Ativar doação diária" AutomationProperties.Name="Ativar doação diária" />
+                            <CheckBox Grid.Column="1" Style="{StaticResource Toggle}" IsChecked="{Binding Configuration.DailyDonation}" Checked="DailyDonation_Toggled" Unchecked="DailyDonation_Toggled" VerticalAlignment="Center" ToolTip="Ativar doação diária" AutomationProperties.Name="Ativar doação diária" />
                         </Grid>
                         <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,16" />
                         <Grid>
                             <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                             <StackPanel>
-                                <TextBlock Text="Comprar pergaminho diário" FontWeight="SemiBold" />
-                                <TextBlock Text="Executada independentemente da doação" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,3,0,0" />
+                                <TextBlock Text="DailyScroll" FontWeight="SemiBold" />
+                                <TextBlock Text="Compra o pergaminho diário após pressionar F10" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,3,0,0" />
                             </StackPanel>
-                            <CheckBox Grid.Column="1" Style="{StaticResource Toggle}" IsChecked="{Binding Configuration.BuyDailyScroll}" VerticalAlignment="Center" ToolTip="Ativar compra de pergaminho diário" AutomationProperties.Name="Ativar compra de pergaminho diário" />
+                            <CheckBox Grid.Column="1" Style="{StaticResource Toggle}" IsChecked="{Binding Configuration.DailyScroll}" Checked="DailyScroll_Toggled" Unchecked="DailyScroll_Toggled" VerticalAlignment="Center" ToolTip="Ativar rotina DailyScroll" AutomationProperties.Name="Ativar rotina DailyScroll" />
                         </Grid>
                         <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,16" />
                         <TextBlock Text="Selecione os launchers para as rotinas diárias" FontWeight="SemiBold" Margin="0,0,0,10" />
@@ -109,7 +109,7 @@
                                             <ColumnDefinition Width="72" />
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="Quantidade de vezes" VerticalAlignment="Center" />
-                                        <TextBox Grid.Column="1" Text="{Binding RepeatCountText, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" IsEnabled="{Binding IsEnabled}" AutomationProperties.Name="Quantidade de repetições da raid normal" />
+                                        <TextBox Grid.Column="1" Text="{Binding RepeatCountText, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsEnabled}" AutomationProperties.Name="Quantidade de repetições da raid normal" />
                                     </Grid>
                                     <TextBlock Text="Executada no starter e nos convidados selecionados." Style="{StaticResource Caption}" Margin="0,12,0,0" />
                                 </StackPanel>
@@ -138,7 +138,7 @@
                                     </Grid>
                                     <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="72" /></Grid.ColumnDefinitions>
                                         <TextBlock Text="Quantidade de vezes" VerticalAlignment="Center" />
-                                        <TextBox Grid.Column="1" Text="{Binding RepeatCountText, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" IsEnabled="{Binding IsEnabled}" AutomationProperties.Name="Quantidade de repetições da raid boss" />
+                                        <TextBox Grid.Column="1" Text="{Binding RepeatCountText, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsEnabled}" AutomationProperties.Name="Quantidade de repetições da raid boss" />
                                     </Grid>
                                     <TextBlock Text="Executada no starter e nos convidados selecionados." Style="{StaticResource Caption}" Margin="0,12,0,0" />
                                 </StackPanel>
@@ -149,7 +149,7 @@
                         <StackPanel>
                             <TextBlock Text="Missões Diárias" Style="{StaticResource PageSectionHeading}" />
                             <TextBlock Text="O macro atual executa as missões favoritas selecionadas dentro do jogo." Style="{StaticResource Caption}" />
-                            <CheckBox Content="Executar missões favoritas nos launchers selecionados" IsChecked="{Binding Configuration.DailyFavorites}" Margin="0,4,0,12" />
+                            <CheckBox Content="Executar missões favoritas nos launchers selecionados" IsChecked="{Binding Configuration.DailyFavorites}" Checked="DailyFavorites_Toggled" Unchecked="DailyFavorites_Toggled" Margin="0,4,0,12" />
                             <TextBlock Text="Launchers das missões diárias" FontWeight="SemiBold" Margin="0,0,0,8" />
                             <WrapPanel Margin="0,0,0,12">
                                 <CheckBox x:Name="DailyLauncher1" Style="{StaticResource DonationChoice}" Content="Launcher 1" Tag="MIR4 Launcher 1" Checked="DailyLauncher_Checked" Unchecked="DailyLauncher_Unchecked" />
@@ -173,6 +173,7 @@
                     <TabItem><TabItem.Header><StackPanel Orientation="Horizontal"><TextBlock Text="⚔" Foreground="{StaticResource AccentBrush}" Margin="0,0,8,0" /><TextBlock Text="Arena" /></StackPanel></TabItem.Header><StackPanel><TextBlock Text="Arena" Style="{StaticResource PageSectionHeading}" /><TextBlock Text="O starter começa os movimentos; o convidado aceita e termina a sequência. Use DoArena para executar." Style="{StaticResource Caption}" /><WrapPanel><StackPanel Width="240" Margin="0,0,12,12"><TextBlock Text="Starter da arena" Margin="0,0,0,7" /><ComboBox ItemsSource="{Binding Launchers}" SelectedItem="{Binding Configuration.ArenaStarter}" AutomationProperties.Name="Starter da arena" /></StackPanel><StackPanel Width="240" Margin="0,0,12,12"><TextBlock Text="Convidado da arena" Margin="0,0,0,7" /><ComboBox ItemsSource="{Binding Launchers}" SelectedItem="{Binding Configuration.ArenaInviter}" AutomationProperties.Name="Convidado da arena" /></StackPanel></WrapPanel></StackPanel></TabItem>
                 </TabControl>
             </StackPanel>
+            <Button Content="Testar captura de janela" Click="PreviewWindow_Click" HorizontalAlignment="Left" Margin="0,18,0,0" Padding="16,10" />
             <UniformGrid Columns="4" Margin="0,18,0,14">
                 <Button x:Name="BtnStart" Content="▶   Start" Style="{StaticResource PrimaryButton}" Click="BtnStart_Click" Margin="0,0,10,0" />
                 <Button x:Name="BtnStop" Content="■   Stop" Click="BtnStop_Click" Margin="0,0,10,0" />
@@ -185,7 +186,7 @@
                     <TextBox x:Name="ExecutionLog" IsReadOnly="True" TextWrapping="Wrap" Height="100" VerticalScrollBarVisibility="Auto" Background="Transparent" BorderThickness="0" FontFamily="Consolas" FontSize="12" />
                 </StackPanel>
             </Border>
-            <Expander Header="Captura de tela" Foreground="#A8A8A8" Margin="0,16,0,0">
+            <Expander x:Name="CaptureExpander" Header="Captura e detecção da doação" Foreground="#A8A8A8" Margin="0,16,0,0">
                 <Border Style="{StaticResource Card}" Margin="0,10,0,0">
                     <Image x:Name="ScreenshotImage" Stretch="Uniform" MaxHeight="450" />
                 </Border>

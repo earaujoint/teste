@@ -1,0 +1,110 @@
+using OpenCvSharp;
+using System.Runtime.InteropServices;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+
+namespace Macro.Services;
+
+public sealed record RelativeSearchRegion(double X, double Y, double Width, double Height);
+public sealed record TemplateSearchResult(bool Found, double Confidence, OpenCvSharp.Rect Bounds, BitmapSource AnnotatedFrame);
+
+public sealed class TemplateSearchService
+{
+    public Task<TemplateSearchResult> FindAsync(BitmapSource frame, string templatePath,
+        RelativeSearchRegion region, double threshold, CancellationToken token, Int32Rect? templateCrop = null) =>
+        Task.Run(() => Find(frame, templatePath, region, threshold, token, templateCrop), token);
+
+    private static TemplateSearchResult Find(BitmapSource frame, string templatePath,
+        RelativeSearchRegion region, double threshold, CancellationToken token, Int32Rect? templateCrop)
+    {
+        Validate(region, threshold);
+        using var color = ToBgr(frame);
+        using var gray = new Mat();
+        Cv2.CvtColor(color, gray, ColorConversionCodes.BGR2GRAY);
+        using var originalTemplate = Cv2.ImRead(templatePath, ImreadModes.Grayscale);
+        if (originalTemplate.Empty()) throw new InvalidOperationException("Não foi possível abrir a imagem selecionada.");
+        var crop = templateCrop ?? new Int32Rect(0, 0, originalTemplate.Width, originalTemplate.Height);
+        if (crop.X < 0 || crop.Y < 0 || crop.Width <= 0 || crop.Height <= 0 ||
+            crop.X + crop.Width > originalTemplate.Width || crop.Y + crop.Height > originalTemplate.Height)
+            throw new ArgumentException("Recorte do ícone fora dos limites da imagem.");
+        using var template = new Mat(originalTemplate, new OpenCvSharp.Rect(crop.X, crop.Y, crop.Width, crop.Height));
+        token.ThrowIfCancellationRequested();
+
+        var x = Math.Clamp((int)Math.Round(region.X * gray.Width), 0, gray.Width - 1);
+        var y = Math.Clamp((int)Math.Round(region.Y * gray.Height), 0, gray.Height - 1);
+        var right = Math.Clamp((int)Math.Round((region.X + region.Width) * gray.Width), x + 1, gray.Width);
+        var bottom = Math.Clamp((int)Math.Round((region.Y + region.Height) * gray.Height), y + 1, gray.Height);
+        var roi = new OpenCvSharp.Rect(x, y, right - x, bottom - y);
+        using var roiMat = new Mat(gray, roi);
+        var found = false;
+        double confidence = double.NegativeInfinity;
+        var bounds = new OpenCvSharp.Rect();
+        // O template da captura pode ter uma escala diferente da janela atual.
+        // Testamos escalas próximas sem redimensionar o frame inteiro.
+        // O jogo pode exibir os assets em resoluções/densidades bem diferentes.
+        // Escanear escalas 0.40x–1.80x, com passos finos, evita perder imagens
+        // grandes como o botão Cobre quando o template veio de outra resolução.
+        for (var scaleStep = 40; scaleStep <= 180; scaleStep += 4)
+        {
+            var scale = scaleStep / 100d;
+            token.ThrowIfCancellationRequested();
+            var width = Math.Max(1, (int)Math.Round(template.Width * scale));
+            var height = Math.Max(1, (int)Math.Round(template.Height * scale));
+            if (width > roi.Width || height > roi.Height) continue;
+            using var scaledTemplate = new Mat();
+            Cv2.Resize(template, scaledTemplate, new OpenCvSharp.Size(width, height), 0, 0,
+                scale < 1 ? InterpolationFlags.Area : InterpolationFlags.Cubic);
+            using var scores = new Mat();
+            Cv2.MatchTemplate(roiMat, scaledTemplate, scores, TemplateMatchModes.CCoeffNormed);
+            Cv2.MinMaxLoc(scores, out _, out var max, out _, out var location);
+            if (double.IsFinite(max) && max > confidence)
+            {
+                confidence = max;
+                bounds = new(location.X + x, location.Y + y, width, height);
+            }
+        }
+        if (!double.IsFinite(confidence)) confidence = 0;
+        found = confidence >= threshold;
+
+        Cv2.Rectangle(color, roi, Scalar.DodgerBlue, 2);
+        if (bounds.Width > 0 && bounds.Height > 0)
+        {
+            var markerColor = found ? Scalar.LimeGreen : Scalar.OrangeRed;
+            Cv2.Rectangle(color, bounds, markerColor, 2);
+            Cv2.Circle(color, new(bounds.X + bounds.Width / 2, bounds.Y + bounds.Height / 2), 4, Scalar.Red, -1);
+            Cv2.PutText(color, $"{confidence:0.00} / {threshold:0.00}", new(bounds.X, Math.Max(18, bounds.Y - 6)),
+                HersheyFonts.HersheySimplex, 0.6, markerColor, 2);
+        }
+        token.ThrowIfCancellationRequested();
+        using var bgra = new Mat();
+        Cv2.CvtColor(color, bgra, ColorConversionCodes.BGR2BGRA);
+        var pixels = new byte[bgra.Rows * bgra.Cols * 4];
+        Marshal.Copy(bgra.Data, pixels, 0, pixels.Length);
+        var bitmap = BitmapSource.Create(bgra.Cols, bgra.Rows, 96, 96, PixelFormats.Bgra32,
+            null, pixels, bgra.Cols * 4);
+        bitmap.Freeze();
+        return new(found, confidence, bounds, bitmap);
+    }
+
+    private static Mat ToBgr(BitmapSource frame)
+    {
+        var converted = new FormatConvertedBitmap(frame, PixelFormats.Bgra32, null, 0);
+        var pixels = new byte[converted.PixelWidth * converted.PixelHeight * 4];
+        converted.CopyPixels(pixels, converted.PixelWidth * 4, 0);
+        using var bgra = new Mat(converted.PixelHeight, converted.PixelWidth, MatType.CV_8UC4);
+        Marshal.Copy(pixels, 0, bgra.Data, pixels.Length);
+        var bgr = new Mat();
+        Cv2.CvtColor(bgra, bgr, ColorConversionCodes.BGRA2BGR);
+        return bgr;
+    }
+
+    private static void Validate(RelativeSearchRegion region, double threshold)
+    {
+        if (region.X < 0 || region.Y < 0 || region.Width <= 0 || region.Height <= 0 ||
+            region.X + region.Width > 1 || region.Y + region.Height > 1)
+            throw new ArgumentOutOfRangeException(nameof(region), "A região deve estar dentro da janela, em valores de 0 a 100%.");
+        if (threshold <= 0 || threshold > 1)
+            throw new ArgumentOutOfRangeException(nameof(threshold), "A confiança deve estar entre 0 e 1.");
+    }
+}

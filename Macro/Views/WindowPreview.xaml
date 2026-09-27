@@ -1,0 +1,50 @@
+<Window x:Class="Macro.Views.WindowPreview"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Teste de captura e busca" Width="980" Height="780" MinWidth="680" MinHeight="540"
+        Background="{StaticResource CanvasBrush}" WindowStartupLocation="CenterOwner">
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/><RowDefinition Height="100"/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="A lista mostra apenas janelas de processos MIR4. Capture a janela e arraste na prévia para marcar a área de busca, inclusive junto aos cantos. Depois escolha a imagem de referência."
+                   TextWrapping="Wrap" Margin="0,0,0,10"/>
+        <Grid Grid.Row="1" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+            <ComboBox x:Name="WindowList" DisplayMemberPath="Label" MinWidth="200"/>
+            <Button x:Name="RefreshButton" Grid.Column="1" Content="Atualizar janelas" Click="Refresh_Click" Margin="8,0" Padding="12,6"/>
+            <Button x:Name="CaptureButton" Grid.Column="2" Content="Capturar" Click="Capture_Click" Padding="12,6"/>
+        </Grid>
+        <StackPanel Grid.Row="2" Margin="0,0,0,10">
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <TextBox x:Name="TemplatePath" IsReadOnly="True" VerticalContentAlignment="Center" ToolTip="Imagem de referência PNG, BMP ou JPG"/>
+                <Button Grid.Column="1" Content="Escolher imagem..." Click="ChooseTemplate_Click" Margin="8,0,0,0" Padding="12,6"/>
+            </Grid>
+            <WrapPanel VerticalAlignment="Center">
+                <TextBlock Text="Área selecionada (%)  X" VerticalAlignment="Center"/><TextBox x:Name="RegionX" Text="0" IsReadOnly="True" Width="48" Margin="5,0,10,0"/>
+                <TextBlock Text="Y" VerticalAlignment="Center"/><TextBox x:Name="RegionY" Text="0" IsReadOnly="True" Width="48" Margin="5,0,10,0"/>
+                <TextBlock Text="Largura" VerticalAlignment="Center"/><TextBox x:Name="RegionWidth" Text="100" IsReadOnly="True" Width="48" Margin="5,0,10,0"/>
+                <TextBlock Text="Altura" VerticalAlignment="Center"/><TextBox x:Name="RegionHeight" Text="100" IsReadOnly="True" Width="48" Margin="5,0,10,0"/>
+                <TextBlock Text="Confiança mínima" VerticalAlignment="Center"/><TextBox x:Name="Confidence" Text="0.88" Width="52" Margin="5,0,10,0"/>
+                <Button x:Name="SearchButton" Content="Buscar imagem" Click="Search_Click" Padding="12,6" Margin="0,0,8,0"/>
+                <Button x:Name="SearchAndClickButton" Content="Buscar e clicar" Click="SearchAndClick_Click" Padding="12,6"/>
+            </WrapPanel>
+            <TextBlock Text="Arraste para marcar uma região. A seleção é salva como percentuais da janela, mesmo quando a janela mudar de posição."
+                       TextWrapping="Wrap" FontSize="12" Opacity="0.8" Margin="0,6,0,0"/>
+        </StackPanel>
+        <Border Grid.Row="3" Background="#171717" BorderBrush="#555555" BorderThickness="1" ClipToBounds="True">
+            <Grid x:Name="PreviewSurface" Background="Transparent"
+                  MouseLeftButtonDown="Preview_MouseLeftButtonDown"
+                  MouseMove="Preview_MouseMove" MouseLeftButtonUp="Preview_MouseLeftButtonUp">
+                <Image x:Name="Preview" Stretch="Uniform" IsHitTestVisible="False"/>
+                <Canvas x:Name="SelectionOverlay" IsHitTestVisible="False">
+                    <Rectangle x:Name="SelectionRectangle" Stroke="#FF4FA3FF" StrokeThickness="2" Fill="#334FA3FF" Visibility="Collapsed"/>
+                </Canvas>
+            </Grid>
+        </Border>
+        <TextBox Grid.Row="4" x:Name="Log" IsReadOnly="True" TextWrapping="Wrap"
+                 VerticalScrollBarVisibility="Auto" Margin="0,10,0,0"/>
+    </Grid>
+</Window>

@@ -1,368 +1,915 @@
 using Macro.Models;
-using Macro.Services;
-using Macro.Services.Models;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Shapes;
-using static Macro.Services.MovementService;
-using static Macro.Services.ScreenCaptureService;
-using SDPoint = System.Drawing.Point;
+using Macro.Services;
+using System.Globalization;
 
-namespace Macro.Views
+namespace Macro.Views;
+
+public partial class FarmingPage : Page
 {
-    public partial class FarmingPage : Page
+    private int _normalRaidImageIndex;
+    private int _bossRaidImageIndex;
+    private CancellationTokenSource? _runCancellation;
+    private readonly WindowClickService _windowClickService = new();
+    private readonly WindowPreviewService _windowCaptureService = new();
+    private readonly TemplateSearchService _templateSearchService = new();
+
+    public FarmingConfiguration Configuration { get; } = new();
+    public string[] Launchers { get; } = ["MIR4 Launcher 1", "MIR4 Launcher 2", "MIR4 Steam"];
+    public string[] GuestLaunchers { get; } = ["Não utilizar", "MIR4 Launcher 1", "MIR4 Launcher 2", "MIR4 Steam"];
+    public IReadOnlyList<RaidConfiguration> NormalRaids { get; }
+    public IReadOnlyList<RaidConfiguration> BossRaids { get; }
+
+    public FarmingPage()
     {
-        private bool _mouseLoopRunning = false;
-        private bool _syncingDailyLaunchers;
-        private int _normalRaidImageIndex;
-        private int _bossRaidImageIndex;
+        InitializeComponent();
+        NormalRaids = [Configuration.Normal, new() { Name = "Raide 2" }, new() { Name = "Raide 3" }];
+        BossRaids = [Configuration.Boss, new() { Name = "Boss 2" }, new() { Name = "Boss 3" }];
+        DataContext = this;
+    }
 
-        private void PreviousNormalRaidImage_Click(object sender, RoutedEventArgs e) => ChangeNormalRaidImage(-1);
-        private void NextNormalRaidImage_Click(object sender, RoutedEventArgs e) => ChangeNormalRaidImage(1);
+    private void PreviousNormalRaidImage_Click(object sender, RoutedEventArgs e) => ChangeNormalRaidImage(-1);
+    private void NextNormalRaidImage_Click(object sender, RoutedEventArgs e) => ChangeNormalRaidImage(1);
+    private void PreviousBossRaidImage_Click(object sender, RoutedEventArgs e) => ChangeBossRaidImage(-1);
+    private void NextBossRaidImage_Click(object sender, RoutedEventArgs e) => ChangeBossRaidImage(1);
 
-        private void ChangeNormalRaidImage(int direction)
-        {
-            _normalRaidImageIndex = (_normalRaidImageIndex + direction + 2) % 2;
-            AnimateCarouselImage(NormalRaidImage, $"pack://application:,,,/Assets/raid-slide-{_normalRaidImageIndex + 1}.png", direction);
-            NormalRaidImageCounter.Text = $"{_normalRaidImageIndex + 1} / 2";
-        }
-        private void PreviousBossRaidImage_Click(object sender, RoutedEventArgs e) => ChangeBossRaidImage(-1);
-        private void NextBossRaidImage_Click(object sender, RoutedEventArgs e) => ChangeBossRaidImage(1);
-        private void ChangeBossRaidImage(int direction)
-        {
-            _bossRaidImageIndex = (_bossRaidImageIndex + direction + 2) % 2;
-            AnimateCarouselImage(BossRaidImage, $"pack://application:,,,/Assets/boss-slide-{_bossRaidImageIndex + 1}.png", direction);
-            BossRaidImageCounter.Text = $"{_bossRaidImageIndex + 1} / 2";
-        }
-        private static void AnimateCarouselImage(Image image, string source, int direction)
-        {
-            image.Source = new BitmapImage(new Uri(source));
-            image.BeginAnimation(UIElement.OpacityProperty, null);
-            var translation = new TranslateTransform();
-            image.RenderTransform = translation;
-            if (!SystemParameters.ClientAreaAnimation) return;
+    private void ChangeNormalRaidImage(int direction)
+    {
+        _normalRaidImageIndex = (_normalRaidImageIndex + direction + 2) % 2;
+        AnimateCarouselImage(NormalRaidImage, $"pack://application:,,,/Assets/raid-slide-{_normalRaidImageIndex + 1}.png", direction);
+        NormalRaidImageCounter.Text = $"{_normalRaidImageIndex + 1} / 2";
+    }
 
-            var duration = TimeSpan.FromMilliseconds(240);
-            var easing = new CubicEase { EasingMode = EasingMode.EaseOut };
-            image.BeginAnimation(UIElement.OpacityProperty,
-                new DoubleAnimation(0.25, 1, duration) { EasingFunction = easing, FillBehavior = FillBehavior.Stop });
-            translation.BeginAnimation(TranslateTransform.XProperty,
-                new DoubleAnimation(direction * 18, 0, duration) { EasingFunction = easing, FillBehavior = FillBehavior.Stop });
-        }
+    private void ChangeBossRaidImage(int direction)
+    {
+        _bossRaidImageIndex = (_bossRaidImageIndex + direction + 2) % 2;
+        AnimateCarouselImage(BossRaidImage, $"pack://application:,,,/Assets/boss-slide-{_bossRaidImageIndex + 1}.png", direction);
+        BossRaidImageCounter.Text = $"{_bossRaidImageIndex + 1} / 2";
+    }
 
-        private CancellationTokenSource? _farmingCts;
-        private CancellationTokenSource? _doArenaCts;
-        public event Action<bool>? MacroRunStateChanged;
-        public FarmingConfiguration Configuration { get; private set; } = new();
-        public string[] Launchers { get; } = ["MIR4 Launcher 1", "MIR4 Launcher 2", "MIR4 Steam"];
-        public string[] GuestLaunchers { get; } = ["Não utilizar", "MIR4 Launcher 1", "MIR4 Launcher 2", "MIR4 Steam"];
-        private WindowTarget[] Guests(LauncherGroup group) => new[] { group.Guest1, group.Guest2 }
-            .Where(value => value != "Não utilizar").Select(Target).ToArray();
+    private static void AnimateCarouselImage(Image image, string source, int direction)
+    {
+        image.Source = new BitmapImage(new Uri(source));
+        image.BeginAnimation(UIElement.OpacityProperty, null);
+        var translation = new TranslateTransform();
+        image.RenderTransform = translation;
+        if (!SystemParameters.ClientAreaAnimation) return;
+        var duration = TimeSpan.FromMilliseconds(240);
+        var easing = new CubicEase { EasingMode = EasingMode.EaseOut };
+        image.BeginAnimation(UIElement.OpacityProperty,
+            new DoubleAnimation(0.25, 1, duration) { EasingFunction = easing, FillBehavior = FillBehavior.Stop });
+        translation.BeginAnimation(TranslateTransform.XProperty,
+            new DoubleAnimation(direction * 18, 0, duration) { EasingFunction = easing, FillBehavior = FillBehavior.Stop });
+    }
 
-        private void ValidateGroup(LauncherGroup group)
+    private void PreviewWindow_Click(object sender, RoutedEventArgs e)
+    {
+        new WindowPreview { Owner = Window.GetWindow(this) }.ShowDialog();
+    }
+
+    // A interface permanece pronta para receber uma nova implementação.
+    private void DonationLauncher_Checked(object sender, RoutedEventArgs e) => UpdateLauncherSelection(Configuration.DonationLaunchers, sender, true);
+    private void DonationLauncher_Unchecked(object sender, RoutedEventArgs e) => UpdateLauncherSelection(Configuration.DonationLaunchers, sender, false);
+    private void DailyLauncher_Checked(object sender, RoutedEventArgs e) => UpdateLauncherSelection(Configuration.DailyLaunchers, sender, true);
+    private void DailyLauncher_Unchecked(object sender, RoutedEventArgs e) => UpdateLauncherSelection(Configuration.DailyLaunchers, sender, false);
+
+    private static void UpdateLauncherSelection(List<string> selection, object sender, bool enabled)
+    {
+        if (sender is not CheckBox { Tag: string launcher }) return;
+        if (enabled && !selection.Contains(launcher, StringComparer.OrdinalIgnoreCase)) selection.Add(launcher);
+        else if (!enabled) selection.RemoveAll(item => string.Equals(item, launcher, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void DailyDonation_Toggled(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not null)
+            AppendLog(Configuration.DailyDonation
+                ? "Doação diária ativada. Clique em Start para executar nos launchers selecionados."
+                : "Doação diária desativada.");
+    }
+
+    private void DailyScroll_Toggled(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not null)
+            AppendLog(Configuration.DailyScroll
+                ? "DailyScroll ativado. Clique em Start para executar nos launchers selecionados."
+                : "DailyScroll desativado.");
+    }
+
+    private void DailyFavorites_Toggled(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not null)
+            AppendLog(Configuration.DailyFavorites
+                ? "Missões favoritas ativadas. Clique em Start para executar nos launchers diários selecionados."
+                : "Missões favoritas desativadas.");
+    }
+
+    private void BtnDoArena_Click(object sender, RoutedEventArgs e) { }
+    private void BtnStop_Click(object sender, RoutedEventArgs e)
+    {
+        _runCancellation?.Cancel();
+        AppendLog("Parada solicitada.");
+    }
+
+    private async void BtnStart_Click(object sender, RoutedEventArgs e)
+    {
+        if (_runCancellation is not null)
         {
-            var starter = Target(group.Starter);
-            var guests = Guests(group);
-            if (guests.Length == 0)
-                throw new ArgumentException("Selecione pelo menos um convidado para a raid.");
-            if (guests.Contains(starter) || guests.Distinct().Count() != guests.Length)
-                throw new ArgumentException("Starter e convidados devem usar launchers diferentes.");
-        }
-        public IReadOnlyList<RaidConfiguration> NormalRaids { get; private set; } = [];
-        public IReadOnlyList<RaidConfiguration> BossRaids { get; private set; } = [];
-        private static WindowTarget Target(string launcher) => launcher switch
-        {
-            "MIR4 Launcher 1" => new("Mir4G", "Mir4G[1]"),
-            "MIR4 Launcher 2" => new("Mir4G", "Mir4G[2]"),
-            "MIR4 Steam" => new("Mir4S", "Mir4G[0]"),
-            _ => throw new InvalidOperationException("Selecione um launcher válido.")
-        };
-        private static RaidConfiguration Pending(string name) => new() { Name = name, Description = "Seleção desta raide ainda não implementada", IsAvailable = false };
-        private void Log(string message) => Dispatcher.Invoke(() =>
-        {
-            if (ExecutionLog.LineCount > 200) ExecutionLog.Clear();
-            ExecutionLog.AppendText($"{DateTime.Now:HH:mm:ss}  {message}{Environment.NewLine}");
-            ExecutionLog.ScrollToEnd();
-        });
-        private static bool HasErrors(DependencyObject element)
-        {
-            if (Validation.GetHasError(element)) return true;
-            for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(element); i++)
-                if (HasErrors(System.Windows.Media.VisualTreeHelper.GetChild(element, i))) return true;
-            return false;
-        }
-        public FarmingPage()
-        {
-            InitializeComponent();
-            try { Configuration = FarmingConfigurationService.Load(); }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Text.Json.JsonException or ArgumentException)
-            { Log("Não foi possível carregar as configurações: " + ex.Message); }
-            NormalRaids = [Configuration.Normal, Pending("Raide 2"), Pending("Raide 3")];
-            BossRaids = [Configuration.Boss, Pending("Boss 2"), Pending("Boss 3")];
-            Configuration.DonationLaunchers ??= ["MIR4 Launcher 1", "MIR4 Launcher 2", "MIR4 Steam"];
-            DonateLauncher1.IsChecked = Configuration.DonationLaunchers.Contains("MIR4 Launcher 1");
-            DonateLauncher2.IsChecked = Configuration.DonationLaunchers.Contains("MIR4 Launcher 2");
-            DonateSteam.IsChecked = Configuration.DonationLaunchers.Contains("MIR4 Steam");
-            DataContext = this;
-            SyncDailyLauncherChoices();
-            Log("Pronto. Configure as janelas antes de iniciar.");
+            AppendLog("A rotina já está em execução.");
+            return;
         }
 
-        private void SyncDailyLauncherChoices()
+        DateTime? scheduledStart = null;
+        var requestedTime = Configuration.StartTime?.Trim();
+        if (!string.IsNullOrWhiteSpace(requestedTime))
         {
-            _syncingDailyLaunchers = true;
-            try
+            if (!TimeOnly.TryParseExact(requestedTime, "HH:mm", CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out var startTime))
             {
-                DailyLauncher1.IsChecked = Configuration.DailyLaunchers.Contains("MIR4 Launcher 1");
-                DailyLauncher2.IsChecked = Configuration.DailyLaunchers.Contains("MIR4 Launcher 2");
-                DailySteam.IsChecked = Configuration.DailyLaunchers.Contains("MIR4 Steam");
+                AppendLog("Horário inválido. Informe no formato 24 horas HH:mm, por exemplo 21:30.");
+                MessageBox.Show("Informe o horário no formato HH:mm (24 horas), por exemplo 21:30.",
+                    "Horário inválido", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
             }
-            finally { _syncingDailyLaunchers = false; }
+
+            scheduledStart = DateTime.Today.Add(startTime.ToTimeSpan());
+            if (scheduledStart <= DateTime.Now)
+                scheduledStart = scheduledStart.Value.AddDays(1);
         }
 
-        private void UpdateDailyLaunchers()
+        _runCancellation = new CancellationTokenSource();
+        var cancellationToken = _runCancellation.Token;
+        BtnStart.IsEnabled = false;
+        try
         {
-            if (_syncingDailyLaunchers) return;
-            Configuration.DailyLaunchers = new[] { DailyLauncher1, DailyLauncher2, DailySteam }
-                .Where(checkBox => checkBox.IsChecked == true)
-                .Select(checkBox => (string)checkBox.Tag)
-                .ToList();
-        }
-
-        private void DailyLauncher_Checked(object sender, RoutedEventArgs e) => UpdateDailyLaunchers();
-        private void DailyLauncher_Unchecked(object sender, RoutedEventArgs e) => UpdateDailyLaunchers();
-
-        private void DonationLauncher_Checked(object sender, RoutedEventArgs e) => UpdateDonationLauncher(sender, true);
-        private void DonationLauncher_Unchecked(object sender, RoutedEventArgs e) => UpdateDonationLauncher(sender, false);
-        private void UpdateDonationLauncher(object sender, bool selected)
-        {
-            if (sender is not CheckBox checkBox || Configuration.DonationLaunchers is null) return;
-            var launcher = checkBox.Tag?.ToString();
-            if (string.IsNullOrWhiteSpace(launcher)) return;
-            if (selected && !Configuration.DonationLaunchers.Contains(launcher))
-                Configuration.DonationLaunchers.Add(launcher);
-            else if (!selected)
-                Configuration.DonationLaunchers.Remove(launcher);
-        }
-
-        private async void BtnDoArena_Click(object sender, RoutedEventArgs e)
-        {
-            if (_doArenaCts != null || _farmingCts != null) return;
-            WindowTarget arenaStarter, arenaInviter;
-            try
+            if (scheduledStart is DateTime startAt)
             {
-                arenaStarter = Target(Configuration.ArenaStarter);
-                arenaInviter = Target(Configuration.ArenaInviter);
-                if (arenaStarter == arenaInviter) throw new ArgumentException("Escolha dois launchers diferentes para a arena.");
-                FarmingConfigurationService.Save(Configuration);
-            }
-            catch (Exception ex) { Log(ex.Message); return; }
-            using var cts = new CancellationTokenSource();
-            _doArenaCts = cts;
-            MacroRunStateChanged?.Invoke(true);
-            BtnDoArena.IsEnabled = false;
-            BtnStart.IsEnabled = false;
-            ConfigurationPanel.IsEnabled = false;
-            StatusText.Text = "Arena em execução";
-            Log("Arena iniciada.");
-
-            try
-            {
-                await Task.Run(() =>
+                var delay = startAt - DateTime.Now;
+                if (delay > TimeSpan.Zero)
                 {
-                    var token = cts.Token;
-                    var mir41 = arenaInviter;
-                    var mir40 = arenaStarter;
-                    RemoveEnergySave(mir41);
-                    RemoveEnergySave(mir40);
-                    for (int i = 0; i < 10; i++)
-                    {
-                        DoArena(mir41, mir40, token);
-                    }
-                }, cts.Token);
-            }
-            catch (OperationCanceledException) { Log("Execução cancelada."); }
-            catch (Exception ex)
-            {
-                Log(ex.Message);
-                MessageBox.Show(ex.Message, "DoArena interrompido", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-            finally
-            {
-                _doArenaCts = null;
-                MacroRunStateChanged?.Invoke(false);
-                ConfigurationPanel.IsEnabled = true;
-                BtnDoArena.IsEnabled = true;
-                BtnStart.IsEnabled = true;
-                StatusText.Text = "Pronto";
-                Log("Arena encerrada.");
-            }
-        }
-
-        private void BtnStop_Click(object sender, RoutedEventArgs e)
-        {
-            StopCurrentRoutine();
-        }
-
-        public void StopCurrentRoutine()
-        {
-            if (_farmingCts is null && _doArenaCts is null) return;
-            _farmingCts?.Cancel();
-            _doArenaCts?.Cancel();
-            Log("Parada solicitada. Aguardando a rotina atual liberar o controle.");
-        }
-        private async void BtnStart_Click(object sender, RoutedEventArgs e)
-        {
-            if (_farmingCts != null || _doArenaCts != null) return;
-            if (HasErrors(ConfigurationPanel) || !Configuration.Normal.HasValidCount || !Configuration.Boss.HasValidCount) { Log("Corrija a quantidade: use um número inteiro de 1 a 99."); return; }
-            DateTime? scheduledStart = null;
-            if (!string.IsNullOrWhiteSpace(Configuration.StartTime))
-            {
-                if (!DateTime.TryParseExact(Configuration.StartTime.Trim(), "HH:mm", System.Globalization.CultureInfo.InvariantCulture,
-                        System.Globalization.DateTimeStyles.None, out var startTime))
-                {
-                    Log("Informe o horário no formato 24h HH:mm, por exemplo 21:30.");
-                    return;
+                    StatusText.Text = "Aguardando horário";
+                    AppendLog($"Início agendado para {startAt:dd/MM/yyyy HH:mm}. Use Stop para cancelar a espera.");
+                    await Task.Delay(delay, cancellationToken);
                 }
-                scheduledStart = DateTime.Today.Add(startTime.TimeOfDay);
-                if (scheduledStart <= DateTime.Now) scheduledStart = scheduledStart.Value.AddDays(1);
+                AppendLog("Horário atingido; iniciando as rotinas selecionadas.");
             }
-            try
-            {
-                if (Configuration.Normal.IsEnabled) ValidateGroup(Configuration.NormalLaunchers);
-                if (Configuration.Boss.IsEnabled) ValidateGroup(Configuration.BossLaunchers);
-                if ((Configuration.DailyDonation || Configuration.BuyDailyScroll) && (Configuration.DonationLaunchers is null || Configuration.DonationLaunchers.Count == 0))
-                    throw new ArgumentException("Selecione pelo menos um launcher para as rotinas diárias.");
-                if (Configuration.DailyDonation || Configuration.BuyDailyScroll)
-                    foreach (var launcher in Configuration.DonationLaunchers) Target(launcher);
-                if (Configuration.DailyFavorites)
-                {
-                    if (Configuration.DailyLaunchers is null || Configuration.DailyLaunchers.Count == 0)
-                        throw new ArgumentException("Selecione pelo menos um launcher para as missões diárias.");
-                    foreach (var launcher in Configuration.DailyLaunchers) Target(launcher);
-                }
-            }
-            catch (ArgumentException ex) { Log(ex.Message); return; }
-            catch (InvalidOperationException ex) { Log(ex.Message); return; }
-            try { FarmingConfigurationService.Save(Configuration); }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Log("Não foi possível salvar: " + ex.Message); return; }
-            using var cts = new CancellationTokenSource();
-            _farmingCts = cts;
-            MacroRunStateChanged?.Invoke(true);
-            BtnStart.IsEnabled = false;
-            BtnDoArena.IsEnabled = false;
-            ConfigurationPanel.IsEnabled = false;
+            else
+                AppendLog("Macro iniciado imediatamente.");
+
             StatusText.Text = "Em execução";
-            if (scheduledStart is DateTime plannedStart)
+            if (Configuration.DailyDonation)
+                await DailyDonate(cancellationToken);
+            if (Configuration.DailyScroll)
+                await DailyScroll(cancellationToken);
+            if (Configuration.DailyFavorites)
+                await DailyFavoriteMissions(cancellationToken);
+            if (Configuration.Normal.IsEnabled)
+                await DailyFavoriteRaid(cancellationToken);
+            if (!Configuration.DailyDonation && !Configuration.DailyScroll && !Configuration.DailyFavorites && !Configuration.Normal.IsEnabled)
+                AppendLog("Nenhuma rotina diária está ativada; nenhuma ação executada.");
+            AppendLog("Macro finalizado.");
+        }
+        catch (OperationCanceledException) { AppendLog("Macro cancelado."); }
+        catch (Exception ex) { AppendLog($"Erro no macro: {ex.Message}"); }
+        finally
+        {
+            _runCancellation.Dispose();
+            _runCancellation = null;
+            BtnStart.IsEnabled = true;
+            StatusText.Text = "Pronto";
+        }
+    }
+
+    private async Task DailyDonate(CancellationToken cancellationToken)
+    {
+        if (Configuration.DonationLaunchers.Count == 0)
+        {
+            AppendLog("Doação diária: selecione pelo menos um launcher.");
+            return;
+        }
+
+        var windows = new WindowPreviewService().ListWindows();
+        var gameClients = windows.Where(window => window.ProcessName.StartsWith("Mir4G", StringComparison.OrdinalIgnoreCase))
+            .OrderBy(window => window.StartedAt).ToArray();
+        var steamWindow = windows.FirstOrDefault(window => window.ProcessName.StartsWith("Mir4S", StringComparison.OrdinalIgnoreCase));
+
+        var targets = new Dictionary<string, PreviewWindow>(StringComparer.OrdinalIgnoreCase);
+        if (gameClients.Length > 0) targets["MIR4 Launcher 1"] = gameClients[0];
+        if (gameClients.Length > 1) targets["MIR4 Launcher 2"] = gameClients[1];
+        if (steamWindow is not null) targets["MIR4 Steam"] = steamWindow;
+
+        var templatePath = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates", "daily-donate.png");
+        var warehouseTemplatePath = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates", "daily-donate-warehouse.png");
+        var donateButtonTemplatePath = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates", "daily-donate-button.png");
+        var templatesDirectory = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates");
+        var flowTemplates = Enumerable.Range(1, 12)
+            .Select(index => Path.Combine(templatesDirectory, $"daily-flow-{index:D2}-" + new[]
             {
-                StatusText.Text = "Agendado";
-                Log($"Macro agendado para {plannedStart:dd/MM HH:mm}. Aguardando horário.");
+                "cobre", "max", "doar", "doar", "aco-negro", "max", "doar", "doar", "energia", "max", "doar", "doar"
+            }[index - 1] + ".png"))
+            .ToArray();
+        if (new[] { templatePath, warehouseTemplatePath, donateButtonTemplatePath }.Any(path => !File.Exists(path)) ||
+            flowTemplates.Any(path => !File.Exists(path)))
+        {
+            AppendLog("Uma das imagens da sequência diária não foi encontrada na pasta Assets\\Templates.");
+            return;
+        }
+
+        // Sequência: ícone de doação e depois a opção Armazém nas regiões selecionadas.
+        var donationRegion = new RelativeSearchRegion(0.7172, 0.0131, 0.2819, 0.0793);
+        var warehouseRegion = new RelativeSearchRegion(0.5578, 0.7367, 0.3910, 0.2097);
+        var donateButtonRegion = new RelativeSearchRegion(0.4033, 0.8849, 0.1478, 0.0972);
+        const double confidenceThreshold = 0.82;
+        CaptureExpander.IsExpanded = true;
+        FarmingScroll.ScrollToBottom();
+        foreach (var launcher in Launchers.Where(Configuration.DonationLaunchers.Contains))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!targets.TryGetValue(launcher, out var target))
+            {
+                AppendLog($"{launcher}: processo MIR4 correspondente não está aberto.");
+                continue;
             }
-            else
-                Log("Macro iniciado.");
 
             try
             {
-                await Task.Run(async () =>
-                {
-                    var token = cts.Token;
-                    if (scheduledStart is DateTime runAt)
-                    {
-                        var delay = runAt - DateTime.Now;
-                        if (delay > TimeSpan.Zero) await Task.Delay(delay, token);
-                        token.ThrowIfCancellationRequested();
-                        Dispatcher.Invoke(() => StatusText.Text = "Em execução");
-                        Log("Horário atingido. Iniciando macro.");
-                    }
-                    // Validate assets/native runtime before interacting with the game.
-                    if (Configuration.Normal.IsEnabled || Configuration.Boss.IsEnabled)
-                        using (var detector = new Macro.Services.RaidRewardDetector()) { }
+                AppendLog($"{launcher}: maximizando e ativando a janela {target.ProcessName} (PID {target.ProcessId}).");
+                await _windowClickService.MaximizeAndActivateAsync(target, cancellationToken);
+                AppendLog($"{launcher}: procurando o ícone na janela {target.ProcessName} (PID {target.ProcessId}).");
+                var donationClicked = await FindAndClickTemplateAsync(target, templatePath, donationRegion,
+                    new Int32Rect(10, 20, 34, 43), "ícone de doação", confidenceThreshold, cancellationToken);
+                if (!donationClicked) continue;
 
-                    if (Configuration.DailyDonation)
+                AppendLog($"{launcher}: doação aberta; procurando Armazém na segunda região.");
+                await Task.Delay(350, cancellationToken);
+                var warehouseClicked = await FindAndClickTemplateAsync(target, warehouseTemplatePath, warehouseRegion,
+                    new Int32Rect(34, 48, 102, 103), "Armazém", confidenceThreshold, cancellationToken);
+                if (!warehouseClicked) continue;
+
+                AppendLog($"{launcher}: Armazém selecionado; procurando o botão Doar na terceira região.");
+                await Task.Delay(350, cancellationToken);
+                var donationMenuOpened = await FindAndClickTemplateAsync(target, donateButtonTemplatePath, donateButtonRegion,
+                    new Int32Rect(0, 0, 277, 82), "botão Doar", confidenceThreshold, cancellationToken);
+                if (!donationMenuOpened) continue;
+
+                // As três buscas de recurso compartilham a faixa selecionada; depois:
+                // recurso → MAX → Doar 1 → Doar 2.
+                var resourceListRegion = new RelativeSearchRegion(0.2326, 0.1128, 0.1491, 0.7747);
+                var maxRegion = new RelativeSearchRegion(0.3885, 0.6114, 0.3708, 0.1406);
+                var donateOneRegion = new RelativeSearchRegion(0.2326, 0.7264, 0.5361, 0.1585);
+                var donateTwoRegion = new RelativeSearchRegion(0.2890, 0.2867, 0.4206, 0.4295);
+                var flowSteps = new (int Template, RelativeSearchRegion Region, Int32Rect Crop, string Name)[]
+                {
+                    (0, resourceListRegion, new(0, 0, 220, 125), "Cobre"),
+                    (1, maxRegion, new(0, 0, 95, 72), "MAX após Cobre"),
+                    (2, donateOneRegion, new(0, 0, 241, 80), "Doar 1 após Cobre"),
+                    (3, donateTwoRegion, new(0, 0, 241, 80), "Doar 2 após Cobre"),
+                    (4, resourceListRegion, new(0, 0, 214, 115), "Aço Negro"),
+                    (5, maxRegion, new(0, 0, 95, 72), "MAX após Aço Negro"),
+                    (6, donateOneRegion, new(0, 0, 241, 80), "Doar 1 após Aço Negro"),
+                    (7, donateTwoRegion, new(0, 0, 241, 80), "Doar 2 após Aço Negro"),
+                    (8, resourceListRegion, new(0, 0, 213, 118), "Energia"),
+                    (9, maxRegion, new(0, 0, 95, 72), "MAX após Energia"),
+                    (10, donateOneRegion, new(0, 0, 241, 80), "Doar 1 após Energia"),
+                    (11, donateTwoRegion, new(0, 0, 241, 80), "Doar 2 após Energia")
+                };
+                foreach (var step in flowSteps)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    AppendLog($"{launcher}: procurando {step.Name} na região X={step.Region.X:P2}, Y={step.Region.Y:P2}, {step.Region.Width:P2} × {step.Region.Height:P2}.");
+                    var stepThreshold = step.Name == "Cobre" ? 0.48 : confidenceThreshold;
+                    var completed = await FindAndClickTemplateAsync(target, flowTemplates[step.Template], step.Region, step.Crop,
+                        step.Name, stepThreshold, cancellationToken);
+                    if (!completed)
                     {
-                        Log("Doação diária.");
-                        foreach (var launcher in Configuration.DonationLaunchers)
-                        {
-                            token.ThrowIfCancellationRequested();
-                            Log($"Doação em {launcher}.");
-                            DailyDonates(Target(launcher));
-                        }
+                        AppendLog($"{launcher}: sequência interrompida em {step.Name}; os passos seguintes foram ignorados.");
+                        break;
                     }
-                    if (Configuration.BuyDailyScroll)
-                    {
-                        Log("Compra de pergaminho diário.");
-                        foreach (var launcher in Configuration.DonationLaunchers)
-                        {
-                            token.ThrowIfCancellationRequested();
-                            Log($"Compra de pergaminho em {launcher}.");
-                            BuyDailyScroll(Target(launcher));
-                        }
-                    }
-                    if (Configuration.Normal.IsEnabled)
-                        for (int i = 0; i < Configuration.Normal.RepeatCount; i++)
-                        {
-                            token.ThrowIfCancellationRequested();
-                            Log($"Raide normal {i + 1}/{Configuration.Normal.RepeatCount}.");
-                            await DoNormalRaid(Target(Configuration.NormalLaunchers.Starter), Guests(Configuration.NormalLaunchers), token);
-                        }
-                    if (Configuration.Boss.IsEnabled)
-                        for (int i = 0; i < Configuration.Boss.RepeatCount; i++)
-                        {
-                            token.ThrowIfCancellationRequested();
-                            Log($"Boss raid {i + 1}/{Configuration.Boss.RepeatCount}.");
-                            await DoBossRaid(Target(Configuration.BossLaunchers.Starter), Guests(Configuration.BossLaunchers), token);
-                        }
-                    if (Configuration.DailyFavorites)
-                    {
-                        foreach (var launcher in Configuration.DailyLaunchers)
-                        {
-                            Log($"Missões favoritas em {launcher}.");
-                            token.ThrowIfCancellationRequested();
-                            DailyFavoriteMissions(Target(launcher));
-                        }
-                    }
-                }, cts.Token);
+                    await Task.Delay(250, cancellationToken);
+                }
+
+                AppendLog($"{launcher}: encerrando a rotina de doação com três pressionamentos de Esc.");
+                await _windowClickService.PressEscapeThreeTimesAsync(target, cancellationToken, AppendLog);
             }
-            catch (OperationCanceledException) { Log("Execução cancelada."); }
-            catch (Exception ex)
-            {
-                Log(ex.Message);
-                MessageBox.Show(ex.Message, "Automação interrompida", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-            finally
-            {
-                _farmingCts = null;
-                MacroRunStateChanged?.Invoke(false);
-                ConfigurationPanel.IsEnabled = true;
-                BtnDoArena.IsEnabled = true;
-                StatusText.Text = "Pronto";
-                Log("Macro encerrado.");
-                BtnStart.IsEnabled = true;
-            }
+            catch (OperationCanceledException) { throw; }
+            catch (Exception ex) { AppendLog($"{launcher}: falha ao clicar — {ex.Message}"); }
+        }
+    }
+
+    private async Task DailyScroll(CancellationToken cancellationToken)
+    {
+        if (Configuration.DonationLaunchers.Count == 0)
+        {
+            AppendLog("DailyScroll: selecione pelo menos um launcher.");
+            return;
         }
 
-        private void BtnMousePercent_Click(object sender, RoutedEventArgs e)
+        var windows = _windowCaptureService.ListWindows();
+        var gameClients = windows.Where(window => window.ProcessName.StartsWith("Mir4G", StringComparison.OrdinalIgnoreCase))
+            .OrderBy(window => window.StartedAt).ToArray();
+        var steamWindow = windows.FirstOrDefault(window => window.ProcessName.StartsWith("Mir4S", StringComparison.OrdinalIgnoreCase));
+        var targets = new Dictionary<string, PreviewWindow>(StringComparer.OrdinalIgnoreCase);
+        if (gameClients.Length > 0) targets["MIR4 Launcher 1"] = gameClients[0];
+        if (gameClients.Length > 1) targets["MIR4 Launcher 2"] = gameClients[1];
+        if (steamWindow is not null) targets["MIR4 Steam"] = steamWindow;
+
+        var templatesDirectory = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates");
+        var mapTemplate = Path.Combine(templatesDirectory, "daily-scroll-map.png");
+        var currencyTemplate = Path.Combine(templatesDirectory, "daily-scroll-currency.png");
+        var itemTemplate = Path.Combine(templatesDirectory, "daily-scroll-item.png");
+        var buyTemplate = Path.Combine(templatesDirectory, "daily-scroll-buy.png");
+        var targetTemplate = Path.Combine(templatesDirectory, "daily-scroll-target.png");
+        var fiveTemplate = Path.Combine(templatesDirectory, "daily-scroll-five.png");
+        var buy150kTemplate = Path.Combine(templatesDirectory, "daily-scroll-150k-buy.png");
+        if (new[] { mapTemplate, currencyTemplate, itemTemplate, buyTemplate, targetTemplate, fiveTemplate, buy150kTemplate }.Any(path => !File.Exists(path)))
         {
-            if (!_mouseLoopRunning)
+            AppendLog("DailyScroll: uma das imagens de referência não foi encontrada em Assets\\Templates.");
+            return;
+        }
+
+        var firstRegion = new RelativeSearchRegion(0.5000, 0.0872, 0.2459, 0.2097);
+        var secondRegion = new RelativeSearchRegion(0.3132, 0.0284, 0.3762, 0.2480);
+        var thirdRegion = new RelativeSearchRegion(0.3092, 0.8261, 0.3856, 0.1585);
+        var buyButtonRegion = new RelativeSearchRegion(0.2300, 0.3500, 0.2100, 0.3500);
+        var scrollListRegion = new RelativeSearchRegion(0.6303, 0.1665, 0.3574, 0.8130);
+        var quantityFiveRegion = new RelativeSearchRegion(0.2985, 0.4708, 0.4152, 0.1585);
+        var buy150kRegion = new RelativeSearchRegion(0.2810, 0.6190, 0.4394, 0.1508);
+        var steps = new (string Template, RelativeSearchRegion Region, string Name, double? ClickX, double? ClickY)[]
+        {
+            (mapTemplate, firstRegion, "ícone de mapa", null, null),
+            (currencyTemplate, secondRegion, "ícone dourado", null, null),
+            (itemTemplate, thirdRegion, "pergaminho de deslocamento rápido", null, null),
+            (buyTemplate, buyButtonRegion, "Comprar", 0.22, 0.50)
+        };
+
+        foreach (var launcher in Launchers.Where(Configuration.DonationLaunchers.Contains))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!targets.TryGetValue(launcher, out var target))
             {
-                // Inicia loop contínuo
-                StartMousePercentageLoop();
-                _mouseLoopRunning = true;
-                BtnMousePercent.Content = "Stop MousePercent";
+                AppendLog($"DailyScroll — {launcher}: processo MIR4 correspondente não está aberto.");
+                continue;
             }
-            else
+
+            try
             {
-                // Para loop contínuo
-                StopMousePercentageLoop();
-                _mouseLoopRunning = false;
-                BtnMousePercent.Content = "MousePercent";
+                AppendLog($"DailyScroll — {launcher}: maximizando janela e iniciando com F10.");
+                await _windowClickService.MaximizeAndActivateAsync(target, cancellationToken);
+                await _windowClickService.PressKeyAsync(target, 0x79, "F10", cancellationToken, AppendLog);
+                await Task.Delay(500, cancellationToken);
+
+                var sequenceCompleted = true;
+                foreach (var step in steps)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    AppendLog($"DailyScroll — {launcher}: procurando {step.Name} em X={step.Region.X:P2}, Y={step.Region.Y:P2}, {step.Region.Width:P2} × {step.Region.Height:P2}.");
+                    // Recorta apenas o texto fixo do cartão para ignorar a quantidade variável.
+                    Int32Rect? crop = step.Name == "pergaminho de deslocamento rápido"
+                        ? new Int32Rect(136, 17, 174, 50)
+                        : null;
+                    var found = await FindAndClickTemplateAsync(target, step.Template, step.Region, crop,
+                        step.Name, 0.78, cancellationToken, step.ClickX, step.ClickY);
+                    if (!found)
+                    {
+                        AppendLog($"DailyScroll — {launcher}: sequência interrompida em {step.Name}; os passos seguintes foram ignorados.");
+                        sequenceCompleted = false;
+                        break;
+                    }
+                    await Task.Delay(350, cancellationToken);
+                }
+
+                if (sequenceCompleted)
+                {
+                    AppendLog($"DailyScroll — {launcher}: procurando o item por rolagem na região X={scrollListRegion.X:P2}, Y={scrollListRegion.Y:P2}, {scrollListRegion.Width:P2} × {scrollListRegion.Height:P2}.");
+                    var targetFound = await FindWhileScrollingAsync(target, targetTemplate, scrollListRegion,
+                        "item DailyScroll", 0.78, cancellationToken);
+                    if (targetFound)
+                    {
+                        await Task.Delay(350, cancellationToken);
+                        AppendLog($"DailyScroll — {launcher}: selecionando quantidade 5 em X={quantityFiveRegion.X:P2}, Y={quantityFiveRegion.Y:P2}, {quantityFiveRegion.Width:P2} × {quantityFiveRegion.Height:P2}.");
+                        var fiveSelected = await FindAndClickTemplateAsync(target, fiveTemplate, quantityFiveRegion, null,
+                            "quantidade 5", 0.78, cancellationToken);
+                        if (fiveSelected)
+                        {
+                            await Task.Delay(300, cancellationToken);
+                            AppendLog($"DailyScroll — {launcher}: procurando 150K Comprar em X={buy150kRegion.X:P2}, Y={buy150kRegion.Y:P2}, {buy150kRegion.Width:P2} × {buy150kRegion.Height:P2}.");
+                            await FindAndClickTemplateAsync(target, buy150kTemplate, buy150kRegion, null,
+                                "150K Comprar", 0.78, cancellationToken);
+                        }
+                        else
+                            AppendLog($"DailyScroll — {launcher}: compra interrompida porque a opção 5 não foi encontrada.");
+                    }
+                }
+            }
+            catch (OperationCanceledException) { throw; }
+            catch (Exception ex) { AppendLog($"DailyScroll — {launcher}: falha — {ex.Message}"); }
+            finally
+            {
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    try
+                    {
+                        AppendLog($"DailyScroll — {launcher}: encerrando a rotina com um pressionamento de Esc.");
+                        await _windowClickService.PressKeyAsync(target, 0x1B, "Esc", CancellationToken.None, AppendLog);
+                    }
+                    catch (Exception ex) { AppendLog($"DailyScroll — {launcher}: não foi possível enviar Esc — {ex.Message}"); }
+                }
             }
         }
     }
+
+    private async Task DailyFavoriteMissions(CancellationToken cancellationToken)
+    {
+        if (Configuration.DailyLaunchers.Count == 0)
+        {
+            AppendLog("Missões favoritas: selecione ao menos um launcher na aba Missões Diárias.");
+            return;
+        }
+
+        var windows = _windowCaptureService.ListWindows();
+        var gameClients = windows.Where(window => window.ProcessName.StartsWith("Mir4G", StringComparison.OrdinalIgnoreCase))
+            .OrderBy(window => window.StartedAt).ToArray();
+        var steamWindow = windows.FirstOrDefault(window => window.ProcessName.StartsWith("Mir4S", StringComparison.OrdinalIgnoreCase));
+        var targets = new Dictionary<string, PreviewWindow>(StringComparer.OrdinalIgnoreCase);
+        if (gameClients.Length > 0) targets["MIR4 Launcher 1"] = gameClients[0];
+        if (gameClients.Length > 1) targets["MIR4 Launcher 2"] = gameClients[1];
+        if (steamWindow is not null) targets["MIR4 Steam"] = steamWindow;
+
+        var templatesDirectory = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates");
+        var questTemplate = Path.Combine(templatesDirectory, "daily-favorite-quest.png");
+        var fieldTemplate = Path.Combine(templatesDirectory, "daily-favorite-field.png");
+        var acceptTemplate = Path.Combine(templatesDirectory, "daily-favorite-accept.png");
+        var autoTemplate = Path.Combine(templatesDirectory, "daily-favorite-auto.png");
+        var checkTemplate = Path.Combine(templatesDirectory, "daily-favorite-check.png");
+        var startTemplate = Path.Combine(templatesDirectory, "daily-favorite-start.png");
+        var travelTemplate = Path.Combine(templatesDirectory, "daily-favorite-travel.png");
+        var travelItemTemplate = Path.Combine(templatesDirectory, "daily-favorite-travel-item.png");
+        var plusTemplate = Path.Combine(templatesDirectory, "daily-favorite-plus.png");
+        var energyTemplate = Path.Combine(templatesDirectory, "daily-favorite-energy.png");
+        if (new[] { questTemplate, fieldTemplate, acceptTemplate, autoTemplate, checkTemplate, startTemplate,
+                travelTemplate, travelItemTemplate, plusTemplate, energyTemplate }
+            .Any(path => !File.Exists(path)))
+        {
+            AppendLog("Missões favoritas: não foi encontrada uma das imagens em Assets\\Templates.");
+            return;
+        }
+
+        var questRegion = new RelativeSearchRegion(0.7432, 0.0003, 0.2568, 0.0997);
+        var fieldRegion = new RelativeSearchRegion(0.0002, 0.0412, 0.8384, 0.1457);
+        var acceptRegion = new RelativeSearchRegion(0.8279, 0.2841, 0.1721, 0.5778);
+        var autoRegion = new RelativeSearchRegion(0.6653, 0.1614, 0.3346, 0.1253);
+        var checkRegion = new RelativeSearchRegion(0.1050, 0.0617, 0.2096, 0.2148);
+        var startRegion = new RelativeSearchRegion(0.6868, 0.7622, 0.1989, 0.1687);
+        var travelRegion = new RelativeSearchRegion(0.6653, 0.4503, 0.2257, 0.2097);
+        var travelItemRegion = new RelativeSearchRegion(0.3670, 0.6702, 0.2660, 0.1253);
+        var plusRegion = new RelativeSearchRegion(0.7311, 0.0003, 0.2689, 0.1099);
+        var energyRegion = new RelativeSearchRegion(0.0109, 0.6676, 0.2996, 0.1662);
+
+        foreach (var launcher in Launchers.Where(Configuration.DailyLaunchers.Contains))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!targets.TryGetValue(launcher, out var target))
+            {
+                AppendLog($"Missões favoritas — {launcher}: processo MIR4 correspondente não está aberto.");
+                continue;
+            }
+
+            try
+            {
+                AppendLog($"Missões favoritas — {launcher}: maximizando e ativando a janela.");
+                await _windowClickService.MaximizeAndActivateAsync(target, cancellationToken);
+                var questOpened = await FindAndClickTemplateAsync(target, questTemplate, questRegion, null,
+                    "ícone de missões", 0.78, cancellationToken);
+                if (!questOpened) continue;
+
+                await Task.Delay(350, cancellationToken);
+                var fieldSelected = await FindAndClickTemplateAsync(target, fieldTemplate, fieldRegion, null,
+                    "Campo", 0.78, cancellationToken);
+                if (!fieldSelected) continue;
+
+                AppendLog($"Missões favoritas — {launcher}: rolando quinze vezes antes de aceitar as missões.");
+                for (var scroll = 1; scroll <= 15; scroll++)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    await _windowClickService.ScrollDownAtRelativeAsync(target, 0.50, 0.55,
+                        cancellationToken, AppendLog);
+                    await Task.Delay(150, cancellationToken);
+                }
+
+                var acceptedCount = 0;
+                while (true)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    await Task.Delay(350, cancellationToken);
+                    var attemptName = $"Aceitar missão ({acceptedCount + 1})";
+                    AppendLog($"Missões favoritas — {launcher}: procurando outro botão Aceitar missão.");
+                    var accepted = await FindAndClickTemplateAsync(target, acceptTemplate, acceptRegion,
+                        new Int32Rect(8, 14, 158, 52),
+                        attemptName, 0.78, cancellationToken, timeoutOverride: TimeSpan.FromSeconds(2));
+                    if (!accepted)
+                    {
+                        AppendLog($"Missões favoritas — {launcher}: não há mais botão Aceitar missão após {acceptedCount} clique(s); continuando a sequência.");
+                        break;
+                    }
+                    acceptedCount++;
+                    AppendLog($"Missões favoritas — {launcher}: clique {acceptedCount} em Aceitar missão concluído.");
+                }
+
+                await Task.Delay(300, cancellationToken);
+                var favoriteSteps = new (string Template, RelativeSearchRegion Region, string Name)[]
+                {
+                    (autoTemplate, autoRegion, "Jogar autom."),
+                    (checkTemplate, checkRegion, "confirmação da missão"),
+                    (startTemplate, startRegion, "Iniciar"),
+                    (travelTemplate, travelRegion, "Deslocamento rápido"),
+                    (travelItemTemplate, travelItemRegion, "item Deslocamento rápido")
+                };
+                foreach (var step in favoriteSteps)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    AppendLog($"Missões favoritas — {launcher}: procurando {step.Name} em X={step.Region.X:P2}, Y={step.Region.Y:P2}, {step.Region.Width:P2} × {step.Region.Height:P2}.");
+                    Int32Rect? crop = step.Name == "item Deslocamento rápido"
+                        ? new Int32Rect(113, 18, 145, 40)
+                        : null;
+                    var completed = await FindAndClickTemplateAsync(target, step.Template, step.Region, crop,
+                        step.Name, 0.78, cancellationToken);
+                    if (!completed)
+                    {
+                        AppendLog($"Missões favoritas — {launcher}: sequência interrompida em {step.Name}.");
+                        break;
+                    }
+                    await Task.Delay(300, cancellationToken);
+                }
+
+            }
+            catch (OperationCanceledException) { throw; }
+            catch (Exception ex) { AppendLog($"Missões favoritas — {launcher}: falha — {ex.Message}"); }
+            finally
+            {
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    try
+                    {
+                        AppendLog($"Missões favoritas — {launcher}: iniciando encerramento com + e Poupança de energia.");
+                        var finishSteps = new (string Template, RelativeSearchRegion Region, string Name)[]
+                        {
+                            (plusTemplate, plusRegion, "ícone +"),
+                            (energyTemplate, energyRegion, "Poupança de energia")
+                        };
+                        var finishStepsCompleted = true;
+                        foreach (var step in finishSteps)
+                        {
+                            cancellationToken.ThrowIfCancellationRequested();
+                            AppendLog($"Missões favoritas — {launcher}: etapa final {step.Name} em X={step.Region.X:P2}, Y={step.Region.Y:P2}, {step.Region.Width:P2} × {step.Region.Height:P2}.");
+                            var isPlusButton = step.Name == "ícone +";
+                            // A imagem de referência do + inclui um selo N variável; comparar só o
+                            // círculo evita que o selo determine o ponto de clique.
+                            Int32Rect? finishCrop = isPlusButton ? new Int32Rect(8, 34, 80, 53) : null;
+                            var completed = await FindAndClickTemplateAsync(target, step.Template, step.Region, finishCrop,
+                                step.Name, isPlusButton ? 0.72 : 0.78, cancellationToken);
+                            if (!completed)
+                            {
+                                AppendLog($"Missões favoritas — {launcher}: etapa final interrompida em {step.Name}.");
+                                finishStepsCompleted = false;
+                                break;
+                            }
+                            await Task.Delay(300, cancellationToken);
+                        }
+
+                        if (finishStepsCompleted)
+                            await _windowClickService.ResizeToSmallestAsync(target, cancellationToken, AppendLog);
+                    }
+                    catch (OperationCanceledException) { throw; }
+                    catch (Exception ex) { AppendLog($"Missões favoritas — {launcher}: falha no encerramento — {ex.Message}"); }
+                }
+            }
+        }
+    }
+
+    private async Task DailyFavoriteRaid(CancellationToken cancellationToken)
+    {
+        if (!int.TryParse(Configuration.Normal.RepeatCountText, NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out var raidCount) || raidCount is < 1 or > 100)
+        {
+            AppendLog("DailyFavoriteRaid: informe entre 1 e 100 repetições na configuração da Raide Normal.");
+            return;
+        }
+
+        var launcherGroup = Configuration.NormalLaunchers;
+        var windows = _windowCaptureService.ListWindows();
+        var gameClients = windows.Where(window => window.ProcessName.StartsWith("Mir4G", StringComparison.OrdinalIgnoreCase))
+            .OrderBy(window => window.StartedAt).ToArray();
+        var targets = new Dictionary<string, PreviewWindow>(StringComparer.OrdinalIgnoreCase);
+        if (gameClients.Length > 0) targets["MIR4 Launcher 1"] = gameClients[0];
+        if (gameClients.Length > 1) targets["MIR4 Launcher 2"] = gameClients[1];
+        var steamWindow = windows.FirstOrDefault(window => window.ProcessName.StartsWith("Mir4S", StringComparison.OrdinalIgnoreCase));
+        if (steamWindow is not null) targets["MIR4 Steam"] = steamWindow;
+
+        if (!targets.TryGetValue(launcherGroup.Starter, out var starter))
+        {
+            AppendLog($"DailyFavoriteRaid: starter {launcherGroup.Starter} não está aberto.");
+            return;
+        }
+
+        var guests = new[] { launcherGroup.Guest1, launcherGroup.Guest2 }
+            .Where(name => !string.IsNullOrWhiteSpace(name) && name != "Não utilizar" &&
+                !string.Equals(name, launcherGroup.Starter, StringComparison.OrdinalIgnoreCase))
+            .Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+        foreach (var guest in guests)
+        {
+            if (targets.ContainsKey(guest))
+                AppendLog($"DailyFavoriteRaid: {guest} está aberto e será incluído pelo comando Convidar todos.");
+            else
+                AppendLog($"DailyFavoriteRaid: launcher convidado {guest} não está aberto; continuando com os que estiverem disponíveis.");
+        }
+
+        var directory = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates");
+        var templates = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["ícone +"] = Path.Combine(directory, "daily-raid-plus.png"),
+            ["ícone Raide"] = Path.Combine(directory, "daily-raid-icon.png"),
+            ["opção Raide"] = Path.Combine(directory, "daily-raid-label.png"),
+            ["Criar um Raide (menu)"] = Path.Combine(directory, "daily-raid-create-banner.png"),
+            ["Privado"] = Path.Combine(directory, "daily-raid-private.png"),
+            ["campo da senha"] = Path.Combine(directory, "daily-raid-password.png"),
+            ["botão 2"] = Path.Combine(directory, "daily-raid-two.png"),
+            ["Entrada completa"] = Path.Combine(directory, "daily-raid-entry-complete.png"),
+            ["Criar um Raide"] = Path.Combine(directory, "daily-raid-create.png"),
+            ["adicionar convidados"] = Path.Combine(directory, "daily-raid-add.png"),
+            ["Convidar todos"] = Path.Combine(directory, "daily-raid-invite-all.png"),
+            ["Aceitar convite"] = Path.Combine(directory, "daily-raid-accept.png"),
+            ["Entrar na raide"] = Path.Combine(directory, "daily-raid-enter.png"),
+            ["Iniciar Raide"] = Path.Combine(directory, "daily-raid-start.png"),
+            ["fechar janela da raide"] = Path.Combine(directory, "daily-raid-close.png"),
+            ["OK"] = Path.Combine(directory, "daily-raid-ok.png")
+        };
+        if (templates.Values.Any(path => !File.Exists(path)))
+        {
+            AppendLog("DailyFavoriteRaid: faltam imagens em Assets\\Templates\\daily-raid-*.png.");
+            return;
+        }
+
+        var regions = new Dictionary<string, RelativeSearchRegion>(StringComparer.Ordinal)
+        {
+            ["ícone +"] = new(0.7378, 0.0003, 0.2622, 0.1125),
+            ["ícone Raide"] = new(0.7110, 0.5040, 0.1962, 0.1508),
+            ["opção Raide"] = new(0.6841, 0.6446, 0.3159, 0.1253),
+            ["Criar um Raide (menu)"] = new(0.5363, 0.8440, 0.4488, 0.1483),
+            ["Privado"] = new(0.2581, 0.4503, 0.2580, 0.1841),
+            ["campo da senha"] = new(0.6088, 0.4912, 0.1384, 0.1227),
+            ["botão 2"] = new(0.3992, 0.2637, 0.2002, 0.3861),
+            ["Entrada completa"] = new(0.4019, 0.7852, 0.2042, 0.1253),
+            ["Criar um Raide"] = new(0.4046, 0.7597, 0.1962, 0.1432),
+            ["adicionar convidados"] = new(0.1560, 0.3148, 0.3467, 0.1330),
+            ["Convidar todos"] = new(0.4624, 0.1946, 0.1666, 0.0946),
+            ["Aceitar convite"] = new(0.0459, 0.4043, 0.1693, 0.1330),
+            ["Entrar na raide"] = new(0.3603, 0.5756, 0.2929, 0.1585),
+            ["Iniciar Raide"] = new(0.5054, 0.7699, 0.3561, 0.1508),
+            ["fechar janela da raide"] = new(0.8184, 0.1230, 0.1209, 0.0767),
+            ["OK"] = new(0.2850, 0.8338, 0.4488, 0.1355)
+        };
+
+        AppendLog($"DailyFavoriteRaid: criando {raidCount} raide(s) pelo starter {launcherGroup.Starter}.");
+        try
+        {
+            await _windowClickService.MaximizeAndActivateAsync(starter, cancellationToken);
+            for (var raid = 1; raid <= raidCount; raid++)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                AppendLog($"DailyFavoriteRaid — {launcherGroup.Starter}: iniciando raide {raid}/{raidCount}.");
+                await _windowClickService.PressCtrlNumberAsync(starter, 0x31, cancellationToken, AppendLog);
+                var steps = new[] { "ícone +", "ícone Raide", "opção Raide", "Criar um Raide (menu)", "Privado", "campo da senha", "botão 2", "Entrada completa", "Criar um Raide", "adicionar convidados", "Convidar todos" };
+                foreach (var name in steps)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    AppendLog($"DailyFavoriteRaid — raide {raid}/{raidCount}: procurando {name}.");
+                    var clicks = name == "botão 2" ? 4 : 1;
+                    var threshold = name is "botão 2" or "ícone +" ? 0.72 : 0.78;
+                    var found = await FindAndClickTemplateAsync(starter, templates[name], regions[name], null,
+                        name, threshold, cancellationToken, clickCount: clicks);
+                    if (!found)
+                        throw new InvalidOperationException($"sequência interrompida em {name} (raide {raid}/{raidCount}).");
+                    if (name == "campo da senha")
+                        await _windowClickService.ReplaceTextAsync(starter, "0000", cancellationToken, AppendLog);
+                    await Task.Delay(350, cancellationToken);
+                }
+                AppendLog($"DailyFavoriteRaid — raide {raid}/{raidCount}: convites enviados pelo comando Convidar todos.");
+
+                foreach (var guestName in guests)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (!targets.TryGetValue(guestName, out var guest)) continue;
+                    AppendLog($"DailyFavoriteRaid — raide {raid}/{raidCount}: ativando launcher convidado {guestName}.");
+                    await _windowClickService.MaximizeAndActivateAsync(guest, cancellationToken);
+                    await _windowClickService.PressCtrlNumberAsync(guest, 0x31, cancellationToken, AppendLog);
+                    foreach (var guestStep in new[] { "Aceitar convite", "Entrar na raide" })
+                    {
+                        var guestStepFound = await FindAndClickTemplateAsync(guest, templates[guestStep], regions[guestStep],
+                            null, guestStep, 0.78, cancellationToken);
+                        if (!guestStepFound)
+                            throw new InvalidOperationException($"{guestName}: não foi possível concluir {guestStep}.");
+                        await Task.Delay(350, cancellationToken);
+                    }
+                }
+
+                await _windowClickService.ActivateAsync(starter, cancellationToken);
+                var closed = await FindAndClickTemplateAsync(starter, templates["fechar janela da raide"],
+                    regions["fechar janela da raide"], null, "fechar janela da raide", 0.78, cancellationToken);
+                if (!closed)
+                    throw new InvalidOperationException($"não foi possível localizar o X antes de iniciar a raide {raid}/{raidCount}.");
+                await Task.Delay(350, cancellationToken);
+
+                var started = await FindAndClickTemplateAsync(starter, templates["Iniciar Raide"],
+                    regions["Iniciar Raide"], null, "Iniciar Raide", 0.78, cancellationToken);
+                if (!started)
+                    throw new InvalidOperationException($"não foi possível iniciar a raide {raid}/{raidCount} no starter.");
+                AppendLog($"DailyFavoriteRaid — raide {raid}/{raidCount}: iniciada pelo starter {launcherGroup.Starter}.");
+                await WaitAndClickTemplateIndefinitelyAsync(starter, templates["OK"], regions["OK"],
+                    cancellationToken);
+
+                foreach (var guestName in guests)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (!targets.TryGetValue(guestName, out var guest)) continue;
+                    AppendLog($"DailyFavoriteRaid — OK do starter clicado; mudando para {guestName} para procurar o OK na mesma região.");
+                    await _windowClickService.MaximizeAndActivateAsync(guest, cancellationToken);
+                    await WaitAndClickTemplateIndefinitelyAsync(guest, templates["OK"], regions["OK"],
+                        cancellationToken);
+                    AppendLog($"DailyFavoriteRaid — OK clicado em {guestName}.");
+                }
+            }
+        }
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) { AppendLog($"DailyFavoriteRaid — {launcherGroup.Starter}: {ex.Message}"); }
+        finally
+        {
+            if (!cancellationToken.IsCancellationRequested)
+            {
+                try
+                {
+                    AppendLog($"DailyFavoriteRaid — {launcherGroup.Starter}: rotina encerrada.");
+                }
+                catch (Exception ex) { AppendLog($"DailyFavoriteRaid — falha ao enviar Esc 2x: {ex.Message}"); }
+            }
+        }
+    }
+
+    private async Task WaitAndClickTemplateIndefinitelyAsync(PreviewWindow target, string templatePath,
+        RelativeSearchRegion region, CancellationToken cancellationToken)
+    {
+        AppendLog($"DailyFavoriteRaid — aguardando o botão OK sem limite de tempo na região X={region.X:P2}, Y={region.Y:P2}, {region.Width:P2} × {region.Height:P2}. Use Stop para cancelar.");
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        var lastReport = TimeSpan.Zero;
+        var consecutiveMatches = 0;
+        OpenCvSharp.Rect? previousMatch = null;
+
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var frame = await _windowCaptureService.CaptureAsync(target, cancellationToken);
+            var result = await _templateSearchService.FindAsync(frame, templatePath, region, 0.78,
+                cancellationToken);
+            ScreenshotImage.Source = result.AnnotatedFrame;
+            var stablePosition = previousMatch is { } previous &&
+                Math.Abs(previous.X + previous.Width / 2d - result.Bounds.X - result.Bounds.Width / 2d) <= Math.Max(4, result.Bounds.Width * 0.2) &&
+                Math.Abs(previous.Y + previous.Height / 2d - result.Bounds.Y - result.Bounds.Height / 2d) <= Math.Max(4, result.Bounds.Height * 0.2);
+            consecutiveMatches = result.Found ? (stablePosition ? consecutiveMatches + 1 : 1) : 0;
+            previousMatch = result.Found ? result.Bounds : null;
+
+            if (consecutiveMatches >= 3)
+            {
+                var clickX = result.Bounds.X + result.Bounds.Width / 2d;
+                var clickY = result.Bounds.Y + result.Bounds.Height / 2d;
+                AppendLog($"DailyFavoriteRaid: OK confirmado ({result.Confidence:0.00}); movendo o mouse e clicando.");
+                var click = await _windowClickService.ClickRelativeAsync(target, clickX / frame.PixelWidth,
+                    clickY / frame.PixelHeight, cancellationToken, AppendLog);
+                AppendLog($"DailyFavoriteRaid: clique em OK enviado em X={click.X}, Y={click.Y}; Windows aceitou a entrada.");
+                return;
+            }
+
+            if (watch.Elapsed - lastReport >= TimeSpan.FromSeconds(10))
+            {
+                AppendLog($"DailyFavoriteRaid: OK ainda não apareceu ({watch.Elapsed.TotalMinutes:0} min; melhor confiança recente {result.Confidence:0.00}/0.78).");
+                lastReport = watch.Elapsed;
+            }
+            await Task.Delay(250, cancellationToken);
+        }
+    }
+
+    private async Task<bool> FindWhileScrollingAsync(PreviewWindow target, string templatePath,
+        RelativeSearchRegion region, string targetName, double threshold, CancellationToken cancellationToken)
+    {
+        var timer = System.Diagnostics.Stopwatch.StartNew();
+        var consecutiveMatches = 0;
+        var scrollCount = 0;
+        var bestConfidence = 0d;
+        OpenCvSharp.Rect? previousMatch = null;
+        var scrollX = region.X + region.Width / 2;
+        var scrollY = region.Y + region.Height / 2;
+
+        while (timer.Elapsed < TimeSpan.FromSeconds(35) && scrollCount <= 50)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var frame = await _windowCaptureService.CaptureAsync(target, cancellationToken);
+            var result = await _templateSearchService.FindAsync(frame, templatePath, region, threshold, cancellationToken);
+            ScreenshotImage.Source = result.AnnotatedFrame;
+            bestConfidence = Math.Max(bestConfidence, result.Confidence);
+            var stablePosition = previousMatch is { } previous &&
+                Math.Abs(previous.X + previous.Width / 2d - result.Bounds.X - result.Bounds.Width / 2d) <= Math.Max(4, result.Bounds.Width * 0.2) &&
+                Math.Abs(previous.Y + previous.Height / 2d - result.Bounds.Y - result.Bounds.Height / 2d) <= Math.Max(4, result.Bounds.Height * 0.2);
+            consecutiveMatches = result.Found ? (stablePosition ? consecutiveMatches + 1 : 1) : 0;
+            previousMatch = result.Found ? result.Bounds : null;
+            AppendLog($"DailyScroll — PID {target.ProcessId}, {targetName}: confiança {result.Confidence:0.00}/{threshold:0.00}, confirmação {consecutiveMatches}/3, rolagens {scrollCount}.");
+
+            if (consecutiveMatches >= 3)
+            {
+                var clickX = Math.Min(result.Bounds.X + result.Bounds.Width * 1.20, frame.PixelWidth - 1);
+                var clickY = Math.Clamp(result.Bounds.Y + result.Bounds.Height / 2d, 0, frame.PixelHeight - 1);
+                AppendLog($"{targetName} encontrado após {scrollCount} rolagens; clicando cerca de 20% da largura além da borda direita do item.");
+                var click = await _windowClickService.ClickRelativeAsync(target, clickX / frame.PixelWidth,
+                    clickY / frame.PixelHeight, cancellationToken, AppendLog);
+                AppendLog($"Windows aceitou o clique do item em X={click.X}, Y={click.Y}.");
+                return true;
+            }
+
+            if (!result.Found)
+            {
+                var nearTarget = result.Confidence >= threshold - 0.18;
+                var notches = nearTarget ? 1 : 2;
+                await _windowClickService.ScrollDownAtRelativeAsync(target, scrollX, scrollY,
+                    cancellationToken, AppendLog, notches);
+                scrollCount++;
+            }
+            var nearTargetNow = result.Confidence >= threshold - 0.18;
+            await Task.Delay(result.Found ? 100 : nearTargetNow ? 90 : 36, cancellationToken);
+        }
+
+        AppendLog($"DailyScroll: item não encontrado na região após {scrollCount} rolagens. Melhor confiança: {bestConfidence:0.00}; mínimo: {threshold:0.00}. Nenhum clique foi enviado.");
+        return false;
+    }
+
+    private async Task<bool> FindAndClickTemplateAsync(PreviewWindow target, string templatePath,
+        RelativeSearchRegion region, Int32Rect? templateCrop, string targetName, double threshold,
+        CancellationToken cancellationToken, double? clickAnchorX = null, double? clickAnchorY = null,
+        TimeSpan? timeoutOverride = null, int clickCount = 1)
+    {
+        var searchTime = System.Diagnostics.Stopwatch.StartNew();
+        var consecutiveMatches = 0;
+        var bestConfidence = 0d;
+        OpenCvSharp.Rect? previousMatch = null;
+
+        var timeout = timeoutOverride ?? (targetName == "Cobre" ? TimeSpan.FromSeconds(20) : TimeSpan.FromSeconds(12));
+        while (searchTime.Elapsed < timeout)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var frame = await _windowCaptureService.CaptureAsync(target, cancellationToken);
+            var result = await _templateSearchService.FindAsync(frame, templatePath, region, threshold,
+                cancellationToken, templateCrop);
+            ScreenshotImage.Source = result.AnnotatedFrame;
+            bestConfidence = Math.Max(bestConfidence, result.Confidence);
+            var stablePosition = previousMatch is { } previous &&
+                Math.Abs(previous.X + previous.Width / 2d - result.Bounds.X - result.Bounds.Width / 2d) <= Math.Max(4, result.Bounds.Width * 0.2) &&
+                Math.Abs(previous.Y + previous.Height / 2d - result.Bounds.Y - result.Bounds.Height / 2d) <= Math.Max(4, result.Bounds.Height * 0.2);
+            consecutiveMatches = result.Found ? (stablePosition ? consecutiveMatches + 1 : 1) : 0;
+            previousMatch = result.Found ? result.Bounds : null;
+            AppendLog($"PID {target.ProcessId}, {targetName}: confiança {result.Confidence:0.00}/{threshold:0.00}, confirmação {consecutiveMatches}/3 ({searchTime.Elapsed.TotalSeconds:0.0}s).");
+
+            if (consecutiveMatches >= 3)
+            {
+                var clickX = result.Bounds.X + result.Bounds.Width * (clickAnchorX ?? 0.5);
+                var clickY = result.Bounds.Y + result.Bounds.Height * (clickAnchorY ?? 0.5);
+                AppendLog($"{targetName} confirmado ({result.Confidence:0.00}). Preparando {clickCount} clique(s) em X={clickX:0}, Y={clickY:0} da captura.");
+                (int X, int Y) click = default;
+                for (var press = 1; press <= clickCount; press++)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    click = await _windowClickService.ClickRelativeAsync(target, clickX / frame.PixelWidth,
+                        clickY / frame.PixelHeight, cancellationToken, AppendLog);
+                    AppendLog($"{target.ProcessName} (PID {target.ProcessId}): Windows aceitou clique {press}/{clickCount} em X={click.X}, Y={click.Y} da tela.");
+                    if (press < clickCount) await Task.Delay(180, cancellationToken);
+                }
+                return true;
+            }
+
+            await Task.Delay(100, cancellationToken);
+        }
+
+        AppendLog($"{target.ProcessName} (PID {target.ProcessId}), {targetName}: busca encerrada após {searchTime.Elapsed.TotalSeconds:0.0}s sem 3 confirmações consecutivas. Melhor confiança: {bestConfidence:0.00}; mínimo: {threshold:0.00}. Região pesquisada: X={region.X:P2}, Y={region.Y:P2}, {region.Width:P2} × {region.Height:P2}. Nenhum clique foi enviado.");
+        return false;
+    }
+
+    private void AppendLog(string message)
+    {
+        if (ExecutionLog is null) return;
+        if (ExecutionLog.LineCount > 100) ExecutionLog.Clear();
+        ExecutionLog.AppendText($"[{DateTime.Now:HH:mm:ss}] {message}{Environment.NewLine}");
+        ExecutionLog.ScrollToEnd();
+    }
+
+    private void BtnMousePercent_Click(object sender, RoutedEventArgs e) { }
 }
