@@ -170,7 +170,10 @@ public partial class FarmingPage : Page
                 await DailyFavoriteMissions(cancellationToken);
             if (Configuration.Normal.IsEnabled)
                 await DailyFavoriteRaid(cancellationToken);
-            if (!Configuration.DailyDonation && !Configuration.DailyScroll && !Configuration.DailyFavorites && !Configuration.Normal.IsEnabled)
+            if (Configuration.Boss.IsEnabled)
+                await DailyRaidBoss(cancellationToken);
+            if (!Configuration.DailyDonation && !Configuration.DailyScroll && !Configuration.DailyFavorites &&
+                !Configuration.Normal.IsEnabled && !Configuration.Boss.IsEnabled)
                 AppendLog("Nenhuma rotina diária está ativada; nenhuma ação executada.");
             AppendLog("Macro finalizado.");
         }
@@ -335,7 +338,7 @@ public partial class FarmingPage : Page
         var firstRegion = new RelativeSearchRegion(0.5000, 0.0872, 0.2459, 0.2097);
         var secondRegion = new RelativeSearchRegion(0.3132, 0.0284, 0.3762, 0.2480);
         var thirdRegion = new RelativeSearchRegion(0.3092, 0.8261, 0.3856, 0.1585);
-        var buyButtonRegion = new RelativeSearchRegion(0.2300, 0.3500, 0.2100, 0.3500);
+        var buyButtonRegion = new RelativeSearchRegion(0.1574, 0.1512, 0.3265, 0.6187);
         var scrollListRegion = new RelativeSearchRegion(0.6303, 0.1665, 0.3574, 0.8130);
         var quantityFiveRegion = new RelativeSearchRegion(0.2985, 0.4708, 0.4152, 0.1585);
         var buy150kRegion = new RelativeSearchRegion(0.2810, 0.6190, 0.4394, 0.1508);
@@ -344,7 +347,7 @@ public partial class FarmingPage : Page
             (mapTemplate, firstRegion, "ícone de mapa", null, null),
             (currencyTemplate, secondRegion, "ícone dourado", null, null),
             (itemTemplate, thirdRegion, "pergaminho de deslocamento rápido", null, null),
-            (buyTemplate, buyButtonRegion, "Comprar", 0.22, 0.50)
+            (buyTemplate, buyButtonRegion, "Comprar", null, null)
         };
 
         foreach (var launcher in Launchers.Where(Configuration.DonationLaunchers.Contains))
@@ -571,7 +574,7 @@ public partial class FarmingPage : Page
                             // círculo evita que o selo determine o ponto de clique.
                             Int32Rect? finishCrop = isPlusButton ? new Int32Rect(8, 34, 80, 53) : null;
                             var completed = await FindAndClickTemplateAsync(target, step.Template, step.Region, finishCrop,
-                                step.Name, isPlusButton ? 0.72 : 0.78, cancellationToken);
+                                step.Name, isPlusButton ? 0.50 : 0.78, cancellationToken);
                             if (!completed)
                             {
                                 AppendLog($"Missões favoritas — {launcher}: etapa final interrompida em {step.Name}.");
@@ -689,7 +692,12 @@ public partial class FarmingPage : Page
                     cancellationToken.ThrowIfCancellationRequested();
                     AppendLog($"DailyFavoriteRaid — raide {raid}/{raidCount}: procurando {name}.");
                     var clicks = name == "botão 2" ? 4 : 1;
-                    var threshold = name is "botão 2" or "ícone +" ? 0.72 : 0.78;
+                    var threshold = name switch
+                    {
+                        "botão 2" => 0.72,
+                        "ícone +" or "adicionar convidados" => 0.50,
+                        _ => 0.78
+                    };
                     var found = await FindAndClickTemplateAsync(starter, templates[name], regions[name], null,
                         name, threshold, cancellationToken, clickCount: clicks);
                     if (!found)
@@ -759,10 +767,140 @@ public partial class FarmingPage : Page
         }
     }
 
-    private async Task WaitAndClickTemplateIndefinitelyAsync(PreviewWindow target, string templatePath,
-        RelativeSearchRegion region, CancellationToken cancellationToken)
+    private async Task DailyRaidBoss(CancellationToken cancellationToken)
     {
-        AppendLog($"DailyFavoriteRaid — aguardando o botão OK sem limite de tempo na região X={region.X:P2}, Y={region.Y:P2}, {region.Width:P2} × {region.Height:P2}. Use Stop para cancelar.");
+        if (!int.TryParse(Configuration.Boss.RepeatCountText, NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out var raidCount) || raidCount is < 1 or > 100)
+        {
+            AppendLog("DailyRaidBoss: informe entre 1 e 100 repetições na configuração de Raids Boss.");
+            return;
+        }
+
+        var launcherGroup = Configuration.BossLaunchers;
+        var windows = _windowCaptureService.ListWindows();
+        var gameClients = windows.Where(window => window.ProcessName.StartsWith("Mir4G", StringComparison.OrdinalIgnoreCase))
+            .OrderBy(window => window.StartedAt).ToArray();
+        var targets = new Dictionary<string, PreviewWindow>(StringComparer.OrdinalIgnoreCase);
+        if (gameClients.Length > 0) targets["MIR4 Launcher 1"] = gameClients[0];
+        if (gameClients.Length > 1) targets["MIR4 Launcher 2"] = gameClients[1];
+        var steamWindow = windows.FirstOrDefault(window => window.ProcessName.StartsWith("Mir4S", StringComparison.OrdinalIgnoreCase));
+        if (steamWindow is not null) targets["MIR4 Steam"] = steamWindow;
+
+        if (!targets.TryGetValue(launcherGroup.Starter, out var starter))
+        {
+            AppendLog($"DailyRaidBoss: starter {launcherGroup.Starter} não está aberto.");
+            return;
+        }
+
+        var guests = new[] { launcherGroup.Guest1, launcherGroup.Guest2 }
+            .Where(name => !string.IsNullOrWhiteSpace(name) && name != "Não utilizar" &&
+                !string.Equals(name, launcherGroup.Starter, StringComparison.OrdinalIgnoreCase))
+            .Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+        var directory = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates");
+        var templates = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["ícone +"] = Path.Combine(directory, "daily-raid-boss-plus.png"),
+            ["ícone Raide"] = Path.Combine(directory, "daily-raid-boss-icon.png"),
+            ["Raide de Boss"] = Path.Combine(directory, "daily-raid-boss-label.png"),
+            ["Criar um Raide (menu)"] = Path.Combine(directory, "daily-raid-boss-menu-create.png"),
+            ["Criar um Raide"] = Path.Combine(directory, "daily-raid-boss-create.png"),
+            ["adicionar convidados"] = Path.Combine(directory, "daily-raid-add.png"),
+            ["Convidar todos"] = Path.Combine(directory, "daily-raid-invite-all.png"),
+            ["Aceitar convite"] = Path.Combine(directory, "daily-raid-accept.png"),
+            ["Entrar na raide"] = Path.Combine(directory, "daily-raid-enter.png"),
+            ["OK"] = Path.Combine(directory, "daily-raid-ok.png")
+        };
+        if (templates.Values.Any(path => !File.Exists(path)))
+        {
+            AppendLog("DailyRaidBoss: faltam imagens em Assets\\Templates.");
+            return;
+        }
+
+        var regions = new Dictionary<string, RelativeSearchRegion>(StringComparer.Ordinal)
+        {
+            ["ícone +"] = new(0.7392, 0.0029, 0.2608, 0.0946),
+            ["ícone Raide"] = new(0.6868, 0.4989, 0.2969, 0.1739),
+            ["Raide de Boss"] = new(0.6935, 0.6600, 0.2996, 0.1227),
+            ["Criar um Raide (menu)"] = new(0.5282, 0.8134, 0.4703, 0.1866),
+            ["Criar um Raide"] = new(0.3535, 0.7418, 0.2916, 0.1636),
+            ["adicionar convidados"] = new(0.1560, 0.3148, 0.3467, 0.1330),
+            ["Convidar todos"] = new(0.4624, 0.1946, 0.1666, 0.0946),
+            ["Aceitar convite"] = new(0.0459, 0.4043, 0.1693, 0.1330),
+            ["Entrar na raide"] = new(0.3603, 0.5756, 0.2929, 0.1585),
+            ["OK"] = new(0.2850, 0.8338, 0.4488, 0.1355)
+        };
+
+        AppendLog($"DailyRaidBoss: criando {raidCount} raide(s) pelo starter {launcherGroup.Starter}.");
+        try
+        {
+            await _windowClickService.MaximizeAndActivateAsync(starter, cancellationToken);
+            for (var raid = 1; raid <= raidCount; raid++)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                AppendLog($"DailyRaidBoss — {launcherGroup.Starter}: iniciando raide {raid}/{raidCount}.");
+                await _windowClickService.PressCtrlNumberAsync(starter, 0x31, cancellationToken, AppendLog);
+                foreach (var name in new[] { "ícone +", "ícone Raide", "Raide de Boss", "Criar um Raide (menu)", "Criar um Raide", "adicionar convidados", "Convidar todos" })
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    AppendLog($"DailyRaidBoss — raide {raid}/{raidCount}: procurando {name}.");
+                    var threshold = name is "ícone +" or "adicionar convidados" ? 0.50 : 0.78;
+                    var found = await FindAndClickTemplateAsync(starter, templates[name], regions[name], null,
+                        name, threshold, cancellationToken);
+                    if (!found)
+                        throw new InvalidOperationException($"sequência interrompida em {name} (raide {raid}/{raidCount}).");
+                    await Task.Delay(350, cancellationToken);
+                }
+
+                foreach (var guestName in guests)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (!targets.TryGetValue(guestName, out var guest))
+                    {
+                        AppendLog($"DailyRaidBoss — launcher convidado {guestName} não está aberto; pulando esse launcher.");
+                        continue;
+                    }
+
+                    AppendLog($"DailyRaidBoss — raide {raid}/{raidCount}: aceitando convite em {guestName}.");
+                    await _windowClickService.MaximizeAndActivateAsync(guest, cancellationToken);
+                    await _windowClickService.PressCtrlNumberAsync(guest, 0x31, cancellationToken, AppendLog);
+                    foreach (var guestStep in new[] { "Aceitar convite", "Entrar na raide" })
+                    {
+                        var guestStepFound = await FindAndClickTemplateAsync(guest, templates[guestStep],
+                            regions[guestStep], null, guestStep, 0.78, cancellationToken);
+                        if (!guestStepFound)
+                            throw new InvalidOperationException($"{guestName}: não foi possível concluir {guestStep}.");
+                        await Task.Delay(350, cancellationToken);
+                    }
+                }
+
+                await _windowClickService.ActivateAsync(starter, cancellationToken);
+                AppendLog($"DailyRaidBoss — convidados processados; retornando ao starter {launcherGroup.Starter} para aguardar o OK.");
+                await WaitAndClickTemplateIndefinitelyAsync(starter, templates["OK"], regions["OK"],
+                    cancellationToken, "DailyRaidBoss");
+                foreach (var guestName in guests)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (!targets.TryGetValue(guestName, out var guest)) continue;
+                    AppendLog($"DailyRaidBoss — starter confirmou o OK; aguardando o mesmo OK em {guestName}.");
+                    await _windowClickService.MaximizeAndActivateAsync(guest, cancellationToken);
+                    await WaitAndClickTemplateIndefinitelyAsync(guest, templates["OK"], regions["OK"],
+                        cancellationToken, "DailyRaidBoss");
+                }
+            }
+        }
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) { AppendLog($"DailyRaidBoss — {launcherGroup.Starter}: {ex.Message}"); }
+        finally
+        {
+            if (!cancellationToken.IsCancellationRequested)
+                AppendLog($"DailyRaidBoss — {launcherGroup.Starter}: rotina encerrada.");
+        }
+    }
+
+    private async Task WaitAndClickTemplateIndefinitelyAsync(PreviewWindow target, string templatePath,
+        RelativeSearchRegion region, CancellationToken cancellationToken, string routineName = "DailyFavoriteRaid")
+    {
+        AppendLog($"{routineName} — aguardando o botão OK sem limite de tempo na região X={region.X:P2}, Y={region.Y:P2}, {region.Width:P2} × {region.Height:P2}. Use Stop para cancelar.");
         var watch = System.Diagnostics.Stopwatch.StartNew();
         var lastReport = TimeSpan.Zero;
         var consecutiveMatches = 0;
@@ -785,16 +923,16 @@ public partial class FarmingPage : Page
             {
                 var clickX = result.Bounds.X + result.Bounds.Width / 2d;
                 var clickY = result.Bounds.Y + result.Bounds.Height / 2d;
-                AppendLog($"DailyFavoriteRaid: OK confirmado ({result.Confidence:0.00}); movendo o mouse e clicando.");
+                AppendLog($"{routineName}: OK confirmado ({result.Confidence:0.00}); movendo o mouse e clicando.");
                 var click = await _windowClickService.ClickRelativeAsync(target, clickX / frame.PixelWidth,
                     clickY / frame.PixelHeight, cancellationToken, AppendLog);
-                AppendLog($"DailyFavoriteRaid: clique em OK enviado em X={click.X}, Y={click.Y}; Windows aceitou a entrada.");
+                AppendLog($"{routineName}: clique em OK enviado em X={click.X}, Y={click.Y}; Windows aceitou a entrada.");
                 return;
             }
 
             if (watch.Elapsed - lastReport >= TimeSpan.FromSeconds(10))
             {
-                AppendLog($"DailyFavoriteRaid: OK ainda não apareceu ({watch.Elapsed.TotalMinutes:0} min; melhor confiança recente {result.Confidence:0.00}/0.78).");
+                AppendLog($"{routineName}: OK ainda não apareceu ({watch.Elapsed.TotalMinutes:0} min; melhor confiança recente {result.Confidence:0.00}/0.78).");
                 lastReport = watch.Elapsed;
             }
             await Task.Delay(250, cancellationToken);
