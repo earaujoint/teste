@@ -61,6 +61,12 @@
 		<Content Include="Assets\Templates\daily-raid-*.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
+		<Content Include="Assets\Templates\daily-arena-*.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Assets\Templates\daily-arena-*.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
 		<Resource Include="Assets\app-v2.ico" />
 		<Content Include="Data\bosses.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -109,7 +109,128 @@ public partial class FarmingPage : Page
                 : "Missões favoritas desativadas.");
     }
 
-    private void BtnDoArena_Click(object sender, RoutedEventArgs e) { }
+    private async void BtnDoArena_Click(object sender, RoutedEventArgs e)
+    {
+        if (_runCancellation is not null)
+        {
+            AppendLog("Já existe uma rotina em execução.");
+            return;
+        }
+
+        _runCancellation = new CancellationTokenSource();
+        var cancellationToken = _runCancellation.Token;
+        BtnDoArena.IsEnabled = false;
+        BtnStart.IsEnabled = false;
+        StatusText.Text = "Em execução";
+        try
+        {
+            await DailyArena(cancellationToken);
+            AppendLog("DailyArena finalizada.");
+        }
+        catch (OperationCanceledException) { AppendLog("DailyArena cancelada."); }
+        catch (Exception ex) { AppendLog($"DailyArena: falha — {ex.Message}"); }
+        finally
+        {
+            _runCancellation.Dispose();
+            _runCancellation = null;
+            BtnDoArena.IsEnabled = true;
+            BtnStart.IsEnabled = true;
+            StatusText.Text = "Pronto";
+        }
+    }
+
+    private async Task DailyArena(CancellationToken cancellationToken)
+    {
+        var windows = _windowCaptureService.ListWindows();
+        var gameClients = windows.Where(window => window.ProcessName.StartsWith("Mir4G", StringComparison.OrdinalIgnoreCase))
+            .OrderBy(window => window.StartedAt).ToArray();
+        var targets = new Dictionary<string, PreviewWindow>(StringComparer.OrdinalIgnoreCase);
+        if (gameClients.Length > 0) targets["MIR4 Launcher 1"] = gameClients[0];
+        if (gameClients.Length > 1) targets["MIR4 Launcher 2"] = gameClients[1];
+        var steamWindow = windows.FirstOrDefault(window => window.ProcessName.StartsWith("Mir4S", StringComparison.OrdinalIgnoreCase));
+        if (steamWindow is not null) targets["MIR4 Steam"] = steamWindow;
+
+        if (!targets.TryGetValue(Configuration.ArenaStarter, out var starter))
+            throw new InvalidOperationException($"starter {Configuration.ArenaStarter} não está aberto.");
+        if (!targets.TryGetValue(Configuration.ArenaInviter, out var guest))
+            throw new InvalidOperationException($"convidado {Configuration.ArenaInviter} não está aberto.");
+        if (ReferenceEquals(starter, guest))
+            throw new InvalidOperationException("Selecione launchers diferentes para o starter e o convidado da Arena.");
+
+        var directory = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates");
+        var templates = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["ícone +"] = Path.Combine(directory, "daily-arena-plus.png"),
+            ["ícone Guerra"] = Path.Combine(directory, "daily-arena-war-icon.png"),
+            ["Arena"] = Path.Combine(directory, "daily-arena-label.png"),
+            ["Criar Arena (menu)"] = Path.Combine(directory, "daily-arena-create-menu.png"),
+            ["Privado"] = Path.Combine(directory, "daily-arena-private.png"),
+            ["campo da senha"] = Path.Combine(directory, "daily-arena-password.png"),
+            ["botão 2"] = Path.Combine(directory, "daily-arena-two.png"),
+            ["Entrada completa"] = Path.Combine(directory, "daily-arena-entry-complete.png"),
+            ["Criar Arena"] = Path.Combine(directory, "daily-arena-create.png"),
+            ["adicionar convidados"] = Path.Combine(directory, "daily-arena-add.png"),
+            ["Convidar todos"] = Path.Combine(directory, "daily-arena-invite-all.png"),
+            ["Aceitar convite"] = Path.Combine(directory, "daily-raid-accept.png"),
+            ["fechar janela da Arena"] = Path.Combine(directory, "daily-raid-close.png"),
+            ["Iniciar Arena"] = Path.Combine(directory, "daily-arena-start.png")
+        };
+        if (templates.Values.Any(path => !File.Exists(path)))
+            throw new InvalidOperationException("Faltam imagens de referência da Arena em Assets\\Templates.");
+
+        var regions = new Dictionary<string, RelativeSearchRegion>(StringComparer.Ordinal)
+        {
+            ["ícone +"] = new(0.7432, 0.0080, 0.2568, 0.0895),
+            ["ícone Guerra"] = new(0.6989, 0.4861, 0.2983, 0.1841),
+            ["Arena"] = new(0.6935, 0.6574, 0.3037, 0.1202),
+            ["Criar Arena (menu)"] = new(0.5967, 0.8440, 0.4033, 0.1560),
+            ["Privado"] = new(0.2622, 0.4631, 0.2580, 0.1815),
+            ["campo da senha"] = new(0.6653, 0.5270, 0.0712, 0.0767),
+            ["botão 2"] = new(0.3979, 0.2739, 0.2056, 0.3835),
+            ["Entrada completa"] = new(0.3724, 0.7673, 0.2553, 0.1662),
+            ["Criar Arena"] = new(0.4059, 0.7494, 0.1774, 0.1534),
+            ["adicionar convidados"] = new(0.5000, 0.2176, 0.0900, 0.6545),
+            ["Convidar todos"] = new(0.4785, 0.1793, 0.1666, 0.1278),
+            ["Aceitar convite"] = new(0.0459, 0.4043, 0.1693, 0.1330),
+            ["fechar janela da Arena"] = new(0.8534, 0.1051, 0.0873, 0.0946),
+            ["Iniciar Arena"] = new(0.4046, 0.8619, 0.2002, 0.1355)
+        };
+
+        AppendLog($"DailyArena: starter {Configuration.ArenaStarter}; convidado {Configuration.ArenaInviter}.");
+        await _windowClickService.MaximizeAndActivateAsync(starter, cancellationToken);
+        await _windowClickService.PressCtrlNumberAsync(starter, 0x31, cancellationToken, AppendLog);
+        var steps = new[] { "ícone +", "ícone Guerra", "Arena", "Criar Arena (menu)", "Privado", "campo da senha", "botão 2", "Entrada completa", "Criar Arena", "adicionar convidados", "Convidar todos" };
+        foreach (var name in steps)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            AppendLog($"DailyArena — starter: procurando {name}.");
+            var clickCount = name == "botão 2" ? 4 : 1;
+            var threshold = name is "ícone +" or "adicionar convidados" ? 0.50 : name == "botão 2" ? 0.72 : 0.78;
+            var found = await FindAndClickTemplateAsync(starter, templates[name], regions[name], null,
+                name, threshold, cancellationToken, clickCount: clickCount);
+            if (!found) throw new InvalidOperationException($"não foi possível concluir a etapa {name}.");
+            if (name == "campo da senha")
+                await _windowClickService.ReplaceTextAsync(starter, "0000", cancellationToken, AppendLog);
+            await Task.Delay(350, cancellationToken);
+        }
+
+        AppendLog($"DailyArena: convite enviado; mudando para {Configuration.ArenaInviter} para aceitar o pedido.");
+        await _windowClickService.MaximizeAndActivateAsync(guest, cancellationToken);
+        await _windowClickService.PressCtrlNumberAsync(guest, 0x31, cancellationToken, AppendLog);
+        var accepted = await FindAndClickTemplateAsync(guest, templates["Aceitar convite"],
+            regions["Aceitar convite"], null, "Aceitar pedido da Arena", 0.78, cancellationToken);
+        if (!accepted) throw new InvalidOperationException($"{Configuration.ArenaInviter}: o pedido da Arena não apareceu.");
+        await _windowClickService.ActivateAsync(starter, cancellationToken);
+        AppendLog($"DailyArena: pedido aceito em {Configuration.ArenaInviter}; retornando ao starter para fechar a janela da Arena.");
+        var closed = await FindAndClickTemplateAsync(starter, templates["fechar janela da Arena"],
+            regions["fechar janela da Arena"], null, "fechar janela da Arena", 0.78, cancellationToken);
+        if (!closed) throw new InvalidOperationException("não foi possível fechar a janela da Arena pelo X.");
+        await Task.Delay(350, cancellationToken);
+        var started = await FindAndClickTemplateAsync(starter, templates["Iniciar Arena"],
+            regions["Iniciar Arena"], null, "Iniciar Arena", 0.78, cancellationToken);
+        if (!started) throw new InvalidOperationException("não foi possível clicar em Iniciar Arena.");
+        AppendLog("DailyArena: X clicado e Arena iniciada pelo starter.");
+    }
     private void BtnStop_Click(object sender, RoutedEventArgs e)
     {
         _runCancellation?.Cancel();
