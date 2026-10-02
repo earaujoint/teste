@@ -8,7 +8,7 @@ namespace Macro.Services;
 
 public sealed record PreviewWindow(nint Handle, int ProcessId, string ProcessName, DateTime StartedAt, string Label);
 
-// Protótipo: copia a área cliente visível da tela. A janela precisa estar desobstruída.
+// Solicita à própria janela a renderização da área cliente, sem ler pixels de janelas sobrepostas.
 public sealed class WindowPreviewService
 {
     public IReadOnlyList<PreviewWindow> ListWindows()
@@ -51,9 +51,8 @@ public sealed class WindowPreviewService
         {
             if (!GetClientRect(target.Handle, out var rect) || rect.Right <= 0 || rect.Bottom <= 0)
                 throw new InvalidOperationException("A janela não possui área cliente disponível.");
-            var origin = new NativePoint();
-            if (!ClientToScreen(target.Handle, ref origin))
-                throw new InvalidOperationException("Não foi possível localizar a janela na tela.");
+            if (rect.Right != 1280 || rect.Bottom != 720)
+                throw new InvalidOperationException("A captura exige que a área do jogo esteja em 1280 × 720. Capture novamente para redefinir a janela.");
             source = GetDC(0);
             if (source == 0) throw new InvalidOperationException("Não foi possível acessar a tela.");
             memory = CreateCompatibleDC(source);
@@ -62,10 +61,10 @@ public sealed class WindowPreviewService
             previousBitmap = SelectObject(memory, bitmap);
             if (previousBitmap == 0 || previousBitmap == new nint(-1))
                 throw new InvalidOperationException("Não foi possível preparar a captura.");
-            // Ler da tela captura o conteúdo composto pela GPU, ao contrário do DC da janela,
-            // que costuma retornar preto em jogos e outras janelas aceleradas.
-            if (!BitBlt(memory, 0, 0, rect.Right, rect.Bottom, source, origin.X, origin.Y, 0x00CC0020))
-                throw new InvalidOperationException("A janela não permitiu a captura GDI.");
+            // PW_CLIENTONLY | PW_RENDERFULLCONTENT. A origem deixa de ser a tela
+            // composta, portanto uma janela sobreposta não aparece na captura.
+            if (!PrintWindow(target.Handle, memory, 0x3))
+                throw new InvalidOperationException("O MIR4 não permitiu capturar a janela diretamente.");
             token.ThrowIfCancellationRequested();
             var image = Imaging.CreateBitmapSourceFromHBitmap(bitmap, 0, Int32Rect.Empty,
                 BitmapSizeOptions.FromEmptyOptions());
@@ -84,13 +83,11 @@ public sealed class WindowPreviewService
 
     [StructLayout(LayoutKind.Sequential)]
     private struct Rect { public int Left, Top, Right, Bottom; }
-    [StructLayout(LayoutKind.Sequential)]
-    private struct NativePoint { public int X, Y; }
     [DllImport("user32.dll")] private static extern bool IsWindow(nint hwnd);
     [DllImport("user32.dll")] private static extern bool IsIconic(nint hwnd);
     [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(nint hwnd, out uint processId);
     [DllImport("user32.dll")] private static extern bool GetClientRect(nint hwnd, out Rect rect);
-    [DllImport("user32.dll")] private static extern bool ClientToScreen(nint hwnd, ref NativePoint point);
+    [DllImport("user32.dll")] private static extern bool PrintWindow(nint hwnd, nint dc, uint flags);
     [DllImport("user32.dll")] private static extern nint GetDC(nint hwnd);
     [DllImport("user32.dll")] private static extern int ReleaseDC(nint hwnd, nint dc);
     [DllImport("user32.dll")] private static extern nint SetThreadDpiAwarenessContext(nint context);
@@ -99,5 +96,4 @@ public sealed class WindowPreviewService
     [DllImport("gdi32.dll")] private static extern nint SelectObject(nint dc, nint obj);
     [DllImport("gdi32.dll")] private static extern bool DeleteObject(nint obj);
     [DllImport("gdi32.dll")] private static extern bool DeleteDC(nint dc);
-    [DllImport("gdi32.dll")] private static extern bool BitBlt(nint destination, int x, int y, int width, int height, nint source, int sourceX, int sourceY, uint operation);
 }

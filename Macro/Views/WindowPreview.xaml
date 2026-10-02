@@ -8,7 +8,7 @@
             <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/><RowDefinition Height="100"/>
         </Grid.RowDefinitions>
-        <TextBlock Text="A lista mostra apenas janelas de processos MIR4. Capture a janela e arraste na prévia para marcar a área de busca, inclusive junto aos cantos. Depois escolha a imagem de referência."
+        <TextBlock Text="A captura ajusta a área do jogo para 1280 × 720. Arraste na prévia para marcar a área de busca, inclusive junto aos cantos; depois escolha a imagem de referência."
                    TextWrapping="Wrap" Margin="0,0,0,10"/>
         <Grid Grid.Row="1" Margin="0,0,0,10">
             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>

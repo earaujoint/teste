@@ -197,7 +197,7 @@ public partial class FarmingPage : Page
         };
 
         AppendLog($"DailyArena: starter {Configuration.ArenaStarter}; convidado {Configuration.ArenaInviter}.");
-        await _windowClickService.MaximizeAndActivateAsync(starter, cancellationToken);
+        await _windowClickService.Prepare720pAsync(starter, cancellationToken);
         await _windowClickService.PressCtrlNumberAsync(starter, 0x31, cancellationToken, AppendLog);
         var steps = new[] { "ícone +", "ícone Guerra", "Arena", "Criar Arena (menu)", "Privado", "campo da senha", "botão 2", "Entrada completa", "Criar Arena", "adicionar convidados", "Convidar todos" };
         foreach (var name in steps)
@@ -215,7 +215,7 @@ public partial class FarmingPage : Page
         }
 
         AppendLog($"DailyArena: convite enviado; mudando para {Configuration.ArenaInviter} para aceitar o pedido.");
-        await _windowClickService.MaximizeAndActivateAsync(guest, cancellationToken);
+        await _windowClickService.Prepare720pAsync(guest, cancellationToken);
         await _windowClickService.PressCtrlNumberAsync(guest, 0x31, cancellationToken, AppendLog);
         var accepted = await FindAndClickTemplateAsync(guest, templates["Aceitar convite"],
             regions["Aceitar convite"], null, "Aceitar pedido da Arena", 0.78, cancellationToken);
@@ -362,8 +362,8 @@ public partial class FarmingPage : Page
 
             try
             {
-                AppendLog($"{launcher}: maximizando e ativando a janela {target.ProcessName} (PID {target.ProcessId}).");
-                await _windowClickService.MaximizeAndActivateAsync(target, cancellationToken);
+                AppendLog($"{launcher}: ajustando a área para 1280×720 e ativando {target.ProcessName} (PID {target.ProcessId}).");
+                await _windowClickService.Prepare720pAsync(target, cancellationToken);
                 AppendLog($"{launcher}: procurando o ícone na janela {target.ProcessName} (PID {target.ProcessId}).");
                 var donationClicked = await FindAndClickTemplateAsync(target, templatePath, donationRegion,
                     new Int32Rect(10, 20, 34, 43), "ícone de doação", confidenceThreshold, cancellationToken);
@@ -482,8 +482,8 @@ public partial class FarmingPage : Page
 
             try
             {
-                AppendLog($"DailyScroll — {launcher}: maximizando janela e iniciando com F10.");
-                await _windowClickService.MaximizeAndActivateAsync(target, cancellationToken);
+                AppendLog($"DailyScroll — {launcher}: ajustando para 1280×720 e iniciando com F10.");
+                await _windowClickService.Prepare720pAsync(target, cancellationToken);
                 await _windowClickService.PressKeyAsync(target, 0x79, "F10", cancellationToken, AppendLog);
                 await Task.Delay(500, cancellationToken);
 
@@ -605,8 +605,8 @@ public partial class FarmingPage : Page
 
             try
             {
-                AppendLog($"Missões favoritas — {launcher}: maximizando e ativando a janela.");
-                await _windowClickService.MaximizeAndActivateAsync(target, cancellationToken);
+                AppendLog($"Missões favoritas — {launcher}: ajustando a área para 1280×720 e ativando a janela.");
+                await _windowClickService.Prepare720pAsync(target, cancellationToken);
                 var questOpened = await FindAndClickTemplateAsync(target, questTemplate, questRegion, null,
                     "ícone de missões", 0.78, cancellationToken);
                 if (!questOpened) continue;
@@ -706,7 +706,7 @@ public partial class FarmingPage : Page
                         }
 
                         if (finishStepsCompleted)
-                            await _windowClickService.ResizeToSmallestAsync(target, cancellationToken, AppendLog);
+                            await _windowClickService.Prepare720pAsync(target, cancellationToken, AppendLog);
                     }
                     catch (OperationCanceledException) { throw; }
                     catch (Exception ex) { AppendLog($"Missões favoritas — {launcher}: falha no encerramento — {ex.Message}"); }
@@ -780,7 +780,7 @@ public partial class FarmingPage : Page
 
         var regions = new Dictionary<string, RelativeSearchRegion>(StringComparer.Ordinal)
         {
-            ["ícone +"] = new(0.7378, 0.0003, 0.2622, 0.1125),
+            ["ícone +"] = new(0.6500, 0.0000, 0.3500, 0.2000),
             ["ícone Raide"] = new(0.7110, 0.5040, 0.1962, 0.1508),
             ["opção Raide"] = new(0.6841, 0.6446, 0.3159, 0.1253),
             ["Criar um Raide (menu)"] = new(0.5363, 0.8440, 0.4488, 0.1483),
@@ -801,7 +801,7 @@ public partial class FarmingPage : Page
         AppendLog($"DailyFavoriteRaid: criando {raidCount} raide(s) pelo starter {launcherGroup.Starter}.");
         try
         {
-            await _windowClickService.MaximizeAndActivateAsync(starter, cancellationToken);
+            await _windowClickService.Prepare720pAsync(starter, cancellationToken);
             for (var raid = 1; raid <= raidCount; raid++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -834,7 +834,7 @@ public partial class FarmingPage : Page
                     cancellationToken.ThrowIfCancellationRequested();
                     if (!targets.TryGetValue(guestName, out var guest)) continue;
                     AppendLog($"DailyFavoriteRaid — raide {raid}/{raidCount}: ativando launcher convidado {guestName}.");
-                    await _windowClickService.MaximizeAndActivateAsync(guest, cancellationToken);
+                    await _windowClickService.Prepare720pAsync(guest, cancellationToken);
                     await _windowClickService.PressCtrlNumberAsync(guest, 0x31, cancellationToken, AppendLog);
                     foreach (var guestStep in new[] { "Aceitar convite", "Entrar na raide" })
                     {
@@ -866,7 +866,7 @@ public partial class FarmingPage : Page
                     cancellationToken.ThrowIfCancellationRequested();
                     if (!targets.TryGetValue(guestName, out var guest)) continue;
                     AppendLog($"DailyFavoriteRaid — OK do starter clicado; mudando para {guestName} para procurar o OK na mesma região.");
-                    await _windowClickService.MaximizeAndActivateAsync(guest, cancellationToken);
+                    await _windowClickService.Prepare720pAsync(guest, cancellationToken);
                     await WaitAndClickTemplateIndefinitelyAsync(guest, templates["OK"], regions["OK"],
                         cancellationToken);
                     AppendLog($"DailyFavoriteRaid — OK clicado em {guestName}.");
@@ -954,7 +954,7 @@ public partial class FarmingPage : Page
         AppendLog($"DailyRaidBoss: criando {raidCount} raide(s) pelo starter {launcherGroup.Starter}.");
         try
         {
-            await _windowClickService.MaximizeAndActivateAsync(starter, cancellationToken);
+            await _windowClickService.Prepare720pAsync(starter, cancellationToken);
             for (var raid = 1; raid <= raidCount; raid++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -982,7 +982,7 @@ public partial class FarmingPage : Page
                     }
 
                     AppendLog($"DailyRaidBoss — raide {raid}/{raidCount}: aceitando convite em {guestName}.");
-                    await _windowClickService.MaximizeAndActivateAsync(guest, cancellationToken);
+                    await _windowClickService.Prepare720pAsync(guest, cancellationToken);
                     await _windowClickService.PressCtrlNumberAsync(guest, 0x31, cancellationToken, AppendLog);
                     foreach (var guestStep in new[] { "Aceitar convite", "Entrar na raide" })
                     {
@@ -1003,7 +1003,7 @@ public partial class FarmingPage : Page
                     cancellationToken.ThrowIfCancellationRequested();
                     if (!targets.TryGetValue(guestName, out var guest)) continue;
                     AppendLog($"DailyRaidBoss — starter confirmou o OK; aguardando o mesmo OK em {guestName}.");
-                    await _windowClickService.MaximizeAndActivateAsync(guest, cancellationToken);
+                    await _windowClickService.Prepare720pAsync(guest, cancellationToken);
                     await WaitAndClickTemplateIndefinitelyAsync(guest, templates["OK"], regions["OK"],
                         cancellationToken, "DailyRaidBoss");
                 }

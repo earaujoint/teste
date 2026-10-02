@@ -66,6 +66,7 @@ public partial class WindowPreview : Window
         Preview.Source = null;
         try
         {
+            await _input.Ensure720pAsync(target, _lifetime.Token);
             var image = await _service.CaptureAsync(target, _lifetime.Token);
             if (_closed) return;
             Preview.Source = image;
@@ -129,6 +130,8 @@ public partial class WindowPreview : Window
         try
         {
             WriteLog($"Procurando {Path.GetFileName(TemplatePath.Text)} na região X={x:0.#}%, Y={y:0.#}%, {width:0.#}% × {height:0.#}%.");
+            await _input.Ensure720pAsync(target, _lifetime.Token);
+            deadline = DateTime.UtcNow.AddSeconds(5);
             if (clickWhenFound) await _input.ActivateAsync(target, _lifetime.Token);
             while (DateTime.UtcNow < deadline)
             {

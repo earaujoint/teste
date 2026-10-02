@@ -4,6 +4,67 @@ namespace Macro.Services;
 
 public sealed class WindowClickService
 {
+    public async Task Prepare720pAsync(PreviewWindow target, CancellationToken token, Action<string>? log = null)
+    {
+        await Ensure720pAsync(target, token);
+        await ActivateAsync(target, token);
+        log?.Invoke($"MIR4 em 1280 × 720 na área do jogo (PID {target.ProcessId}).");
+    }
+
+    public async Task Ensure720pAsync(PreviewWindow target, CancellationToken token)
+    {
+        ValidateWindow(target);
+        token.ThrowIfCancellationRequested();
+        if (IsZoomed(target.Handle) || IsIconic(target.Handle))
+        {
+            ShowWindowAsync(target.Handle, 9); // SW_RESTORE
+            for (var attempt = 0; attempt < 20 && (IsZoomed(target.Handle) || IsIconic(target.Handle)); attempt++)
+                await Task.Delay(50, token);
+            if (IsZoomed(target.Handle) || IsIconic(target.Handle))
+                throw new InvalidOperationException("Não foi possível restaurar a janela MIR4 para ajustar a resolução.");
+        }
+
+        var stableFrames = 0;
+        for (var attempt = 0; attempt < 20; attempt++)
+        {
+            token.ThrowIfCancellationRequested();
+            stableFrames = ResizeClientTo720p(target) ? stableFrames + 1 : 0;
+            if (stableFrames >= 3) return;
+            await Task.Delay(150, token);
+        }
+        throw new InvalidOperationException("O MIR4 não manteve a área do jogo em 1280 × 720. Verifique se o modo janela permite esse tamanho.");
+    }
+
+    private static bool ResizeClientTo720p(PreviewWindow target)
+    {
+        var oldDpi = SetThreadDpiAwarenessContext(new nint(-4));
+        try
+        {
+            ValidateWindow(target);
+            if (!GetWindowRect(target.Handle, out var outer) || !GetClientRect(target.Handle, out var client))
+                throw new InvalidOperationException("Não foi possível medir a janela MIR4.");
+
+            // A área cliente é o quadro do jogo; somamos as bordas para obter o tamanho externo.
+            var width = 1280 + outer.Right - outer.Left - client.Right;
+            var height = 720 + outer.Bottom - outer.Top - client.Bottom;
+            var info = new MonitorInfo { Size = Marshal.SizeOf<MonitorInfo>() };
+            if (!GetMonitorInfo(MonitorFromWindow(target.Handle, 2), ref info))
+                throw new InvalidOperationException("Não foi possível consultar a área disponível do monitor.");
+            var work = info.Work;
+            if (width > work.Right - work.Left || height > work.Bottom - work.Top)
+                throw new InvalidOperationException("A janela MIR4 em 720p não cabe na área disponível do monitor.");
+
+            var x = Math.Clamp(outer.Left, work.Left, work.Right - width);
+            var y = Math.Clamp(outer.Top, work.Top, work.Bottom - height);
+            if (client.Right == 1280 && client.Bottom == 720 && outer.Left == x && outer.Top == y)
+                return true;
+            if (!SetWindowPos(target.Handle, 0, x, y, width, height, 0x0004 | 0x0010))
+                throw new InvalidOperationException("O Windows recusou ajustar a janela MIR4 para 720p.");
+            return false;
+        }
+        finally { if (oldDpi != 0) SetThreadDpiAwarenessContext(oldDpi); }
+    }
+
     public async Task MaximizeAndActivateAsync(PreviewWindow target, CancellationToken token)
     {
         GetWindowThreadProcessId(target.Handle, out var processId);
@@ -200,9 +261,16 @@ public sealed class WindowClickService
 
     private static void ValidateTarget(PreviewWindow target)
     {
+        ValidateWindow(target);
+        if (IsIconic(target.Handle))
+            throw new InvalidOperationException("A janela alvo está minimizada.");
+    }
+
+    private static void ValidateWindow(PreviewWindow target)
+    {
         GetWindowThreadProcessId(target.Handle, out var processId);
-        if (!IsWindow(target.Handle) || processId != target.ProcessId || IsIconic(target.Handle))
-            throw new InvalidOperationException("A janela alvo não está mais disponível ou está minimizada.");
+        if (!IsWindow(target.Handle) || processId != target.ProcessId)
+            throw new InvalidOperationException("A janela alvo não está mais disponível.");
     }
 
     private static NativePoint ResolvePoint(PreviewWindow target, double x, double y)
@@ -307,6 +375,9 @@ public sealed class WindowClickService
 
     [StructLayout(LayoutKind.Sequential)] private struct NativePoint { public int X, Y; }
     [StructLayout(LayoutKind.Sequential)] private struct NativeRect { public int Left, Top, Right, Bottom; }
+    [StructLayout(LayoutKind.Sequential)] private struct MonitorInfo { public int Size; public NativeRect Monitor, Work; public uint Flags; }
+    [DllImport("user32.dll")] private static extern nint MonitorFromWindow(nint hwnd, uint flags);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern bool GetMonitorInfo(nint monitor, ref MonitorInfo info);
     [StructLayout(LayoutKind.Sequential)] private struct Input { public uint Type; public InputUnion Data; }
     [StructLayout(LayoutKind.Explicit)] private struct InputUnion
     {
