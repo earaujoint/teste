@@ -551,8 +551,8 @@ public partial class FarmingPage : Page
                 {
                     try
                     {
-                        AppendLog($"DailyScroll — {launcher}: encerrando a rotina com um pressionamento de Esc.");
-                        await _windowClickService.PressKeyAsync(target, 0x1B, "Esc", CancellationToken.None, AppendLog);
+                        AppendLog($"DailyScroll — {launcher}: encerrando a rotina com três pressionamentos de Esc.");
+                        await _windowClickService.PressEscapeTimesAsync(target, 3, CancellationToken.None, AppendLog);
                     }
                     catch (Exception ex) { AppendLog($"DailyScroll — {launcher}: não foi possível enviar Esc — {ex.Message}"); }
                 }
@@ -578,7 +578,6 @@ public partial class FarmingPage : Page
         if (steamWindow is not null) targets["MIR4 Steam"] = steamWindow;
 
         var templatesDirectory = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates");
-        var questTemplate = Path.Combine(templatesDirectory, "daily-favorite-quest.png");
         var fieldTemplate = Path.Combine(templatesDirectory, "daily-favorite-field.png");
         var acceptTemplate = Path.Combine(templatesDirectory, "daily-favorite-accept.png");
         var autoTemplate = Path.Combine(templatesDirectory, "daily-favorite-auto.png");
@@ -586,26 +585,23 @@ public partial class FarmingPage : Page
         var startTemplate = Path.Combine(templatesDirectory, "daily-favorite-start.png");
         var travelTemplate = Path.Combine(templatesDirectory, "daily-favorite-travel.png");
         var travelItemTemplate = Path.Combine(templatesDirectory, "daily-favorite-travel-item.png");
-        var plusTemplate = Path.Combine(templatesDirectory, "daily-favorite-plus.png");
         var energyTemplate = Path.Combine(templatesDirectory, "daily-favorite-energy.png");
-        if (new[] { questTemplate, fieldTemplate, acceptTemplate, autoTemplate, checkTemplate, startTemplate,
-                travelTemplate, travelItemTemplate, plusTemplate, energyTemplate }
+        if (new[] { fieldTemplate, acceptTemplate, autoTemplate, checkTemplate, startTemplate,
+                travelTemplate, travelItemTemplate, energyTemplate }
             .Any(path => !File.Exists(path)))
         {
             AppendLog("Missões favoritas: não foi encontrada uma das imagens em Assets\\Templates.");
             return;
         }
 
-        var questRegion = new RelativeSearchRegion(0.7432, 0.0003, 0.2568, 0.0997);
-        var fieldRegion = new RelativeSearchRegion(0.0002, 0.0412, 0.8384, 0.1457);
-        var acceptRegion = new RelativeSearchRegion(0.8279, 0.2841, 0.1721, 0.5778);
-        var autoRegion = new RelativeSearchRegion(0.6653, 0.1614, 0.3346, 0.1253);
-        var checkRegion = new RelativeSearchRegion(0.1050, 0.0617, 0.2096, 0.2148);
-        var startRegion = new RelativeSearchRegion(0.6868, 0.7622, 0.1989, 0.1687);
-        var travelRegion = new RelativeSearchRegion(0.6653, 0.4503, 0.2257, 0.2097);
-        var travelItemRegion = new RelativeSearchRegion(0.3670, 0.6702, 0.2660, 0.1253);
-        var plusRegion = new RelativeSearchRegion(0.7311, 0.0003, 0.2689, 0.1099);
-        var energyRegion = new RelativeSearchRegion(0.0109, 0.6676, 0.2996, 0.1662);
+        var fieldRegion = new RelativeSearchRegion(0.0012, 0.0420, 0.1382, 0.1670);
+        var acceptRegion = new RelativeSearchRegion(0.8247, 0.2581, 0.1753, 0.7419);
+        var autoRegion = new RelativeSearchRegion(0.6423, 0.1427, 0.2612, 0.1597);
+        var checkRegion = new RelativeSearchRegion(0.0896, 0.1304, 0.1175, 0.1400);
+        var startRegion = new RelativeSearchRegion(0.7197, 0.7666, 0.2017, 0.1769);
+        var travelRegion = new RelativeSearchRegion(0.6175, 0.4203, 0.2985, 0.2850);
+        var travelItemRegion = new RelativeSearchRegion(0.3632, 0.6610, 0.3109, 0.1572);
+        var energyRegion = new RelativeSearchRegion(0.1615, 0.6585, 0.0912, 0.1646);
 
         foreach (var launcher in Launchers.Where(Configuration.DailyLaunchers.Contains))
         {
@@ -618,44 +614,51 @@ public partial class FarmingPage : Page
 
             try
             {
-                AppendLog($"Missões favoritas — {launcher}: ajustando a área para 1280×720 e ativando a janela.");
+                AppendLog($"Missões favoritas — {launcher}: ajustando a área para 1280×720 e pressionando F6.");
                 await _windowClickService.Prepare720pAsync(target, cancellationToken);
-                var questOpened = await FindAndClickTemplateAsync(target, questTemplate, questRegion, null,
-                    "ícone de missões", 0.78, cancellationToken);
-                if (!questOpened) continue;
-
+                await _windowClickService.PressKeyAsync(target, 0x75, "F6", cancellationToken, AppendLog);
                 await Task.Delay(350, cancellationToken);
-                var fieldSelected = await FindAndClickTemplateAsync(target, fieldTemplate, fieldRegion, null,
-                    "Campo", 0.78, cancellationToken);
+                var fieldSelected = await FindAndClickTemplateAsync(target, fieldTemplate, fieldRegion,
+                    new Int32Rect(12, 14, 78, 32), "Campo", 0.75, cancellationToken);
                 if (!fieldSelected) continue;
 
-                AppendLog($"Missões favoritas — {launcher}: rolando quinze vezes antes de aceitar as missões.");
-                for (var scroll = 1; scroll <= 15; scroll++)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    await _windowClickService.ScrollDownAtRelativeAsync(target, 0.50, 0.55,
-                        cancellationToken, AppendLog);
-                    await Task.Delay(150, cancellationToken);
-                }
-
                 var acceptedCount = 0;
-                while (true)
+                var emptyScrolls = 0;
+                var totalScrolls = 0;
+                const int maxEmptyScrolls = 5;
+                const int maxMissionScrolls = 60;
+                AppendLog($"Missões favoritas — {launcher}: procurando e aceitando missões enquanto rola a lista.");
+                while (emptyScrolls < maxEmptyScrolls && totalScrolls < maxMissionScrolls)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    await Task.Delay(350, cancellationToken);
+                    await Task.Delay(150, cancellationToken);
                     var attemptName = $"Aceitar missão ({acceptedCount + 1})";
                     AppendLog($"Missões favoritas — {launcher}: procurando outro botão Aceitar missão.");
                     var accepted = await FindAndClickTemplateAsync(target, acceptTemplate, acceptRegion,
-                        new Int32Rect(8, 14, 158, 52),
-                        attemptName, 0.78, cancellationToken, timeoutOverride: TimeSpan.FromSeconds(2));
+                        new Int32Rect(12, 17, 112, 34),
+                        attemptName, 0.72, cancellationToken, timeoutOverride: TimeSpan.FromSeconds(0.8));
                     if (!accepted)
                     {
-                        AppendLog($"Missões favoritas — {launcher}: não há mais botão Aceitar missão após {acceptedCount} clique(s); continuando a sequência.");
-                        break;
+                        emptyScrolls++;
+                        AppendLog($"Missões favoritas — {launcher}: botão não encontrado; rolando a lista ({emptyScrolls}/{maxEmptyScrolls}).");
+                        if (emptyScrolls < maxEmptyScrolls)
+                        {
+                            await _windowClickService.ScrollDownAtRelativeAsync(target,
+                                acceptRegion.X + acceptRegion.Width / 2, acceptRegion.Y + acceptRegion.Height / 2,
+                                cancellationToken, AppendLog, notches: 5);
+                            totalScrolls++;
+                            await Task.Delay(100, cancellationToken);
+                        }
+                        continue;
                     }
+
                     acceptedCount++;
+                    emptyScrolls = 0;
                     AppendLog($"Missões favoritas — {launcher}: clique {acceptedCount} em Aceitar missão concluído.");
+                    await Task.Delay(250, cancellationToken);
                 }
+                AppendLog($"Missões favoritas — {launcher}: busca encerrada após {acceptedCount} missão(ões) aceita(s) e {totalScrolls} rolagem(ns)." +
+                    (totalScrolls >= maxMissionScrolls ? " Limite de rolagens atingido." : " Nenhum botão foi detectado após rolar a lista."));
 
                 await Task.Delay(300, cancellationToken);
                 var favoriteSteps = new (string Template, RelativeSearchRegion Region, string Name)[]
@@ -666,65 +669,52 @@ public partial class FarmingPage : Page
                     (travelTemplate, travelRegion, "Deslocamento rápido"),
                     (travelItemTemplate, travelItemRegion, "item Deslocamento rápido")
                 };
+                var favoriteStepsCompleted = true;
                 foreach (var step in favoriteSteps)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     AppendLog($"Missões favoritas — {launcher}: procurando {step.Name} em X={step.Region.X:P2}, Y={step.Region.Y:P2}, {step.Region.Width:P2} × {step.Region.Height:P2}.");
                     Int32Rect? crop = step.Name == "item Deslocamento rápido"
-                        ? new Int32Rect(113, 18, 145, 40)
+                        ? new Int32Rect(104, 14, 91, 26)
                         : null;
+                    var threshold = step.Name == "Deslocamento rápido" ? 0.65 : 0.78;
                     var completed = await FindAndClickTemplateAsync(target, step.Template, step.Region, crop,
-                        step.Name, 0.78, cancellationToken);
+                        step.Name, threshold, cancellationToken);
                     if (!completed)
                     {
+                        if (step.Name.Contains("Deslocamento rápido", StringComparison.Ordinal))
+                        {
+                            AppendLog($"Missões favoritas — {launcher}: {step.Name} não encontrado; continuando para a próxima etapa.");
+                            await Task.Delay(300, cancellationToken);
+                            continue;
+                        }
                         AppendLog($"Missões favoritas — {launcher}: sequência interrompida em {step.Name}.");
+                        favoriteStepsCompleted = false;
                         break;
                     }
                     await Task.Delay(300, cancellationToken);
                 }
-
+                if (favoriteStepsCompleted)
+                {
+                    AppendLog($"Missões favoritas — {launcher}: aguardando 7 segundos antes de abrir Poupança de energia com F9.");
+                    await Task.Delay(TimeSpan.FromSeconds(7), cancellationToken);
+                    await _windowClickService.PressKeyAsync(target, 0x78, "F9", cancellationToken, AppendLog);
+                    await Task.Delay(350, cancellationToken);
+                    AppendLog($"Missões favoritas — {launcher}: procurando Poupança de energia em X={energyRegion.X:P2}, Y={energyRegion.Y:P2}, {energyRegion.Width:P2} × {energyRegion.Height:P2}.");
+                    var energySelected = await FindAndClickTemplateAsync(target, energyTemplate, energyRegion, null,
+                        "Poupança de energia", 0.78, cancellationToken);
+                    if (!energySelected)
+                        AppendLog($"Missões favoritas — {launcher}: não foi possível selecionar Poupança de energia.");
+                    else
+                    {
+                        AppendLog($"Missões favoritas — {launcher}: reduzindo a janela ao menor tamanho permitido e mantendo o foco.");
+                        await _windowClickService.ResizeToSmallestAsync(target, cancellationToken, AppendLog);
+                        await _windowClickService.ActivateAsync(target, cancellationToken);
+                    }
+                }
             }
             catch (OperationCanceledException) { throw; }
             catch (Exception ex) { AppendLog($"Missões favoritas — {launcher}: falha — {ex.Message}"); }
-            finally
-            {
-                if (!cancellationToken.IsCancellationRequested)
-                {
-                    try
-                    {
-                        AppendLog($"Missões favoritas — {launcher}: iniciando encerramento com + e Poupança de energia.");
-                        var finishSteps = new (string Template, RelativeSearchRegion Region, string Name)[]
-                        {
-                            (plusTemplate, plusRegion, "ícone +"),
-                            (energyTemplate, energyRegion, "Poupança de energia")
-                        };
-                        var finishStepsCompleted = true;
-                        foreach (var step in finishSteps)
-                        {
-                            cancellationToken.ThrowIfCancellationRequested();
-                            AppendLog($"Missões favoritas — {launcher}: etapa final {step.Name} em X={step.Region.X:P2}, Y={step.Region.Y:P2}, {step.Region.Width:P2} × {step.Region.Height:P2}.");
-                            var isPlusButton = step.Name == "ícone +";
-                            // A imagem de referência do + inclui um selo N variável; comparar só o
-                            // círculo evita que o selo determine o ponto de clique.
-                            Int32Rect? finishCrop = isPlusButton ? new Int32Rect(8, 34, 80, 53) : null;
-                            var completed = await FindAndClickTemplateAsync(target, step.Template, step.Region, finishCrop,
-                                step.Name, isPlusButton ? 0.50 : 0.78, cancellationToken);
-                            if (!completed)
-                            {
-                                AppendLog($"Missões favoritas — {launcher}: etapa final interrompida em {step.Name}.");
-                                finishStepsCompleted = false;
-                                break;
-                            }
-                            await Task.Delay(300, cancellationToken);
-                        }
-
-                        if (finishStepsCompleted)
-                            await _windowClickService.Prepare720pAsync(target, cancellationToken, AppendLog);
-                    }
-                    catch (OperationCanceledException) { throw; }
-                    catch (Exception ex) { AppendLog($"Missões favoritas — {launcher}: falha no encerramento — {ex.Message}"); }
-                }
-            }
         }
     }
 
