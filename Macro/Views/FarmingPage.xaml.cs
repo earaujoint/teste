@@ -327,10 +327,10 @@ public partial class FarmingPage : Page
         if (gameClients.Length > 1) targets["MIR4 Launcher 2"] = gameClients[1];
         if (steamWindow is not null) targets["MIR4 Steam"] = steamWindow;
 
-        var templatePath = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates", "daily-donate.png");
-        var warehouseTemplatePath = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates", "daily-donate-warehouse.png");
-        var donateButtonTemplatePath = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates", "daily-donate-button.png");
-        var templatesDirectory = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates");
+        var templatesDirectory = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates", "DailyDonate");
+        var templatePath = Path.Combine(templatesDirectory, "daily-donate.png");
+        var warehouseTemplatePath = Path.Combine(templatesDirectory, "daily-donate-warehouse.png");
+        var donateButtonTemplatePath = Path.Combine(templatesDirectory, "daily-donate-button.png");
         var flowTemplates = Enumerable.Range(1, 12)
             .Select(index => Path.Combine(templatesDirectory, $"daily-flow-{index:D2}-" + new[]
             {
@@ -340,15 +340,16 @@ public partial class FarmingPage : Page
         if (new[] { templatePath, warehouseTemplatePath, donateButtonTemplatePath }.Any(path => !File.Exists(path)) ||
             flowTemplates.Any(path => !File.Exists(path)))
         {
-            AppendLog("Uma das imagens da sequência diária não foi encontrada na pasta Assets\\Templates.");
+            AppendLog("Uma das imagens da sequência diária não foi encontrada em Assets\\Templates\\DailyDonate.");
             return;
         }
 
         // Sequência: ícone de doação e depois a opção Armazém nas regiões selecionadas.
-        var donationRegion = new RelativeSearchRegion(0.7172, 0.0131, 0.2819, 0.0793);
-        var warehouseRegion = new RelativeSearchRegion(0.5578, 0.7367, 0.3910, 0.2097);
-        var donateButtonRegion = new RelativeSearchRegion(0.4033, 0.8849, 0.1478, 0.0972);
+        var donationRegion = new RelativeSearchRegion(0.7100, 0.0027, 0.2900, 0.1179);
+        var warehouseRegion = new RelativeSearchRegion(0.6451, 0.7101, 0.1479, 0.2727);
+        var donateButtonRegion = new RelativeSearchRegion(0.3425, 0.7912, 0.3399, 0.2088);
         const double confidenceThreshold = 0.82;
+        const double donationIconThreshold = 0.70;
         CaptureExpander.IsExpanded = true;
         FarmingScroll.ScrollToBottom();
         foreach (var launcher in Launchers.Where(Configuration.DonationLaunchers.Contains))
@@ -366,7 +367,7 @@ public partial class FarmingPage : Page
                 await _windowClickService.Prepare720pAsync(target, cancellationToken);
                 AppendLog($"{launcher}: procurando o ícone na janela {target.ProcessName} (PID {target.ProcessId}).");
                 var donationClicked = await FindAndClickTemplateAsync(target, templatePath, donationRegion,
-                    new Int32Rect(10, 20, 34, 43), "ícone de doação", confidenceThreshold, cancellationToken);
+                    null, "ícone de doação", donationIconThreshold, cancellationToken);
                 if (!donationClicked) continue;
 
                 AppendLog($"{launcher}: doação aberta; procurando Armazém na segunda região.");
@@ -378,35 +379,35 @@ public partial class FarmingPage : Page
                 AppendLog($"{launcher}: Armazém selecionado; procurando o botão Doar na terceira região.");
                 await Task.Delay(350, cancellationToken);
                 var donationMenuOpened = await FindAndClickTemplateAsync(target, donateButtonTemplatePath, donateButtonRegion,
-                    new Int32Rect(0, 0, 277, 82), "botão Doar", confidenceThreshold, cancellationToken);
+                    null, "botão Doar", confidenceThreshold, cancellationToken);
                 if (!donationMenuOpened) continue;
 
-                // As três buscas de recurso compartilham a faixa selecionada; depois:
-                // recurso → MAX → Doar 1 → Doar 2.
-                var resourceListRegion = new RelativeSearchRegion(0.2326, 0.1128, 0.1491, 0.7747);
-                var maxRegion = new RelativeSearchRegion(0.3885, 0.6114, 0.3708, 0.1406);
-                var donateOneRegion = new RelativeSearchRegion(0.2326, 0.7264, 0.5361, 0.1585);
-                var donateTwoRegion = new RelativeSearchRegion(0.2890, 0.2867, 0.4206, 0.4295);
-                var flowSteps = new (int Template, RelativeSearchRegion Region, Int32Rect Crop, string Name)[]
+                // Regiões capturadas na ordem de Cobre, Aço Negro e Energia.
+                var flowSteps = new (int Template, RelativeSearchRegion Region, Int32Rect? Crop, string Name)[]
                 {
-                    (0, resourceListRegion, new(0, 0, 220, 125), "Cobre"),
-                    (1, maxRegion, new(0, 0, 95, 72), "MAX após Cobre"),
-                    (2, donateOneRegion, new(0, 0, 241, 80), "Doar 1 após Cobre"),
-                    (3, donateTwoRegion, new(0, 0, 241, 80), "Doar 2 após Cobre"),
-                    (4, resourceListRegion, new(0, 0, 214, 115), "Aço Negro"),
-                    (5, maxRegion, new(0, 0, 95, 72), "MAX após Aço Negro"),
-                    (6, donateOneRegion, new(0, 0, 241, 80), "Doar 1 após Aço Negro"),
-                    (7, donateTwoRegion, new(0, 0, 241, 80), "Doar 2 após Aço Negro"),
-                    (8, resourceListRegion, new(0, 0, 213, 118), "Energia"),
-                    (9, maxRegion, new(0, 0, 95, 72), "MAX após Energia"),
-                    (10, donateOneRegion, new(0, 0, 241, 80), "Doar 1 após Energia"),
-                    (11, donateTwoRegion, new(0, 0, 241, 80), "Doar 2 após Energia")
+                    (0, new(0.1822, 0.1697, 0.2349, 0.1867), null, "Cobre"),
+                    (1, new(0.3770, 0.5750, 0.3966, 0.1842), null, "MAX após Cobre"),
+                    (2, new(0.5705, 0.7175, 0.2349, 0.1769), null, "Doar 1 após Cobre"),
+                    (3, new(0.4199, 0.4866, 0.2874, 0.2457), null, "Doar 2 após Cobre"),
+                    (4, new(0.2002, 0.2901, 0.1962, 0.1965), null, "Aço Negro"),
+                    (5, new(0.3770, 0.5726, 0.4049, 0.1793), null, "MAX após Aço Negro"),
+                    (6, new(0.5677, 0.6880, 0.2391, 0.2162), null, "Doar 1 após Aço Negro"),
+                    (7, new(0.3508, 0.5333, 0.3441, 0.2039), null, "Doar 2 após Aço Negro"),
+                    (8, new(0.1905, 0.4227, 0.2156, 0.2063), null, "Energia"),
+                    (9, new(0.4281, 0.5480, 0.3620, 0.2088), null, "MAX após Energia"),
+                    (10, new(0.5663, 0.6954, 0.2418, 0.2162), null, "Doar 1 após Energia"),
+                    (11, new(0.4682, 0.4915, 0.2169, 0.2653), null, "Doar 2 após Energia")
                 };
                 foreach (var step in flowSteps)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     AppendLog($"{launcher}: procurando {step.Name} na região X={step.Region.X:P2}, Y={step.Region.Y:P2}, {step.Region.Width:P2} × {step.Region.Height:P2}.");
-                    var stepThreshold = step.Name == "Cobre" ? 0.48 : confidenceThreshold;
+                    var stepThreshold = step.Name switch
+                    {
+                        "Cobre" => 0.48,
+                        "Energia" => 0.70,
+                        _ => confidenceThreshold
+                    };
                     var completed = await FindAndClickTemplateAsync(target, flowTemplates[step.Template], step.Region, step.Crop,
                         step.Name, stepThreshold, cancellationToken);
                     if (!completed)
@@ -417,8 +418,8 @@ public partial class FarmingPage : Page
                     await Task.Delay(250, cancellationToken);
                 }
 
-                AppendLog($"{launcher}: encerrando a rotina de doação com três pressionamentos de Esc.");
-                await _windowClickService.PressEscapeThreeTimesAsync(target, cancellationToken, AppendLog);
+                AppendLog($"{launcher}: encerrando a rotina de doação com cinco pressionamentos de Esc.");
+                await _windowClickService.PressEscapeTimesAsync(target, 5, cancellationToken, AppendLog);
             }
             catch (OperationCanceledException) { throw; }
             catch (Exception ex) { AppendLog($"{launcher}: falha ao clicar — {ex.Message}"); }
@@ -442,7 +443,7 @@ public partial class FarmingPage : Page
         if (gameClients.Length > 1) targets["MIR4 Launcher 2"] = gameClients[1];
         if (steamWindow is not null) targets["MIR4 Steam"] = steamWindow;
 
-        var templatesDirectory = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates");
+        var templatesDirectory = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates", "DailyScroll");
         var mapTemplate = Path.Combine(templatesDirectory, "daily-scroll-map.png");
         var currencyTemplate = Path.Combine(templatesDirectory, "daily-scroll-currency.png");
         var itemTemplate = Path.Combine(templatesDirectory, "daily-scroll-item.png");
@@ -452,17 +453,17 @@ public partial class FarmingPage : Page
         var buy150kTemplate = Path.Combine(templatesDirectory, "daily-scroll-150k-buy.png");
         if (new[] { mapTemplate, currencyTemplate, itemTemplate, buyTemplate, targetTemplate, fiveTemplate, buy150kTemplate }.Any(path => !File.Exists(path)))
         {
-            AppendLog("DailyScroll: uma das imagens de referência não foi encontrada em Assets\\Templates.");
+            AppendLog("DailyScroll: uma das imagens de referência não foi encontrada em Assets\\Templates\\DailyScroll.");
             return;
         }
 
-        var firstRegion = new RelativeSearchRegion(0.5000, 0.0872, 0.2459, 0.2097);
-        var secondRegion = new RelativeSearchRegion(0.3132, 0.0284, 0.3762, 0.2480);
-        var thirdRegion = new RelativeSearchRegion(0.3092, 0.8261, 0.3856, 0.1585);
-        var buyButtonRegion = new RelativeSearchRegion(0.1574, 0.1512, 0.3265, 0.6187);
-        var scrollListRegion = new RelativeSearchRegion(0.6303, 0.1665, 0.3574, 0.8130);
-        var quantityFiveRegion = new RelativeSearchRegion(0.2985, 0.4708, 0.4152, 0.1585);
-        var buy150kRegion = new RelativeSearchRegion(0.2810, 0.6190, 0.4394, 0.1508);
+        var firstRegion = new RelativeSearchRegion(0.5912, 0.1476, 0.1092, 0.1498);
+        var secondRegion = new RelativeSearchRegion(0.2844, 0.1206, 0.1644, 0.1548);
+        var thirdRegion = new RelativeSearchRegion(0.2554, 0.8108, 0.2846, 0.1892);
+        var buyButtonRegion = new RelativeSearchRegion(0.1311, 0.1771, 0.3786, 0.6731);
+        var scrollListRegion = new RelativeSearchRegion(0.6023, 0.0985, 0.3977, 0.8942);
+        var quantityFiveRegion = new RelativeSearchRegion(0.3024, 0.4424, 0.4118, 0.1892);
+        var buy150kRegion = new RelativeSearchRegion(0.4793, 0.5529, 0.2681, 0.2727);
         var steps = new (string Template, RelativeSearchRegion Region, string Name, double? ClickX, double? ClickY)[]
         {
             (mapTemplate, firstRegion, "ícone de mapa", null, null),
@@ -496,8 +497,20 @@ public partial class FarmingPage : Page
                     Int32Rect? crop = step.Name == "pergaminho de deslocamento rápido"
                         ? new Int32Rect(136, 17, 174, 50)
                         : null;
+                    var threshold = step.Name switch
+                    {
+                        "pergaminho de deslocamento rápido" => 0.65,
+                        "Comprar" => 0.70,
+                        _ => 0.78
+                    };
+                    if (step.Name == "Comprar")
+                    {
+                        AppendLog($"DailyScroll — {launcher}: aguardando 5 segundos antes de procurar o botão Comprar.");
+                        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+                    }
                     var found = await FindAndClickTemplateAsync(target, step.Template, step.Region, crop,
-                        step.Name, 0.78, cancellationToken, step.ClickX, step.ClickY);
+                        step.Name, threshold, cancellationToken, step.ClickX, step.ClickY,
+                        clickCount: step.Name == "Comprar" ? 3 : 1);
                     if (!found)
                     {
                         AppendLog($"DailyScroll — {launcher}: sequência interrompida em {step.Name}; os passos seguintes foram ignorados.");
