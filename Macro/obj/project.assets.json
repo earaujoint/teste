@@ -2,337 +2,83 @@
   "version": 4,
   "targets": {
     "net10.0-windows": {
-      "Emgu.CV/4.13.0.5924": {
-        "type": "package",
-        "compile": {
-          "lib/netstandard2.0/Emgu.CV.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/netstandard2.0/Emgu.CV.dll": {
-            "related": ".xml"
-          }
-        }
-      },
-      "Emgu.CV.runtime.windows/4.13.0.5924": {
-        "type": "package",
-        "dependencies": {
-          "Emgu.CV": "4.13.0",
-          "Emgu.runtime.windows.msvc.rt.arm64": "19.44.35224",
-          "Emgu.runtime.windows.msvc.rt.x64": "19.44.35224",
-          "Emgu.runtime.windows.msvc.rt.x86": "19.44.35224"
-        },
-        "runtimeTargets": {
-          "runtimes/win-arm64/native/cvextern.dll": {
-            "assetType": "native",
-            "rid": "win-arm64"
-          },
-          "runtimes/win-x64/native/cvextern.dll": {
-            "assetType": "native",
-            "rid": "win-x64"
-          },
-          "runtimes/win-x64/native/libusb-1.0.dll": {
-            "assetType": "native",
-            "rid": "win-x64"
-          },
-          "runtimes/win-x64/native/opencv_videoio_ffmpeg4130_64.dll": {
-            "assetType": "native",
-            "rid": "win-x64"
-          },
-          "runtimes/win-x86/native/cvextern.dll": {
-            "assetType": "native",
-            "rid": "win-x86"
-          },
-          "runtimes/win-x86/native/libusb-1.0.dll": {
-            "assetType": "native",
-            "rid": "win-x86"
-          },
-          "runtimes/win-x86/native/opencv_videoio_ffmpeg4130.dll": {
-            "assetType": "native",
-            "rid": "win-x86"
-          }
-        }
-      },
-      "Emgu.runtime.windows.msvc.rt.arm64/19.44.35224": {
-        "type": "package",
-        "runtimeTargets": {
-          "runtimes/win-arm64/native/concrt140.dll": {
-            "assetType": "native",
-            "rid": "win-arm64"
-          },
-          "runtimes/win-arm64/native/msvcp140.dll": {
-            "assetType": "native",
-            "rid": "win-arm64"
-          },
-          "runtimes/win-arm64/native/msvcp140_1.dll": {
-            "assetType": "native",
-            "rid": "win-arm64"
-          },
-          "runtimes/win-arm64/native/msvcp140_2.dll": {
-            "assetType": "native",
-            "rid": "win-arm64"
-          },
-          "runtimes/win-arm64/native/msvcp140_atomic_wait.dll": {
-            "assetType": "native",
-            "rid": "win-arm64"
-          },
-          "runtimes/win-arm64/native/msvcp140_codecvt_ids.dll": {
-            "assetType": "native",
-            "rid": "win-arm64"
-          },
-          "runtimes/win-arm64/native/vcruntime140.dll": {
-            "assetType": "native",
-            "rid": "win-arm64"
-          },
-          "runtimes/win-arm64/native/vcruntime140_1.dll": {
-            "assetType": "native",
-            "rid": "win-arm64"
-          }
-        }
-      },
-      "Emgu.runtime.windows.msvc.rt.x64/19.44.35224": {
-        "type": "package",
-        "runtimeTargets": {
-          "runtimes/win-x64/native/concrt140.dll": {
-            "assetType": "native",
-            "rid": "win-x64"
-          },
-          "runtimes/win-x64/native/msvcp140.dll": {
-            "assetType": "native",
-            "rid": "win-x64"
-          },
-          "runtimes/win-x64/native/msvcp140_1.dll": {
-            "assetType": "native",
-            "rid": "win-x64"
-          },
-          "runtimes/win-x64/native/msvcp140_2.dll": {
-            "assetType": "native",
-            "rid": "win-x64"
-          },
-          "runtimes/win-x64/native/msvcp140_atomic_wait.dll": {
-            "assetType": "native",
-            "rid": "win-x64"
-          },
-          "runtimes/win-x64/native/msvcp140_codecvt_ids.dll": {
-            "assetType": "native",
-            "rid": "win-x64"
-          },
-          "runtimes/win-x64/native/vcruntime140.dll": {
-            "assetType": "native",
-            "rid": "win-x64"
-          },
-          "runtimes/win-x64/native/vcruntime140_1.dll": {
-            "assetType": "native",
-            "rid": "win-x64"
-          }
-        }
-      },
-      "Emgu.runtime.windows.msvc.rt.x86/19.44.35224": {
-        "type": "package",
-        "runtimeTargets": {
-          "runtimes/win-x86/native/concrt140.dll": {
-            "assetType": "native",
-            "rid": "win-x86"
-          },
-          "runtimes/win-x86/native/msvcp140.dll": {
-            "assetType": "native",
-            "rid": "win-x86"
-          },
-          "runtimes/win-x86/native/msvcp140_1.dll": {
-            "assetType": "native",
-            "rid": "win-x86"
-          },
-          "runtimes/win-x86/native/msvcp140_2.dll": {
-            "assetType": "native",
-            "rid": "win-x86"
-          },
-          "runtimes/win-x86/native/msvcp140_atomic_wait.dll": {
-            "assetType": "native",
-            "rid": "win-x86"
-          },
-          "runtimes/win-x86/native/msvcp140_codecvt_ids.dll": {
-            "assetType": "native",
-            "rid": "win-x86"
-          },
-          "runtimes/win-x86/native/vcruntime140.dll": {
-            "assetType": "native",
-            "rid": "win-x86"
-          }
-        }
-      },
       "Microsoft.NET.ILLink.Tasks/10.0.12": {
         "type": "package",
         "build": {
           "build/Microsoft.NET.ILLink.Tasks.props": {}
+        }
+      },
+      "OpenCvSharp4/4.11.0.20250507": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/OpenCvSharp.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/OpenCvSharp.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "OpenCvSharp4.runtime.win/4.11.0.20250507": {
+        "type": "package",
+        "build": {
+          "build/net5.0/OpenCvSharp4.runtime.win.props": {}
+        },
+        "runtimeTargets": {
+          "runtimes/win-x64/native/OpenCvSharpExtern.dll": {
+            "assetType": "native",
+            "rid": "win-x64"
+          },
+          "runtimes/win-x64/native/opencv_videoio_ffmpeg4110_64.dll": {
+            "assetType": "native",
+            "rid": "win-x64"
+          },
+          "runtimes/win-x86/native/OpenCvSharpExtern.dll": {
+            "assetType": "native",
+            "rid": "win-x86"
+          },
+          "runtimes/win-x86/native/opencv_videoio_ffmpeg4110.dll": {
+            "assetType": "native",
+            "rid": "win-x86"
+          }
         }
       }
     },
     "net10.0-windows/win-x64": {
-      "Emgu.CV/4.13.0.5924": {
-        "type": "package",
-        "compile": {
-          "lib/netstandard2.0/Emgu.CV.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/netstandard2.0/Emgu.CV.dll": {
-            "related": ".xml"
-          }
-        }
-      },
-      "Emgu.CV.runtime.windows/4.13.0.5924": {
-        "type": "package",
-        "dependencies": {
-          "Emgu.CV": "4.13.0",
-          "Emgu.runtime.windows.msvc.rt.arm64": "19.44.35224",
-          "Emgu.runtime.windows.msvc.rt.x64": "19.44.35224",
-          "Emgu.runtime.windows.msvc.rt.x86": "19.44.35224"
-        },
-        "native": {
-          "runtimes/win-x64/native/cvextern.dll": {},
-          "runtimes/win-x64/native/libusb-1.0.dll": {},
-          "runtimes/win-x64/native/opencv_videoio_ffmpeg4130_64.dll": {}
-        }
-      },
-      "Emgu.runtime.windows.msvc.rt.arm64/19.44.35224": {
-        "type": "package"
-      },
-      "Emgu.runtime.windows.msvc.rt.x64/19.44.35224": {
-        "type": "package",
-        "native": {
-          "runtimes/win-x64/native/concrt140.dll": {},
-          "runtimes/win-x64/native/msvcp140.dll": {},
-          "runtimes/win-x64/native/msvcp140_1.dll": {},
-          "runtimes/win-x64/native/msvcp140_2.dll": {},
-          "runtimes/win-x64/native/msvcp140_atomic_wait.dll": {},
-          "runtimes/win-x64/native/msvcp140_codecvt_ids.dll": {},
-          "runtimes/win-x64/native/vcruntime140.dll": {},
-          "runtimes/win-x64/native/vcruntime140_1.dll": {}
-        }
-      },
-      "Emgu.runtime.windows.msvc.rt.x86/19.44.35224": {
-        "type": "package"
-      },
       "Microsoft.NET.ILLink.Tasks/10.0.12": {
         "type": "package",
         "build": {
           "build/Microsoft.NET.ILLink.Tasks.props": {}
+        }
+      },
+      "OpenCvSharp4/4.11.0.20250507": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/OpenCvSharp.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/OpenCvSharp.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "OpenCvSharp4.runtime.win/4.11.0.20250507": {
+        "type": "package",
+        "native": {
+          "runtimes/win-x64/native/OpenCvSharpExtern.dll": {},
+          "runtimes/win-x64/native/opencv_videoio_ffmpeg4110_64.dll": {}
+        },
+        "build": {
+          "build/net5.0/OpenCvSharp4.runtime.win.props": {}
         }
       }
     }
   },
   "libraries": {
-    "Emgu.CV/4.13.0.5924": {
-      "sha512": "st6Jux7EAlK2/LvG/aPaRLElFf54o0UrtCXU5ZEhGLRGeF8W/NW0j1x6MuRXur0DWJni++LsWInUDC6e4MtG5Q==",
-      "type": "package",
-      "path": "emgu.cv/4.13.0.5924",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "LICENSE.txt",
-        "docs/README.md",
-        "emgu.cv.4.13.0.5924.nupkg.sha512",
-        "emgu.cv.nuspec",
-        "lib/net9.0-ios18.0/Emgu.CV.dll",
-        "lib/net9.0-ios18.0/Emgu.CV.xml",
-        "lib/net9.0-maccatalyst18.0/Emgu.CV.dll",
-        "lib/net9.0-maccatalyst18.0/Emgu.CV.xml",
-        "lib/netstandard2.0/Emgu.CV.dll",
-        "lib/netstandard2.0/Emgu.CV.xml",
-        "nuget_icon.png"
-      ]
-    },
-    "Emgu.CV.runtime.windows/4.13.0.5924": {
-      "sha512": "J072mACLTy3R1Y5kqit4IM3LqMoz1g0szIr/MT+qJVOA3RTvwnfyCTTZ6tQnvZLfbvk58PoxZmaU1J6MraeKoQ==",
-      "type": "package",
-      "path": "emgu.cv.runtime.windows/4.13.0.5924",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "LICENSE.txt",
-        "docs/README.md",
-        "docs/build_info_arm64.inc",
-        "docs/build_info_x64.inc",
-        "docs/build_info_x86.inc",
-        "emgu.cv.runtime.windows.4.13.0.5924.nupkg.sha512",
-        "emgu.cv.runtime.windows.nuspec",
-        "nuget_icon.png",
-        "runtimes/win-arm64/native/cvextern.dll",
-        "runtimes/win-x64/native/cvextern.dll",
-        "runtimes/win-x64/native/libusb-1.0.dll",
-        "runtimes/win-x64/native/opencv_videoio_ffmpeg4130_64.dll",
-        "runtimes/win-x86/native/cvextern.dll",
-        "runtimes/win-x86/native/libusb-1.0.dll",
-        "runtimes/win-x86/native/opencv_videoio_ffmpeg4130.dll"
-      ]
-    },
-    "Emgu.runtime.windows.msvc.rt.arm64/19.44.35224": {
-      "sha512": "+805ha7RSJDZ437VekFsju55p4onRbT7as9nT6KHQdR72AQQ8rj3uFzMYu36zDB8hyq2xBWEXCTk4KJuO+rBug==",
-      "type": "package",
-      "path": "emgu.runtime.windows.msvc.rt.arm64/19.44.35224",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "LICENSE.txt",
-        "docs/README.md",
-        "emgu.runtime.windows.msvc.rt.arm64.19.44.35224.nupkg.sha512",
-        "emgu.runtime.windows.msvc.rt.arm64.nuspec",
-        "icon.png",
-        "runtimes/win-arm64/native/concrt140.dll",
-        "runtimes/win-arm64/native/msvcp140.dll",
-        "runtimes/win-arm64/native/msvcp140_1.dll",
-        "runtimes/win-arm64/native/msvcp140_2.dll",
-        "runtimes/win-arm64/native/msvcp140_atomic_wait.dll",
-        "runtimes/win-arm64/native/msvcp140_codecvt_ids.dll",
-        "runtimes/win-arm64/native/vcruntime140.dll",
-        "runtimes/win-arm64/native/vcruntime140_1.dll"
-      ]
-    },
-    "Emgu.runtime.windows.msvc.rt.x64/19.44.35224": {
-      "sha512": "IMJsBnqobR4UM21vLNayY+8GlVRpgQHlRC1q6/iI1wbyejrEfWeWUyNVILj/tgmo8r0CgzOAJgR0jZcZGsPuNw==",
-      "type": "package",
-      "path": "emgu.runtime.windows.msvc.rt.x64/19.44.35224",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "LICENSE.txt",
-        "docs/README.md",
-        "emgu.runtime.windows.msvc.rt.x64.19.44.35224.nupkg.sha512",
-        "emgu.runtime.windows.msvc.rt.x64.nuspec",
-        "icon.png",
-        "runtimes/win-x64/native/concrt140.dll",
-        "runtimes/win-x64/native/msvcp140.dll",
-        "runtimes/win-x64/native/msvcp140_1.dll",
-        "runtimes/win-x64/native/msvcp140_2.dll",
-        "runtimes/win-x64/native/msvcp140_atomic_wait.dll",
-        "runtimes/win-x64/native/msvcp140_codecvt_ids.dll",
-        "runtimes/win-x64/native/vcruntime140.dll",
-        "runtimes/win-x64/native/vcruntime140_1.dll"
-      ]
-    },
-    "Emgu.runtime.windows.msvc.rt.x86/19.44.35224": {
-      "sha512": "h8WzBTKDC3k34LOO4wkeHhq3ltpE3sbpk/2lOoKvTLKROJ/EcNqsYuGSwum8aYCeoMabucMqlbC/mV49uPng5Q==",
-      "type": "package",
-      "path": "emgu.runtime.windows.msvc.rt.x86/19.44.35224",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "LICENSE.txt",
-        "docs/README.md",
-        "emgu.runtime.windows.msvc.rt.x86.19.44.35224.nupkg.sha512",
-        "emgu.runtime.windows.msvc.rt.x86.nuspec",
-        "icon.png",
-        "runtimes/win-x86/native/concrt140.dll",
-        "runtimes/win-x86/native/msvcp140.dll",
-        "runtimes/win-x86/native/msvcp140_1.dll",
-        "runtimes/win-x86/native/msvcp140_2.dll",
-        "runtimes/win-x86/native/msvcp140_atomic_wait.dll",
-        "runtimes/win-x86/native/msvcp140_codecvt_ids.dll",
-        "runtimes/win-x86/native/vcruntime140.dll"
-      ]
-    },
     "Microsoft.NET.ILLink.Tasks/10.0.12": {
       "sha512": "xi+BDjFpW+Sb+MHFHaH6Y/gV9I8BluFwRXc1QyCdoZbIK26eNiBeFuMTe/FMwc33G1wdHCyDg7CVTmb8OdQrMQ==",
       "type": "package",
@@ -382,13 +128,51 @@
         "tools/netframework/build/Microsoft.NET.ILLink.targets",
         "useSharedDesignerContext.txt"
       ]
+    },
+    "OpenCvSharp4/4.11.0.20250507": {
+      "sha512": "j/R+G6xGC5IV2wGRU0/GF5qG/FrP+Uxp8dmNnXFlIdiw8Gfo4mtvKcBOBfS/bn4pP/7FNHLFX/xvMtgPJeDjAA==",
+      "type": "package",
+      "path": "opencvsharp4/4.11.0.20250507",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net48/OpenCvSharp.dll",
+        "lib/net48/OpenCvSharp.xml",
+        "lib/net6.0/OpenCvSharp.dll",
+        "lib/net6.0/OpenCvSharp.xml",
+        "lib/netstandard2.0/OpenCvSharp.dll",
+        "lib/netstandard2.0/OpenCvSharp.xml",
+        "lib/netstandard2.1/OpenCvSharp.dll",
+        "lib/netstandard2.1/OpenCvSharp.xml",
+        "opencvsharp4.4.11.0.20250507.nupkg.sha512",
+        "opencvsharp4.nuspec"
+      ]
+    },
+    "OpenCvSharp4.runtime.win/4.11.0.20250507": {
+      "sha512": "3PxMXyzR+pkL9UOx2PiBjZm+/iyCIu5D6OlA1sq9MH7oWrfvVnCXJlUYhIJv67F7SLUwUuGwXDIQBfdsL/54lg==",
+      "type": "package",
+      "path": "opencvsharp4.runtime.win/4.11.0.20250507",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "build/net48/OpenCvSharp4.runtime.win.props",
+        "build/net5.0/OpenCvSharp4.runtime.win.props",
+        "build/netcoreapp/OpenCvSharp4.runtime.win.props",
+        "build/netstandard/OpenCvSharp4.runtime.win.props",
+        "opencvsharp4.runtime.win.4.11.0.20250507.nupkg.sha512",
+        "opencvsharp4.runtime.win.nuspec",
+        "runtimes/win-x64/native/OpenCvSharpExtern.dll",
+        "runtimes/win-x64/native/opencv_videoio_ffmpeg4110_64.dll",
+        "runtimes/win-x86/native/OpenCvSharpExtern.dll",
+        "runtimes/win-x86/native/opencv_videoio_ffmpeg4110.dll"
+      ]
     }
   },
   "projectFileDependencyGroups": {
     "net10.0-windows": [
-      "Emgu.CV >= 4.13.0.5924",
-      "Emgu.CV.runtime.windows >= 4.13.0.5924",
-      "Microsoft.NET.ILLink.Tasks >= 10.0.12"
+      "Microsoft.NET.ILLink.Tasks >= 10.0.12",
+      "OpenCvSharp4 >= 4.11.0.20250507",
+      "OpenCvSharp4.runtime.win >= 4.11.0.20250507"
     ]
   },
   "packageFolders": {
@@ -398,9 +182,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Macro\\teste\\Macro\\Macro.csproj",
-      "projectName": "Macro",
-      "projectPath": "C:\\Macro\\teste\\Macro\\Macro.csproj",
+      "projectUniqueName": "C:\\Macro\\teste\\Macro\\MacroMir4.csproj",
+      "projectName": "MacroMir4",
+      "projectPath": "C:\\Macro\\teste\\Macro\\MacroMir4.csproj",
       "packagesPath": "C:\\Users\\eriks\\.nuget\\packages\\",
       "outputPath": "C:\\Macro\\teste\\Macro\\obj\\",
       "projectStyle": "PackageReference",
@@ -443,19 +227,19 @@
         "framework": "net10.0-windows7.0",
         "targetAlias": "net10.0-windows",
         "dependencies": {
-          "Emgu.CV": {
-            "target": "Package",
-            "version": "[4.13.0.5924, )"
-          },
-          "Emgu.CV.runtime.windows": {
-            "target": "Package",
-            "version": "[4.13.0.5924, )"
-          },
           "Microsoft.NET.ILLink.Tasks": {
             "suppressParent": "All",
             "target": "Package",
             "version": "[10.0.12, )",
             "autoReferenced": true
+          },
+          "OpenCvSharp4": {
+            "target": "Package",
+            "version": "[4.11.0.20250507, )"
+          },
+          "OpenCvSharp4.runtime.win": {
+            "target": "Package",
+            "version": "[4.11.0.20250507, )"
           }
         },
         "imports": [
@@ -789,13 +573,5 @@
         "#import": []
       }
     }
-  },
-  "logs": [
-    {
-      "code": "NU1900",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Ocorreu um erro ao obter os dados de vulnerabilidade do pacote: Não é possível carregar o índice de serviço para a origem https://api.nuget.org/v3/index.json."
-    }
-  ]
+  }
 }

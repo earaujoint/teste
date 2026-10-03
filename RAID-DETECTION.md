@@ -26,7 +26,7 @@ A espera fixa de quatro minutos foi removida. A interface permanece responsiva, 
 
 ## Imagens e ajustes
 
-`Macro/Assets/RaidDetection/team-reward.png` e `ok.png` foram extraídos da captura fornecida, incluindo texto e contorno. São copiados para a saída e publicação. Idioma, tema e mudanças importantes de escala/layout do jogo podem exigir novos templates. Os recortes podem ser reproduzidos com `tools/Extract-RaidTemplates.ps1 -Source <captura original>`; as coordenadas desse script são específicas da imagem original.
+Os templates de recompensa foram removidos e poderão ser recriados a partir de uma nova captura. Idioma, tema e mudanças importantes de escala/layout do jogo podem exigir novos templates. Os recortes podem ser reproduzidos com `tools/Extract-RaidTemplates.ps1 -Source <captura original>`; as coordenadas desse script são específicas da imagem original.
 
 O limiar fica em `RaidRewardDetector.MinimumConfidence`; tempo limite, intervalo e confirmações ficam em `RaidRewardMonitor`. A saída Debug registra similaridade e confirmações. Não reduza o limiar sem avaliar capturas reais positivas e negativas.
 
