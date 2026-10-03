@@ -752,7 +752,7 @@ public partial class FarmingPage : Page
                 AppendLog($"DailyFavoriteRaid: launcher convidado {guest} não está aberto; continuando com os que estiverem disponíveis.");
         }
 
-        var directory = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates");
+        var directory = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates", "DailyRaid");
         var templates = new Dictionary<string, string>(StringComparer.Ordinal)
         {
             ["ícone +"] = Path.Combine(directory, "daily-raid-plus.png"),
@@ -769,33 +769,33 @@ public partial class FarmingPage : Page
             ["Aceitar convite"] = Path.Combine(directory, "daily-raid-accept.png"),
             ["Entrar na raide"] = Path.Combine(directory, "daily-raid-enter.png"),
             ["Iniciar Raide"] = Path.Combine(directory, "daily-raid-start.png"),
-            ["fechar janela da raide"] = Path.Combine(directory, "daily-raid-close.png"),
             ["OK"] = Path.Combine(directory, "daily-raid-ok.png")
         };
         if (templates.Values.Any(path => !File.Exists(path)))
         {
-            AppendLog("DailyFavoriteRaid: faltam imagens em Assets\\Templates\\daily-raid-*.png.");
+            var missingTemplates = templates.Values.Where(path => !File.Exists(path))
+                .Select(Path.GetFileName).ToArray();
+            AppendLog($"DailyFavoriteRaid: faltam imagens em Assets\\Templates\\DailyRaid: {string.Join(", ", missingTemplates)}.");
             return;
         }
 
         var regions = new Dictionary<string, RelativeSearchRegion>(StringComparer.Ordinal)
         {
-            ["ícone +"] = new(0.6500, 0.0000, 0.3500, 0.2000),
-            ["ícone Raide"] = new(0.7110, 0.5040, 0.1962, 0.1508),
-            ["opção Raide"] = new(0.6841, 0.6446, 0.3159, 0.1253),
-            ["Criar um Raide (menu)"] = new(0.5363, 0.8440, 0.4488, 0.1483),
-            ["Privado"] = new(0.2581, 0.4503, 0.2580, 0.1841),
-            ["campo da senha"] = new(0.6088, 0.4912, 0.1384, 0.1227),
-            ["botão 2"] = new(0.3992, 0.2637, 0.2002, 0.3861),
-            ["Entrada completa"] = new(0.4019, 0.7852, 0.2042, 0.1253),
-            ["Criar um Raide"] = new(0.4046, 0.7597, 0.1962, 0.1432),
-            ["adicionar convidados"] = new(0.1560, 0.3148, 0.3467, 0.1330),
-            ["Convidar todos"] = new(0.4624, 0.1946, 0.1666, 0.0946),
-            ["Aceitar convite"] = new(0.0459, 0.4043, 0.1693, 0.1330),
-            ["Entrar na raide"] = new(0.3603, 0.5756, 0.2929, 0.1585),
-            ["Iniciar Raide"] = new(0.5054, 0.7699, 0.3561, 0.1508),
-            ["fechar janela da raide"] = new(0.8184, 0.1230, 0.1209, 0.0767),
-            ["OK"] = new(0.2850, 0.8338, 0.4488, 0.1355)
+            ["ícone +"] = new(0.7156, 0.0002, 0.2844, 0.0909),
+            ["ícone Raide"] = new(0.6796, 0.5062, 0.3164, 0.1695),
+            ["opção Raide"] = new(0.6644, 0.6561, 0.3356, 0.1179),
+            ["Criar um Raide (menu)"] = new(0.5014, 0.8428, 0.4986, 0.1548),
+            ["Privado"] = new(0.2430, 0.4645, 0.5223, 0.1597),
+            ["campo da senha"] = new(0.5152, 0.5333, 0.2418, 0.0712),
+            ["botão 2"] = new(0.3908, 0.2680, 0.2183, 0.3881),
+            ["Entrada completa"] = new(0.3784, 0.7740, 0.2432, 0.1474),
+            ["Criar um Raide"] = new(0.2458, 0.7543, 0.5113, 0.1400),
+            ["adicionar convidados"] = new(0.1366, 0.3245, 0.3620, 0.1277),
+            ["Convidar todos"] = new(0.4572, 0.1844, 0.2197, 0.1155),
+            ["Aceitar convite"] = new(0.0509, 0.4252, 0.1893, 0.0933),
+            ["Entrar na raide"] = new(0.3439, 0.5750, 0.3454, 0.1548),
+            ["Iniciar Raide"] = new(0.5111, 0.7740, 0.3800, 0.1548),
+            ["OK"] = new(0.2513, 0.8158, 0.5196, 0.1793)
         };
 
         AppendLog($"DailyFavoriteRaid: criando {raidCount} raide(s) pelo starter {launcherGroup.Starter}.");
@@ -847,10 +847,8 @@ public partial class FarmingPage : Page
                 }
 
                 await _windowClickService.ActivateAsync(starter, cancellationToken);
-                var closed = await FindAndClickTemplateAsync(starter, templates["fechar janela da raide"],
-                    regions["fechar janela da raide"], null, "fechar janela da raide", 0.78, cancellationToken);
-                if (!closed)
-                    throw new InvalidOperationException($"não foi possível localizar o X antes de iniciar a raide {raid}/{raidCount}.");
+                AppendLog("DailyFavoriteRaid: enviando Esc uma vez para fechar a janela da raide.");
+                await _windowClickService.PressKeyAsync(starter, 0x1B, "Esc", cancellationToken, AppendLog);
                 await Task.Delay(350, cancellationToken);
 
                 var started = await FindAndClickTemplateAsync(starter, templates["Iniciar Raide"],
