@@ -915,13 +915,13 @@ public partial class FarmingPage : Page
             .Where(name => !string.IsNullOrWhiteSpace(name) && name != "Não utilizar" &&
                 !string.Equals(name, launcherGroup.Starter, StringComparison.OrdinalIgnoreCase))
             .Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
-        var directory = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates");
+        var directory = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates", "DailyRaid");
         var templates = new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            ["ícone +"] = Path.Combine(directory, "daily-raid-boss-plus.png"),
-            ["ícone Raide"] = Path.Combine(directory, "daily-raid-boss-icon.png"),
+            ["ícone +"] = Path.Combine(directory, "daily-raid-plus.png"),
+            ["ícone Raide"] = Path.Combine(directory, "daily-raid-icon.png"),
             ["Raide de Boss"] = Path.Combine(directory, "daily-raid-boss-label.png"),
-            ["Criar um Raide (menu)"] = Path.Combine(directory, "daily-raid-boss-menu-create.png"),
+            ["Criar um Raide (menu)"] = Path.Combine(directory, "daily-raid-create-banner.png"),
             ["Criar um Raide"] = Path.Combine(directory, "daily-raid-boss-create.png"),
             ["adicionar convidados"] = Path.Combine(directory, "daily-raid-add.png"),
             ["Convidar todos"] = Path.Combine(directory, "daily-raid-invite-all.png"),
@@ -937,16 +937,16 @@ public partial class FarmingPage : Page
 
         var regions = new Dictionary<string, RelativeSearchRegion>(StringComparer.Ordinal)
         {
-            ["ícone +"] = new(0.7392, 0.0029, 0.2608, 0.0946),
-            ["ícone Raide"] = new(0.6868, 0.4989, 0.2969, 0.1739),
-            ["Raide de Boss"] = new(0.6935, 0.6600, 0.2996, 0.1227),
-            ["Criar um Raide (menu)"] = new(0.5282, 0.8134, 0.4703, 0.1866),
-            ["Criar um Raide"] = new(0.3535, 0.7418, 0.2916, 0.1636),
-            ["adicionar convidados"] = new(0.1560, 0.3148, 0.3467, 0.1330),
-            ["Convidar todos"] = new(0.4624, 0.1946, 0.1666, 0.0946),
-            ["Aceitar convite"] = new(0.0459, 0.4043, 0.1693, 0.1330),
-            ["Entrar na raide"] = new(0.3603, 0.5756, 0.2929, 0.1585),
-            ["OK"] = new(0.2850, 0.8338, 0.4488, 0.1355)
+            ["ícone +"] = new(0.7156, 0.0002, 0.2844, 0.0909),
+            ["ícone Raide"] = new(0.6796, 0.5062, 0.3164, 0.1695),
+            ["Raide de Boss"] = new(0.6644, 0.6561, 0.3356, 0.1179),
+            ["Criar um Raide (menu)"] = new(0.5014, 0.8428, 0.4986, 0.1548),
+            ["Criar um Raide"] = new(0.2458, 0.7543, 0.5113, 0.1400),
+            ["adicionar convidados"] = new(0.1366, 0.3245, 0.3620, 0.1277),
+            ["Convidar todos"] = new(0.4572, 0.1844, 0.2197, 0.1155),
+            ["Aceitar convite"] = new(0.0509, 0.4252, 0.1893, 0.0933),
+            ["Entrar na raide"] = new(0.3439, 0.5750, 0.3454, 0.1548),
+            ["OK"] = new(0.2513, 0.8158, 0.5196, 0.1793)
         };
 
         AppendLog($"DailyRaidBoss: criando {raidCount} raide(s) pelo starter {launcherGroup.Starter}.");
@@ -993,7 +993,7 @@ public partial class FarmingPage : Page
                 }
 
                 await _windowClickService.ActivateAsync(starter, cancellationToken);
-                AppendLog($"DailyRaidBoss — convidados processados; retornando ao starter {launcherGroup.Starter} para aguardar o OK.");
+                AppendLog($"DailyRaidBoss — convidados processados; retornando ao starter {launcherGroup.Starter} para aguardar o OK final da raide.");
                 await WaitAndClickTemplateIndefinitelyAsync(starter, templates["OK"], regions["OK"],
                     cancellationToken, "DailyRaidBoss");
                 foreach (var guestName in guests)
