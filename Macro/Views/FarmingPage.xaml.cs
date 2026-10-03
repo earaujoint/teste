@@ -111,6 +111,13 @@ public partial class FarmingPage : Page
 
     private async void BtnDoArena_Click(object sender, RoutedEventArgs e)
     {
+        if (!int.TryParse(Configuration.ArenaRepeatCountText, NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out var repeatCount) || repeatCount is < 1 or > 100)
+        {
+            AppendLog("DailyArena: informe uma quantidade entre 1 e 100.");
+            return;
+        }
+
         if (_runCancellation is not null)
         {
             AppendLog("Já existe uma rotina em execução.");
@@ -124,8 +131,13 @@ public partial class FarmingPage : Page
         StatusText.Text = "Em execução";
         try
         {
-            await DailyArena(cancellationToken);
-            AppendLog("DailyArena finalizada.");
+            for (var iteration = 1; iteration <= repeatCount; iteration++)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                AppendLog($"DailyArena: execução {iteration}/{repeatCount}.");
+                await DailyArena(cancellationToken);
+            }
+            AppendLog($"DailyArena finalizada após {repeatCount} execução(ões).");
         }
         catch (OperationCanceledException) { AppendLog("DailyArena cancelada."); }
         catch (Exception ex) { AppendLog($"DailyArena: falha — {ex.Message}"); }
@@ -158,54 +170,66 @@ public partial class FarmingPage : Page
             throw new InvalidOperationException("Selecione launchers diferentes para o starter e o convidado da Arena.");
 
         var directory = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates");
+        var raidDirectory = Path.Combine(directory, "DailyRaid");
         var templates = new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            ["ícone +"] = Path.Combine(directory, "daily-arena-plus.png"),
             ["ícone Guerra"] = Path.Combine(directory, "daily-arena-war-icon.png"),
             ["Arena"] = Path.Combine(directory, "daily-arena-label.png"),
             ["Criar Arena (menu)"] = Path.Combine(directory, "daily-arena-create-menu.png"),
+            ["Criar Arena"] = Path.Combine(directory, "daily-arena-create.png"),
             ["Privado"] = Path.Combine(directory, "daily-arena-private.png"),
             ["campo da senha"] = Path.Combine(directory, "daily-arena-password.png"),
             ["botão 2"] = Path.Combine(directory, "daily-arena-two.png"),
             ["Entrada completa"] = Path.Combine(directory, "daily-arena-entry-complete.png"),
-            ["Criar Arena"] = Path.Combine(directory, "daily-arena-create.png"),
             ["adicionar convidados"] = Path.Combine(directory, "daily-arena-add.png"),
             ["Convidar todos"] = Path.Combine(directory, "daily-arena-invite-all.png"),
-            ["Aceitar convite"] = Path.Combine(directory, "daily-raid-accept.png"),
-            ["fechar janela da Arena"] = Path.Combine(directory, "daily-raid-close.png"),
-            ["Iniciar Arena"] = Path.Combine(directory, "daily-arena-start.png")
+            ["Aceitar convite"] = Path.Combine(raidDirectory, "daily-raid-accept.png"),
+            ["Entrar na raide"] = Path.Combine(raidDirectory, "daily-raid-enter.png"),
+            ["Iniciar Arena"] = Path.Combine(directory, "daily-arena-start-confirm.png"),
+            ["ícone pós-início"] = Path.Combine(directory, "daily-arena-post-start-icon.png"),
+            ["Confirmar"] = Path.Combine(directory, "daily-arena-confirm.png"),
+            ["Sair"] = Path.Combine(directory, "daily-arena-exit.png")
         };
         if (templates.Values.Any(path => !File.Exists(path)))
             throw new InvalidOperationException("Faltam imagens de referência da Arena em Assets\\Templates.");
 
         var regions = new Dictionary<string, RelativeSearchRegion>(StringComparer.Ordinal)
         {
-            ["ícone +"] = new(0.7432, 0.0080, 0.2568, 0.0895),
-            ["ícone Guerra"] = new(0.6989, 0.4861, 0.2983, 0.1841),
-            ["Arena"] = new(0.6935, 0.6574, 0.3037, 0.1202),
-            ["Criar Arena (menu)"] = new(0.5967, 0.8440, 0.4033, 0.1560),
-            ["Privado"] = new(0.2622, 0.4631, 0.2580, 0.1815),
-            ["campo da senha"] = new(0.6653, 0.5270, 0.0712, 0.0767),
-            ["botão 2"] = new(0.3979, 0.2739, 0.2056, 0.3835),
-            ["Entrada completa"] = new(0.3724, 0.7673, 0.2553, 0.1662),
+            ["ícone Guerra"] = new(0.8330, 0.4890, 0.1670, 0.1793),
+            ["Arena"] = new(0.8068, 0.6807, 0.1506, 0.1204),
+            ["Criar Arena (menu)"] = new(0.5953, 0.8305, 0.4047, 0.1695),
             ["Criar Arena"] = new(0.4059, 0.7494, 0.1774, 0.1534),
-            ["adicionar convidados"] = new(0.5000, 0.2176, 0.0900, 0.6545),
-            ["Convidar todos"] = new(0.4785, 0.1793, 0.1666, 0.1278),
-            ["Aceitar convite"] = new(0.0459, 0.4043, 0.1693, 0.1330),
-            ["fechar janela da Arena"] = new(0.8534, 0.1051, 0.0873, 0.0946),
-            ["Iniciar Arena"] = new(0.4046, 0.8619, 0.2002, 0.1355)
+            ["Privado"] = new(0.2416, 0.5112, 0.2722, 0.1204),
+            ["campo da senha"] = new(0.6631, 0.5112, 0.1202, 0.1130),
+            ["botão 2"] = new(0.3922, 0.2680, 0.2156, 0.3881),
+            ["Entrada completa"] = new(0.4834, 0.7642, 0.1575, 0.1695),
+            ["adicionar convidados"] = new(0.5166, 0.4399, 0.0746, 0.1449),
+            ["Convidar todos"] = new(0.4903, 0.1623, 0.1603, 0.1548),
+            ["Aceitar convite"] = new(0.0509, 0.4252, 0.1893, 0.0933),
+            ["Entrar na raide"] = new(0.3439, 0.5750, 0.3454, 0.1548),
+            ["Iniciar Arena"] = new(0.3673, 0.8280, 0.3081, 0.1720),
+            ["ícone pós-início"] = new(0.6796, 0.0886, 0.1133, 0.2014),
+            ["Confirmar"] = new(0.3632, 0.6512, 0.2998, 0.1720),
+            ["Sair"] = new(0.3300, 0.8575, 0.3731, 0.1425)
         };
 
         AppendLog($"DailyArena: starter {Configuration.ArenaStarter}; convidado {Configuration.ArenaInviter}.");
         await _windowClickService.Prepare720pAsync(starter, cancellationToken);
-        await _windowClickService.PressCtrlNumberAsync(starter, 0x31, cancellationToken, AppendLog);
-        var steps = new[] { "ícone +", "ícone Guerra", "Arena", "Criar Arena (menu)", "Privado", "campo da senha", "botão 2", "Entrada completa", "Criar Arena", "adicionar convidados", "Convidar todos" };
+        await _windowClickService.PressKeyAsync(starter, 0x78, "F9", cancellationToken, AppendLog);
+        await Task.Delay(350, cancellationToken);
+        var steps = new[] { "ícone Guerra", "Arena", "Criar Arena (menu)", "Privado", "campo da senha", "botão 2", "Entrada completa", "Criar Arena", "adicionar convidados", "Convidar todos" };
         foreach (var name in steps)
         {
             cancellationToken.ThrowIfCancellationRequested();
             AppendLog($"DailyArena — starter: procurando {name}.");
             var clickCount = name == "botão 2" ? 4 : 1;
-            var threshold = name is "ícone +" or "adicionar convidados" ? 0.50 : name == "botão 2" ? 0.72 : 0.78;
+            var threshold = name switch
+            {
+                "adicionar convidados" => 0.50,
+                "Criar Arena" => 0.50,
+                "botão 2" => 0.72,
+                _ => 0.78
+            };
             var found = await FindAndClickTemplateAsync(starter, templates[name], regions[name], null,
                 name, threshold, cancellationToken, clickCount: clickCount);
             if (!found) throw new InvalidOperationException($"não foi possível concluir a etapa {name}.");
@@ -214,22 +238,41 @@ public partial class FarmingPage : Page
             await Task.Delay(350, cancellationToken);
         }
 
-        AppendLog($"DailyArena: convite enviado; mudando para {Configuration.ArenaInviter} para aceitar o pedido.");
+        AppendLog($"DailyArena: convite enviado; mudando para {Configuration.ArenaInviter} para aceitar o pedido como na rotina de boss.");
         await _windowClickService.Prepare720pAsync(guest, cancellationToken);
         await _windowClickService.PressCtrlNumberAsync(guest, 0x31, cancellationToken, AppendLog);
-        var accepted = await FindAndClickTemplateAsync(guest, templates["Aceitar convite"],
-            regions["Aceitar convite"], null, "Aceitar pedido da Arena", 0.78, cancellationToken);
-        if (!accepted) throw new InvalidOperationException($"{Configuration.ArenaInviter}: o pedido da Arena não apareceu.");
+        foreach (var guestStep in new[] { "Aceitar convite", "Entrar na raide" })
+        {
+            var accepted = await FindAndClickTemplateAsync(guest, templates[guestStep],
+                regions[guestStep], null, guestStep, 0.78, cancellationToken);
+            if (!accepted) throw new InvalidOperationException($"{Configuration.ArenaInviter}: não foi possível concluir {guestStep}.");
+            await Task.Delay(350, cancellationToken);
+        }
+
         await _windowClickService.ActivateAsync(starter, cancellationToken);
-        AppendLog($"DailyArena: pedido aceito em {Configuration.ArenaInviter}; retornando ao starter para fechar a janela da Arena.");
-        var closed = await FindAndClickTemplateAsync(starter, templates["fechar janela da Arena"],
-            regions["fechar janela da Arena"], null, "fechar janela da Arena", 0.78, cancellationToken);
-        if (!closed) throw new InvalidOperationException("não foi possível fechar a janela da Arena pelo X.");
-        await Task.Delay(350, cancellationToken);
+        AppendLog($"DailyArena: convite aceito em {Configuration.ArenaInviter}; retornando ao starter, pressionando Esc uma vez e iniciando a Arena.");
+        await _windowClickService.PressKeyAsync(starter, 0x1B, "Esc", cancellationToken, AppendLog);
+        await Task.Delay(700, cancellationToken);
         var started = await FindAndClickTemplateAsync(starter, templates["Iniciar Arena"],
-            regions["Iniciar Arena"], null, "Iniciar Arena", 0.78, cancellationToken);
+            regions["Iniciar Arena"], null, "Iniciar Arena", 0.70, cancellationToken);
         if (!started) throw new InvalidOperationException("não foi possível clicar em Iniciar Arena.");
-        AppendLog("DailyArena: X clicado e Arena iniciada pelo starter.");
+        AppendLog("DailyArena: Arena iniciada pelo starter.");
+        await Task.Delay(350, cancellationToken);
+        var postStartIcon = await FindAndClickTemplateAsync(starter, templates["ícone pós-início"],
+            regions["ícone pós-início"], null, "ícone pós-início", 0.72, cancellationToken);
+        if (!postStartIcon) throw new InvalidOperationException("não foi possível localizar ou clicar no ícone após iniciar a Arena.");
+        await Task.Delay(350, cancellationToken);
+        var confirmed = await FindAndClickTemplateAsync(starter, templates["Confirmar"],
+            regions["Confirmar"], null, "Confirmar", 0.78, cancellationToken);
+        if (!confirmed) throw new InvalidOperationException("não foi possível localizar ou clicar em Confirmar após iniciar a Arena.");
+        AppendLog("DailyArena: etapa Confirmar concluída.");
+        await _windowClickService.Prepare720pAsync(guest, cancellationToken);
+        await _windowClickService.ActivateAsync(guest, cancellationToken);
+        await Task.Delay(350, cancellationToken);
+        var exited = await FindAndClickTemplateAsync(guest, templates["Sair"],
+            regions["Sair"], null, "Sair", 0.78, cancellationToken);
+        if (!exited) throw new InvalidOperationException($"{Configuration.ArenaInviter}: não foi possível localizar ou clicar em Sair.");
+        AppendLog($"DailyArena: clique em Sair concluído na janela {Configuration.ArenaInviter}.");
     }
     private void BtnStop_Click(object sender, RoutedEventArgs e)
     {

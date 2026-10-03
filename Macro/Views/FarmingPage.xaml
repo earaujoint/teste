@@ -170,7 +170,37 @@
                             <TextBlock Text="Seleção de mapas e limpeza de mochila aguardam integração." Style="{StaticResource Caption}" />
                         </StackPanel>
                     </TabItem>
-                    <TabItem><TabItem.Header><StackPanel Orientation="Horizontal"><TextBlock Text="⚔" Foreground="{StaticResource AccentBrush}" Margin="0,0,8,0" /><TextBlock Text="Arena" /></StackPanel></TabItem.Header><StackPanel><TextBlock Text="Arena" Style="{StaticResource PageSectionHeading}" /><TextBlock Text="O starter começa os movimentos; o convidado aceita e termina a sequência. Use DoArena para executar." Style="{StaticResource Caption}" /><WrapPanel><StackPanel Width="240" Margin="0,0,12,12"><TextBlock Text="Starter da arena" Margin="0,0,0,7" /><ComboBox ItemsSource="{Binding Launchers}" SelectedItem="{Binding Configuration.ArenaStarter}" AutomationProperties.Name="Starter da arena" /></StackPanel><StackPanel Width="240" Margin="0,0,12,12"><TextBlock Text="Convidado da arena" Margin="0,0,0,7" /><ComboBox ItemsSource="{Binding Launchers}" SelectedItem="{Binding Configuration.ArenaInviter}" AutomationProperties.Name="Convidado da arena" /></StackPanel></WrapPanel></StackPanel></TabItem>
+                    <TabItem>
+                        <TabItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="⚔" Foreground="{StaticResource AccentBrush}" Margin="0,0,8,0" />
+                                <TextBlock Text="Arena" />
+                            </StackPanel>
+                        </TabItem.Header>
+                        <StackPanel>
+                            <TextBlock Text="Arena" Style="{StaticResource PageSectionHeading}" />
+                            <TextBlock Text="Escolha o starter e o convidado e pressione Executar Arena para iniciar." Style="{StaticResource Caption}" />
+                            <WrapPanel>
+                                <StackPanel Width="240" Margin="0,0,12,12">
+                                    <TextBlock Text="Starter da arena" Margin="0,0,0,7" />
+                                    <ComboBox ItemsSource="{Binding Launchers}" SelectedItem="{Binding Configuration.ArenaStarter}" AutomationProperties.Name="Starter da arena" />
+                                </StackPanel>
+                                <StackPanel Width="240" Margin="0,0,12,12">
+                                    <TextBlock Text="Convidado da arena" Margin="0,0,0,7" />
+                                    <ComboBox ItemsSource="{Binding Launchers}" SelectedItem="{Binding Configuration.ArenaInviter}" AutomationProperties.Name="Convidado da arena" />
+                                </StackPanel>
+                            </WrapPanel>
+                            <Grid Margin="0,0,0,8" HorizontalAlignment="Left">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="160" /><ColumnDefinition Width="72" /></Grid.ColumnDefinitions>
+                                <TextBlock Text="Quantidade de vezes" VerticalAlignment="Center" />
+                                <TextBox Grid.Column="1" Text="{Binding Configuration.ArenaRepeatCountText, UpdateSourceTrigger=PropertyChanged}"
+                                         VerticalContentAlignment="Center" ToolTip="Informe de 1 a 100 execuções"
+                                         AutomationProperties.Name="Quantidade de repetições da Arena" />
+                            </Grid>
+                            <Button x:Name="BtnDoArena" Content="⚔   Executar Arena" Style="{StaticResource PrimaryButton}"
+                                    Click="BtnDoArena_Click" HorizontalAlignment="Left" Margin="0,4,0,12" Padding="18,11" />
+                        </StackPanel>
+                    </TabItem>
                 </TabControl>
             </StackPanel>
             <Button Content="Testar captura de janela" Click="PreviewWindow_Click" HorizontalAlignment="Left" Margin="0,18,0,0" Padding="16,10" />
@@ -178,7 +208,6 @@
                 <Button x:Name="BtnStart" Content="▶   Start" Style="{StaticResource PrimaryButton}" Click="BtnStart_Click" Margin="0,0,10,0" />
                 <Button x:Name="BtnStop" Content="■   Stop" Click="BtnStop_Click" Margin="0,0,10,0" />
                 <Button x:Name="BtnMousePercent" Content="MousePercent" Click="BtnMousePercent_Click" Margin="0,0,10,0" />
-                <Button ToolTip="Executa a arena com os launchers definidos na aba Arena." x:Name="BtnDoArena" Content="⚔   DoArena" Click="BtnDoArena_Click" />
             </UniformGrid>
             <Border Style="{StaticResource Card}">
                 <StackPanel>

@@ -7,6 +7,7 @@ public sealed class FarmingConfiguration
     public LauncherGroup BossLaunchers { get; set; } = new();
     public string ArenaStarter { get; set; } = "MIR4 Steam";
     public string ArenaInviter { get; set; } = "MIR4 Launcher 1";
+    public string ArenaRepeatCountText { get; set; } = "1";
     public List<string> DonationLaunchers { get; set; } = [];
     public List<string> DailyLaunchers { get; set; } = [];
     public bool DailyDonation { get; set; }
