@@ -8,6 +8,17 @@
             <DockPanel>
                 <TextBlock DockPanel.Dock="Bottom" Text="v1.0.0" Foreground="#A8A8A8" Margin="14,20,0,0" />
                 <StackPanel Orientation="Vertical">
+                    <Button x:Name="BtnHome" Style="{StaticResource SidebarButtonStyle}" Click="BtnHome_Click" AutomationProperties.Name="Início">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Viewbox Width="18" Height="18" Margin="0,0,8,0">
+                                <Canvas Width="24" Height="24">
+                                    <Path Data="M3,10 L12,3 L21,10 M5,9 L5,20 L10,20 L10,14 L14,14 L14,20 L19,20 L19,9" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                                </Canvas>
+                            </Viewbox>
+                            <TextBlock Text="Início" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" />
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="BtnPresets" Style="{StaticResource SidebarButtonStyle}" Content="☷   Presets" Click="BtnPresets_Click" />
                     <Button Style="{StaticResource SidebarButtonStyle}" Click="BtnFarming_Click" x:Name="BtnFarming">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Viewbox Width="18" Height="18" Margin="0,0,8,0">

@@ -1,0 +1,34 @@
+<Page x:Class="Macro.Views.PresetsPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:controls="clr-namespace:Macro.Controls" Background="{StaticResource CanvasBrush}" FontFamily="Segoe UI" FontSize="14" Title="Presets">
+    <Grid>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="28,24">
+            <TextBlock Text="Presets" Style="{StaticResource Heading}" />
+            <TextBlock Text="Arraste as etapas para mudar a ordem e clique em Salvar ordem. Configure as rotinas e a Arena em Farming." Style="{StaticResource Caption}" TextWrapping="Wrap" />
+            <TextBlock x:Name="Message" TextWrapping="Wrap" Margin="0,12" />
+            <ItemsControl x:Name="PresetList">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource Card}" Margin="0,0,0,12">
+                            <Grid>
+                                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <StackPanel Margin="0,0,20,16" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Name}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding OrderStatus}" Foreground="{StaticResource AccentBrush}" FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top" Margin="0,0,0,16">
+                                    <Button Content="Salvar ordem" Click="SaveOrder_Click" Margin="0,0,8,0" />
+                                    <Button Content="Excluir" Click="Delete_Click" AutomationProperties.Name="{Binding Name, StringFormat=Excluir preset {0}}" />
+                                </StackPanel>
+                                <ContentControl Grid.Row="1" Grid.ColumnSpan="2" Content="{Binding}" ContentTemplate="{StaticResource PresetSummaryTemplate}" HorizontalContentAlignment="Stretch"
+                                    AllowDrop="True" PreviewMouseLeftButtonDown="Steps_MouseDown" PreviewMouseMove="Steps_MouseMove" DragOver="Steps_DragOver" Drop="Steps_Drop" ToolTip="Arraste uma etapa para mudar sua posição; depois salve a ordem." />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </ScrollViewer>
+        <controls:ActionNotification x:Name="SaveNotification" Panel.ZIndex="20" />
+    </Grid>
+</Page>

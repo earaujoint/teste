@@ -5,6 +5,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/MacroMir4;component/Styles/Theme.xaml" />
                 <ResourceDictionary Source="/MacroMir4;component/Styles/SidebarButtonStyle.xaml" />
+                <ResourceDictionary Source="/MacroMir4;component/Styles/PresetTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

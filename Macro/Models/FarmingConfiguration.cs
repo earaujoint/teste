@@ -8,6 +8,11 @@ public sealed class FarmingConfiguration
     public string ArenaStarter { get; set; } = "MIR4 Steam";
     public string ArenaInviter { get; set; } = "MIR4 Launcher 1";
     public string ArenaRepeatCountText { get; set; } = "1";
+    public bool ArenaEnabled { get; set; }
+    public List<string> ActionOrder { get; set; } = [];
+    [System.Text.Json.Serialization.JsonIgnore]
+    public IEnumerable<string> OrderedActions => (ActionOrder ?? []).Concat(new[]
+        { "Doação diária", "Pergaminho diário", "Raids normais", "Boss", "Arena", "Missões favoritas" }).Distinct();
     public List<string> DonationLaunchers { get; set; } = [];
     public List<string> DailyLaunchers { get; set; } = [];
     public bool DailyDonation { get; set; }

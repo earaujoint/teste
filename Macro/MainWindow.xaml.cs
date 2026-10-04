@@ -10,6 +10,8 @@ public partial class MainWindow : Window
     private readonly Views.FarmingPage _farmingPage;
     private readonly Views.DailyPage _dailyPage;
     private readonly Views.TimerPage _timerPage;
+    private readonly Views.HomePage _homePage;
+    private readonly Views.PresetsPage _presetsPage;
 
     public MainWindow()
     {
@@ -19,8 +21,13 @@ public partial class MainWindow : Window
         _farmingPage = new Views.FarmingPage();
         _dailyPage = new Views.DailyPage();
         _timerPage = new Views.TimerPage();
-        MainFrame.Navigate(_timerPage);
+        _homePage = new Views.HomePage(_farmingPage);
+        _presetsPage = new Views.PresetsPage();
+        MainFrame.Navigate(_homePage);
     }
+
+    private void BtnHome_Click(object sender, RoutedEventArgs e) => MainFrame.Navigate(_homePage);
+    private void BtnPresets_Click(object sender, RoutedEventArgs e) => MainFrame.Navigate(_presetsPage);
 
     private void BtnFarming_Click(object sender, RoutedEventArgs e) => MainFrame.Navigate(_farmingPage);
     private void BtnTimer_Click(object sender, RoutedEventArgs e) => MainFrame.Navigate(_timerPage);
@@ -31,9 +38,13 @@ public partial class MainWindow : Window
         DeactivateButton(BtnFarming);
         DeactivateButton(BtnTimer);
         DeactivateButton(BtnDaily);
+        DeactivateButton(BtnHome);
+        DeactivateButton(BtnPresets);
         if (e.Content is Views.FarmingPage) ActivateButton(BtnFarming);
         else if (e.Content is Views.TimerPage) ActivateButton(BtnTimer);
         else if (e.Content is Views.DailyPage) ActivateButton(BtnDaily);
+        else if (e.Content is Views.HomePage) ActivateButton(BtnHome);
+        else if (e.Content is Views.PresetsPage) ActivateButton(BtnPresets);
     }
 
     private static void ActivateButton(Button button)

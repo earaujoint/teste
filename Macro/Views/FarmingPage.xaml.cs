@@ -19,11 +19,15 @@ public partial class FarmingPage : Page
     private readonly WindowPreviewService _windowCaptureService = new();
     private readonly TemplateSearchService _templateSearchService = new();
 
-    public FarmingConfiguration Configuration { get; } = new();
+    private readonly FarmingPresetService _presetService = new();
+    private List<FarmingPreset> _presets = [];
+    private bool _loadingPreset;
+    private bool _presetsAvailable = true;
+    public FarmingConfiguration Configuration { get; private set; } = new();
     public string[] Launchers { get; } = ["MIR4 Launcher 1", "MIR4 Launcher 2", "MIR4 Steam"];
     public string[] GuestLaunchers { get; } = ["Não utilizar", "MIR4 Launcher 1", "MIR4 Launcher 2", "MIR4 Steam"];
-    public IReadOnlyList<RaidConfiguration> NormalRaids { get; }
-    public IReadOnlyList<RaidConfiguration> BossRaids { get; }
+    public IReadOnlyList<RaidConfiguration> NormalRaids { get; private set; }
+    public IReadOnlyList<RaidConfiguration> BossRaids { get; private set; }
 
     public FarmingPage()
     {
@@ -31,6 +35,105 @@ public partial class FarmingPage : Page
         NormalRaids = [Configuration.Normal, new() { Name = "Raide 2" }, new() { Name = "Raide 3" }];
         BossRaids = [Configuration.Boss, new() { Name = "Boss 2" }, new() { Name = "Boss 3" }];
         DataContext = this;
+        Loaded += (_, _) => RefreshPresetList();
+        RefreshPresetList();
+    }
+
+    private void RefreshPresetList()
+    {
+        var selectedName = (PresetSelector.SelectedItem as FarmingPreset)?.Name;
+        _loadingPreset = true;
+        try
+        {
+            _presets = _presetService.Load();
+            PresetSelector.ItemsSource = _presets;
+            PresetSelector.SelectedItem = _presets.FirstOrDefault(p => p.Name == selectedName);
+            _presetsAvailable = true;
+        }
+        catch (Exception ex)
+        {
+            _presetsAvailable = false;
+            AppendLog($"Não foi possível carregar os presets: {ex.Message}");
+        }
+        finally { _loadingPreset = false; }
+    }
+
+    private void SavePreset_Click(object sender, RoutedEventArgs e)
+    {
+        if (_runCancellation is not null) return;
+        var name = PresetName.Text.Trim();
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            AppendLog("Informe um nome para salvar o preset.");
+            SaveNotification.Show("Informe um nome para o preset.", error: true);
+            PresetName.Focus();
+            return;
+        }
+        if (!_presetsAvailable)
+        {
+            AppendLog("Corrija o erro de leitura dos presets antes de salvar para preservar os fluxos existentes.");
+            return;
+        }
+        try
+        {
+            var preset = new FarmingPreset { Name = name, Configuration = FarmingPresetService.Copy(Configuration) };
+            var updated = _presetService.Load().Where(item => !string.Equals(item.Name, name, StringComparison.OrdinalIgnoreCase)).ToList();
+            updated.Add(preset);
+            updated = updated.OrderBy(item => item.Name).ToList();
+            _presetService.Save(updated);
+            _presets = updated;
+            _loadingPreset = true;
+            PresetSelector.ItemsSource = _presets;
+            PresetSelector.SelectedItem = preset;
+            AppendLog($"Preset '{name}' salvo com todas as configurações atuais.");
+            SaveNotification.Show($"Preset '{name}' salvo com sucesso.");
+        }
+        catch (Exception ex)
+        {
+            AppendLog($"Não foi possível salvar o preset: {ex.Message}");
+            SaveNotification.Show("Não foi possível salvar o preset. Confira o log.", error: true);
+        }
+        finally { _loadingPreset = false; }
+    }
+
+    private void Preset_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loadingPreset || _runCancellation is not null || PresetSelector.SelectedItem is not FarmingPreset preset) return;
+        try { ApplyPreset(preset); }
+        catch (Exception ex) { AppendLog($"Não foi possível carregar o preset: {ex.Message}"); }
+    }
+
+    private void ApplyPreset(FarmingPreset preset)
+    {
+        _loadingPreset = true;
+        try
+        {
+            var loaded = FarmingPresetService.Copy(preset.Configuration);
+            Configuration = loaded;
+            NormalRaids = [Configuration.Normal, new() { Name = "Raide 2" }, new() { Name = "Raide 3" }];
+            BossRaids = [Configuration.Boss, new() { Name = "Boss 2" }, new() { Name = "Boss 3" }];
+            DataContext = null;
+            DataContext = this;
+            foreach (var checkbox in new[] { DonateLauncher1, DonateLauncher2, DonateSteam })
+                checkbox.IsChecked = Configuration.DonationLaunchers.Contains((string)checkbox.Tag);
+            foreach (var checkbox in new[] { DailyLauncher1, DailyLauncher2, DailySteam })
+                checkbox.IsChecked = Configuration.DailyLaunchers.Contains((string)checkbox.Tag);
+            PresetName.Text = preset.Name;
+            AppendLog($"Preset '{preset.Name}' carregado. Pressione Iniciar para executar o fluxo.");
+        }
+        finally { _loadingPreset = false; }
+    }
+
+    public bool IsRunning => _runCancellation is not null;
+    public string RunStatus => StatusText.Text;
+    public string RunLog => ExecutionLog.Text;
+    public void StopMacro() => _runCancellation?.Cancel();
+
+    public async Task StartPresetAsync(FarmingPreset preset)
+    {
+        if (IsRunning) throw new InvalidOperationException("Já existe uma rotina em execução.");
+        ApplyPreset(preset);
+        await RunConfiguredAsync();
     }
 
     private void PreviousNormalRaidImage_Click(object sender, RoutedEventArgs e) => ChangeNormalRaidImage(-1);
@@ -78,8 +181,9 @@ public partial class FarmingPage : Page
     private void DailyLauncher_Checked(object sender, RoutedEventArgs e) => UpdateLauncherSelection(Configuration.DailyLaunchers, sender, true);
     private void DailyLauncher_Unchecked(object sender, RoutedEventArgs e) => UpdateLauncherSelection(Configuration.DailyLaunchers, sender, false);
 
-    private static void UpdateLauncherSelection(List<string> selection, object sender, bool enabled)
+    private void UpdateLauncherSelection(List<string> selection, object sender, bool enabled)
     {
+        if (_loadingPreset) return;
         if (sender is not CheckBox { Tag: string launcher }) return;
         if (enabled && !selection.Contains(launcher, StringComparer.OrdinalIgnoreCase)) selection.Add(launcher);
         else if (!enabled) selection.RemoveAll(item => string.Equals(item, launcher, StringComparison.OrdinalIgnoreCase));
@@ -127,6 +231,7 @@ public partial class FarmingPage : Page
         _runCancellation = new CancellationTokenSource();
         var cancellationToken = _runCancellation.Token;
         BtnDoArena.IsEnabled = false;
+        ConfigurationPanel.IsEnabled = false;
         BtnStart.IsEnabled = false;
         StatusText.Text = "Em execução";
         try
@@ -146,6 +251,7 @@ public partial class FarmingPage : Page
             _runCancellation.Dispose();
             _runCancellation = null;
             BtnDoArena.IsEnabled = true;
+            ConfigurationPanel.IsEnabled = true;
             BtnStart.IsEnabled = true;
             StatusText.Text = "Pronto";
         }
@@ -214,7 +320,7 @@ public partial class FarmingPage : Page
         };
 
         AppendLog($"DailyArena: starter {Configuration.ArenaStarter}; convidado {Configuration.ArenaInviter}.");
-        await _windowClickService.Prepare720pAsync(starter, cancellationToken);
+        await PrepareRoutineWindowAsync(starter, cancellationToken);
         await _windowClickService.PressKeyAsync(starter, 0x78, "F9", cancellationToken, AppendLog);
         await Task.Delay(350, cancellationToken);
         var steps = new[] { "ícone Guerra", "Arena", "Criar Arena (menu)", "Privado", "campo da senha", "botão 2", "Entrada completa", "Criar Arena", "adicionar convidados", "Convidar todos" };
@@ -239,7 +345,7 @@ public partial class FarmingPage : Page
         }
 
         AppendLog($"DailyArena: convite enviado; mudando para {Configuration.ArenaInviter} para aceitar o pedido como na rotina de boss.");
-        await _windowClickService.Prepare720pAsync(guest, cancellationToken);
+        await PrepareRoutineWindowAsync(guest, cancellationToken);
         await _windowClickService.PressCtrlNumberAsync(guest, 0x31, cancellationToken, AppendLog);
         foreach (var guestStep in new[] { "Aceitar convite", "Entrar na raide" })
         {
@@ -281,6 +387,9 @@ public partial class FarmingPage : Page
     }
 
     private async void BtnStart_Click(object sender, RoutedEventArgs e)
+        => await RunConfiguredAsync();
+
+    private async Task RunConfiguredAsync()
     {
         if (_runCancellation is not null)
         {
@@ -311,6 +420,7 @@ public partial class FarmingPage : Page
         BtnStart.IsEnabled = false;
         try
         {
+            ConfigurationPanel.IsEnabled = false;
             if (scheduledStart is DateTime startAt)
             {
                 var delay = startAt - DateTime.Now;
@@ -326,18 +436,30 @@ public partial class FarmingPage : Page
                 AppendLog("Macro iniciado imediatamente.");
 
             StatusText.Text = "Em execução";
-            if (Configuration.DailyDonation)
-                await DailyDonate(cancellationToken);
-            if (Configuration.DailyScroll)
-                await DailyScroll(cancellationToken);
-            if (Configuration.DailyFavorites)
-                await DailyFavoriteMissions(cancellationToken);
-            if (Configuration.Normal.IsEnabled)
-                await DailyFavoriteRaid(cancellationToken);
-            if (Configuration.Boss.IsEnabled)
-                await DailyRaidBoss(cancellationToken);
+            foreach (var action in Configuration.OrderedActions)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                switch (action)
+                {
+                    case "Doação diária" when Configuration.DailyDonation: await DailyDonate(cancellationToken); break;
+                    case "Pergaminho diário" when Configuration.DailyScroll: await DailyScroll(cancellationToken); break;
+                    case "Raids normais" when Configuration.Normal.IsEnabled: await DailyFavoriteRaid(cancellationToken); break;
+                    case "Boss" when Configuration.Boss.IsEnabled: await DailyRaidBoss(cancellationToken); break;
+                    case "Missões favoritas" when Configuration.DailyFavorites: await DailyFavoriteMissions(cancellationToken); break;
+                    case "Arena" when Configuration.ArenaEnabled:
+                        if (!int.TryParse(Configuration.ArenaRepeatCountText, out var count) || count is < 1 or > 100)
+                            throw new InvalidOperationException("Arena: informe entre 1 e 100 repetições.");
+                        for (var iteration = 1; iteration <= count; iteration++)
+                        {
+                            cancellationToken.ThrowIfCancellationRequested();
+                            AppendLog($"DailyArena: execução {iteration}/{count}.");
+                            await DailyArena(cancellationToken);
+                        }
+                        break;
+                }
+            }
             if (!Configuration.DailyDonation && !Configuration.DailyScroll && !Configuration.DailyFavorites &&
-                !Configuration.Normal.IsEnabled && !Configuration.Boss.IsEnabled)
+                !Configuration.Normal.IsEnabled && !Configuration.Boss.IsEnabled && !Configuration.ArenaEnabled)
                 AppendLog("Nenhuma rotina diária está ativada; nenhuma ação executada.");
             AppendLog("Macro finalizado.");
         }
@@ -348,6 +470,7 @@ public partial class FarmingPage : Page
             _runCancellation.Dispose();
             _runCancellation = null;
             BtnStart.IsEnabled = true;
+            ConfigurationPanel.IsEnabled = true;
             StatusText.Text = "Pronto";
         }
     }
@@ -371,7 +494,6 @@ public partial class FarmingPage : Page
         if (steamWindow is not null) targets["MIR4 Steam"] = steamWindow;
 
         var templatesDirectory = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates", "DailyDonate");
-        var templatePath = Path.Combine(templatesDirectory, "daily-donate.png");
         var warehouseTemplatePath = Path.Combine(templatesDirectory, "daily-donate-warehouse.png");
         var donateButtonTemplatePath = Path.Combine(templatesDirectory, "daily-donate-button.png");
         var flowTemplates = Enumerable.Range(1, 12)
@@ -380,19 +502,17 @@ public partial class FarmingPage : Page
                 "cobre", "max", "doar", "doar", "aco-negro", "max", "doar", "doar", "energia", "max", "doar", "doar"
             }[index - 1] + ".png"))
             .ToArray();
-        if (new[] { templatePath, warehouseTemplatePath, donateButtonTemplatePath }.Any(path => !File.Exists(path)) ||
+        if (new[] { warehouseTemplatePath, donateButtonTemplatePath }.Any(path => !File.Exists(path)) ||
             flowTemplates.Any(path => !File.Exists(path)))
         {
             AppendLog("Uma das imagens da sequência diária não foi encontrada em Assets\\Templates\\DailyDonate.");
             return;
         }
 
-        // Sequência: ícone de doação e depois a opção Armazém nas regiões selecionadas.
-        var donationRegion = new RelativeSearchRegion(0.7100, 0.0027, 0.2900, 0.1179);
+        // Abre o menu com F5 e procura a opção Armazém.
         var warehouseRegion = new RelativeSearchRegion(0.6451, 0.7101, 0.1479, 0.2727);
         var donateButtonRegion = new RelativeSearchRegion(0.3425, 0.7912, 0.3399, 0.2088);
         const double confidenceThreshold = 0.82;
-        const double donationIconThreshold = 0.70;
         CaptureExpander.IsExpanded = true;
         FarmingScroll.ScrollToBottom();
         foreach (var launcher in Launchers.Where(Configuration.DonationLaunchers.Contains))
@@ -407,11 +527,8 @@ public partial class FarmingPage : Page
             try
             {
                 AppendLog($"{launcher}: ajustando a área para 1280×720 e ativando {target.ProcessName} (PID {target.ProcessId}).");
-                await _windowClickService.Prepare720pAsync(target, cancellationToken);
-                AppendLog($"{launcher}: procurando o ícone na janela {target.ProcessName} (PID {target.ProcessId}).");
-                var donationClicked = await FindAndClickTemplateAsync(target, templatePath, donationRegion,
-                    null, "ícone de doação", donationIconThreshold, cancellationToken);
-                if (!donationClicked) continue;
+                await PrepareRoutineWindowAsync(target, cancellationToken);
+                await _windowClickService.PressKeyAsync(target, 0x74, "F5", cancellationToken, AppendLog);
 
                 AppendLog($"{launcher}: doação aberta; procurando Armazém na segunda região.");
                 await Task.Delay(350, cancellationToken);
@@ -527,7 +644,7 @@ public partial class FarmingPage : Page
             try
             {
                 AppendLog($"DailyScroll — {launcher}: ajustando para 1280×720 e iniciando com F10.");
-                await _windowClickService.Prepare720pAsync(target, cancellationToken);
+                await PrepareRoutineWindowAsync(target, cancellationToken);
                 await _windowClickService.PressKeyAsync(target, 0x79, "F10", cancellationToken, AppendLog);
                 await Task.Delay(500, cancellationToken);
 
@@ -658,7 +775,7 @@ public partial class FarmingPage : Page
             try
             {
                 AppendLog($"Missões favoritas — {launcher}: ajustando a área para 1280×720 e pressionando F6.");
-                await _windowClickService.Prepare720pAsync(target, cancellationToken);
+                await PrepareRoutineWindowAsync(target, cancellationToken);
                 await _windowClickService.PressKeyAsync(target, 0x75, "F6", cancellationToken, AppendLog);
                 await Task.Delay(350, cancellationToken);
                 var fieldSelected = await FindAndClickTemplateAsync(target, fieldTemplate, fieldRegion,
@@ -801,7 +918,6 @@ public partial class FarmingPage : Page
         var directory = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates", "DailyRaid");
         var templates = new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            ["ícone +"] = Path.Combine(directory, "daily-raid-plus.png"),
             ["ícone Raide"] = Path.Combine(directory, "daily-raid-icon.png"),
             ["opção Raide"] = Path.Combine(directory, "daily-raid-label.png"),
             ["Criar um Raide (menu)"] = Path.Combine(directory, "daily-raid-create-banner.png"),
@@ -827,7 +943,6 @@ public partial class FarmingPage : Page
 
         var regions = new Dictionary<string, RelativeSearchRegion>(StringComparer.Ordinal)
         {
-            ["ícone +"] = new(0.7156, 0.0002, 0.2844, 0.0909),
             ["ícone Raide"] = new(0.6796, 0.5062, 0.3164, 0.1695),
             ["opção Raide"] = new(0.6644, 0.6561, 0.3356, 0.1179),
             ["Criar um Raide (menu)"] = new(0.5014, 0.8428, 0.4986, 0.1548),
@@ -847,13 +962,14 @@ public partial class FarmingPage : Page
         AppendLog($"DailyFavoriteRaid: criando {raidCount} raide(s) pelo starter {launcherGroup.Starter}.");
         try
         {
-            await _windowClickService.Prepare720pAsync(starter, cancellationToken);
+            await PrepareRoutineWindowAsync(starter, cancellationToken);
             for (var raid = 1; raid <= raidCount; raid++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 AppendLog($"DailyFavoriteRaid — {launcherGroup.Starter}: iniciando raide {raid}/{raidCount}.");
-                await _windowClickService.PressCtrlNumberAsync(starter, 0x31, cancellationToken, AppendLog);
-                var steps = new[] { "ícone +", "ícone Raide", "opção Raide", "Criar um Raide (menu)", "Privado", "campo da senha", "botão 2", "Entrada completa", "Criar um Raide", "adicionar convidados", "Convidar todos" };
+                await _windowClickService.PressKeyAsync(starter, 0x78, "F9", cancellationToken, AppendLog);
+                await Task.Delay(350, cancellationToken);
+                var steps = new[] { "ícone Raide", "opção Raide", "Criar um Raide (menu)", "Privado", "campo da senha", "botão 2", "Entrada completa", "Criar um Raide", "adicionar convidados", "Convidar todos" };
                 foreach (var name in steps)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
@@ -862,7 +978,8 @@ public partial class FarmingPage : Page
                     var threshold = name switch
                     {
                         "botão 2" => 0.72,
-                        "ícone +" or "adicionar convidados" => 0.50,
+                        "opção Raide" => 0.72,
+                        "adicionar convidados" => 0.50,
                         _ => 0.78
                     };
                     var found = await FindAndClickTemplateAsync(starter, templates[name], regions[name], null,
@@ -880,7 +997,7 @@ public partial class FarmingPage : Page
                     cancellationToken.ThrowIfCancellationRequested();
                     if (!targets.TryGetValue(guestName, out var guest)) continue;
                     AppendLog($"DailyFavoriteRaid — raide {raid}/{raidCount}: ativando launcher convidado {guestName}.");
-                    await _windowClickService.Prepare720pAsync(guest, cancellationToken);
+                    await PrepareRoutineWindowAsync(guest, cancellationToken);
                     await _windowClickService.PressCtrlNumberAsync(guest, 0x31, cancellationToken, AppendLog);
                     foreach (var guestStep in new[] { "Aceitar convite", "Entrar na raide" })
                     {
@@ -964,7 +1081,6 @@ public partial class FarmingPage : Page
         var directory = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates", "DailyRaid");
         var templates = new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            ["ícone +"] = Path.Combine(directory, "daily-raid-plus.png"),
             ["ícone Raide"] = Path.Combine(directory, "daily-raid-icon.png"),
             ["Raide de Boss"] = Path.Combine(directory, "daily-raid-boss-label.png"),
             ["Criar um Raide (menu)"] = Path.Combine(directory, "daily-raid-create-banner.png"),
@@ -983,7 +1099,6 @@ public partial class FarmingPage : Page
 
         var regions = new Dictionary<string, RelativeSearchRegion>(StringComparer.Ordinal)
         {
-            ["ícone +"] = new(0.7156, 0.0002, 0.2844, 0.0909),
             ["ícone Raide"] = new(0.6796, 0.5062, 0.3164, 0.1695),
             ["Raide de Boss"] = new(0.6644, 0.6561, 0.3356, 0.1179),
             ["Criar um Raide (menu)"] = new(0.5014, 0.8428, 0.4986, 0.1548),
@@ -998,17 +1113,23 @@ public partial class FarmingPage : Page
         AppendLog($"DailyRaidBoss: criando {raidCount} raide(s) pelo starter {launcherGroup.Starter}.");
         try
         {
-            await _windowClickService.Prepare720pAsync(starter, cancellationToken);
+            await PrepareRoutineWindowAsync(starter, cancellationToken);
             for (var raid = 1; raid <= raidCount; raid++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 AppendLog($"DailyRaidBoss — {launcherGroup.Starter}: iniciando raide {raid}/{raidCount}.");
-                await _windowClickService.PressCtrlNumberAsync(starter, 0x31, cancellationToken, AppendLog);
-                foreach (var name in new[] { "ícone +", "ícone Raide", "Raide de Boss", "Criar um Raide (menu)", "Criar um Raide", "adicionar convidados", "Convidar todos" })
+                await _windowClickService.PressKeyAsync(starter, 0x78, "F9", cancellationToken, AppendLog);
+                await Task.Delay(350, cancellationToken);
+                foreach (var name in new[] { "ícone Raide", "Raide de Boss", "Criar um Raide (menu)", "Criar um Raide", "adicionar convidados", "Convidar todos" })
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     AppendLog($"DailyRaidBoss — raide {raid}/{raidCount}: procurando {name}.");
-                    var threshold = name is "ícone +" or "adicionar convidados" ? 0.50 : 0.78;
+                    var threshold = name switch
+                    {
+                        "adicionar convidados" => 0.50,
+                        "Raide de Boss" => 0.72,
+                        _ => 0.78
+                    };
                     var found = await FindAndClickTemplateAsync(starter, templates[name], regions[name], null,
                         name, threshold, cancellationToken);
                     if (!found)
@@ -1026,7 +1147,7 @@ public partial class FarmingPage : Page
                     }
 
                     AppendLog($"DailyRaidBoss — raide {raid}/{raidCount}: aceitando convite em {guestName}.");
-                    await _windowClickService.Prepare720pAsync(guest, cancellationToken);
+                    await PrepareRoutineWindowAsync(guest, cancellationToken);
                     await _windowClickService.PressCtrlNumberAsync(guest, 0x31, cancellationToken, AppendLog);
                     foreach (var guestStep in new[] { "Aceitar convite", "Entrar na raide" })
                     {
@@ -1212,6 +1333,51 @@ public partial class FarmingPage : Page
         if (ExecutionLog.LineCount > 100) ExecutionLog.Clear();
         ExecutionLog.AppendText($"[{DateTime.Now:HH:mm:ss}] {message}{Environment.NewLine}");
         ExecutionLog.ScrollToEnd();
+    }
+
+    private async Task PrepareRoutineWindowAsync(PreviewWindow target, CancellationToken token)
+    {
+        await _windowClickService.Prepare720pAsync(target, token);
+        await DismissStartupScreensAsync(target, token);
+    }
+
+    private async Task DismissStartupScreensAsync(PreviewWindow target, CancellationToken token)
+    {
+        var directory = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates");
+        var powerTemplate = Path.Combine(directory, "routine-start-energy.png");
+        var okTemplate = Path.Combine(directory, "routine-start-ok.png");
+        var powerRegion = new RelativeSearchRegion(0.25, 0.60, 0.50, 0.15);
+        var okRegion = new RelativeSearchRegion(0.3936, 0.7814, 0.2252, 0.1695);
+        // Texto fixo da instrução: exclui horário, atividade e contadores variáveis.
+        var powerCrop = new Int32Rect(419, 487, 455, 27);
+        for (var attempt = 0; attempt < 4; attempt++)
+        {
+            token.ThrowIfCancellationRequested();
+            var frame = await _windowCaptureService.CaptureAsync(target, token);
+            var power = await _templateSearchService.FindAsync(frame, powerTemplate, powerRegion, 0.80, token, powerCrop);
+            var ok = await _templateSearchService.FindAsync(frame, okTemplate, okRegion, 0.85, token);
+            if (!power.Found && !ok.Found) return;
+            if (attempt == 3) throw new InvalidOperationException("A tela inicial de poupança/OK permaneceu aberta; rotina interrompida.");
+            await Task.Delay(150, token);
+            frame = await _windowCaptureService.CaptureAsync(target, token);
+            if (power.Found)
+            {
+                var confirmed = await _templateSearchService.FindAsync(frame, powerTemplate, powerRegion, 0.80, token, powerCrop);
+                if (!confirmed.Found) continue;
+                AppendLog($"PID {target.ProcessId}: poupança de energia detectada; deslizando da esquerda para a direita.");
+                await _windowClickService.SwipeRightAsync(target, token);
+            }
+            else
+            {
+                var confirmed = await _templateSearchService.FindAsync(frame, okTemplate, okRegion, 0.85, token);
+                if (!confirmed.Found) continue;
+                AppendLog($"PID {target.ProcessId}: OK detectado antes da rotina.");
+                await _windowClickService.ClickRelativeAsync(target,
+                    (confirmed.Bounds.X + confirmed.Bounds.Width / 2d) / frame.PixelWidth,
+                    (confirmed.Bounds.Y + confirmed.Bounds.Height / 2d) / frame.PixelHeight, token, AppendLog);
+            }
+            await Task.Delay(700, token);
+        }
     }
 
     private void BtnMousePercent_Click(object sender, RoutedEventArgs e) { }

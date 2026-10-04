@@ -1,0 +1,97 @@
+using System.IO;
+using System.Text.Json;
+using Macro.Models;
+
+namespace Macro.Services;
+
+public sealed class FarmingPreset : System.ComponentModel.INotifyPropertyChanged
+{
+    public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+    private string _orderStatus = "";
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string OrderStatus
+    {
+        get => _orderStatus;
+        set { _orderStatus = value; PropertyChanged?.Invoke(this, new(nameof(OrderStatus))); }
+    }
+    public string Name { get; set; } = "";
+    public FarmingConfiguration Configuration { get; set; } = new();
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string ScheduleLabel => string.IsNullOrWhiteSpace(Configuration.StartTime)
+        ? "Início imediato" : $"Agendado · {Configuration.StartTime}";
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string StepCountLabel => Steps.Count == 0 ? "Nenhuma rotina ativada" : $"{Steps.Count} etapas";
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    public IReadOnlyList<PresetStep> Steps
+    {
+        get
+        {
+            var c = Configuration;
+            var steps = new List<PresetStep>();
+            void Add(string title, string details, string repeat = "1 vez") =>
+                steps.Add(new PresetStep((steps.Count + 1).ToString("00"), title, details, repeat));
+            string Launchers(List<string> names) => names.Count == 0 ? "Nenhum launcher selecionado" : string.Join(" · ", names);
+            string RaidDetails(LauncherGroup group)
+            {
+                var guests = new[] { group.Guest1, group.Guest2 }
+                    .Where(name => !string.IsNullOrWhiteSpace(name) && name != "Não utilizar");
+                var guestText = string.Join(" · ", guests);
+                return $"Starter: {group.Starter}" + (guestText.Length == 0 ? "" : $"\nConvidados: {guestText}");
+            }
+            if (c.DailyDonation) Add("Doação diária", Launchers(c.DonationLaunchers));
+            if (c.DailyScroll) Add("Pergaminho diário", Launchers(c.DonationLaunchers));
+            if (c.Normal.IsEnabled) Add("Raids normais", RaidDetails(c.NormalLaunchers), $"{c.Normal.RepeatCountText}×");
+            if (c.Boss.IsEnabled) Add("Boss", RaidDetails(c.BossLaunchers), $"{c.Boss.RepeatCountText}×");
+            if (c.DailyFavorites) Add("Missões favoritas", Launchers(c.DailyLaunchers));
+            if (c.ArenaEnabled) Add("Arena", $"Starter: {c.ArenaStarter}\nConvidado: {c.ArenaInviter}", $"{c.ArenaRepeatCountText}×");
+            return c.OrderedActions.Select(title => steps.FirstOrDefault(step => step.Title == title))
+                .OfType<PresetStep>().Select((step, index) => step with { Number = (index + 1).ToString("00") }).ToList();
+        }
+    }
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string Summary
+    {
+        get
+        {
+            var c = Configuration;
+            var steps = new List<string>();
+            if (c.DailyDonation) steps.Add("Doação diária");
+            if (c.DailyScroll) steps.Add("Pergaminho diário");
+            if (c.Normal.IsEnabled) steps.Add($"Raids normais ({c.Normal.RepeatCountText}x) — {c.NormalLaunchers.Starter}; convidados: {c.NormalLaunchers.Guest1}, {c.NormalLaunchers.Guest2}");
+            if (c.Boss.IsEnabled) steps.Add($"Boss ({c.Boss.RepeatCountText}x) — {c.BossLaunchers.Starter}; convidados: {c.BossLaunchers.Guest1}, {c.BossLaunchers.Guest2}");
+            if (c.DailyFavorites) steps.Add("Missões favoritas — " + string.Join(", ", c.DailyLaunchers));
+            if (steps.Count == 0) steps.Add("Nenhuma rotina ativada");
+            if (c.DailyDonation || c.DailyScroll) steps.Add("Launchers das rotinas diárias: " + string.Join(", ", c.DonationLaunchers));
+            steps.Add(string.IsNullOrWhiteSpace(c.StartTime) ? "Início imediato" : $"Horário: {c.StartTime}");
+            return string.Join(Environment.NewLine, steps);
+        }
+    }
+}
+
+public sealed record PresetStep(string Number, string Title, string Details, string Repeat);
+
+public sealed class FarmingPresetService
+{
+    private readonly string _path = Path.Combine(Environment.GetFolderPath(
+        Environment.SpecialFolder.LocalApplicationData), "MacroMir4", "farming-presets.json");
+
+    public List<FarmingPreset> Load() => File.Exists(_path)
+        ? JsonSerializer.Deserialize<List<FarmingPreset>>(File.ReadAllText(_path))
+            ?? throw new InvalidDataException("Arquivo de presets inválido.")
+        : [];
+
+    public void Save(List<FarmingPreset> presets)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
+        var temporary = _path + ".tmp";
+        File.WriteAllText(temporary, JsonSerializer.Serialize(presets, new JsonSerializerOptions { WriteIndented = true }));
+        File.Move(temporary, _path, overwrite: true);
+    }
+
+    public static FarmingConfiguration Copy(FarmingConfiguration configuration) =>
+        JsonSerializer.Deserialize<FarmingConfiguration>(JsonSerializer.Serialize(configuration))!;
+}

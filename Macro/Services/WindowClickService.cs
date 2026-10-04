@@ -135,6 +135,17 @@ public sealed class WindowClickService
         throw new InvalidOperationException("O Windows não colocou o MIR4 em primeiro plano. Ative a janela do jogo e tente novamente.");
     }
 
+    public nint CaptureForegroundWindow() => GetForegroundWindow();
+
+    public void RestoreForegroundWindow(nint windowHandle, Action<string>? log = null)
+    {
+        if (windowHandle == 0 || !IsWindow(windowHandle) || GetForegroundWindow() == windowHandle) return;
+        SetForegroundWindow(windowHandle);
+        log?.Invoke(GetForegroundWindow() == windowHandle
+            ? "Foco retornado à janela que estava ativa antes da rotina."
+            : "O Windows manteve o foco em outra janela.");
+    }
+
     public async Task<(int X, int Y)> ClickRelativeAsync(PreviewWindow target, double x, double y,
         CancellationToken token, Action<string>? log = null)
     {
@@ -174,6 +185,28 @@ public sealed class WindowClickService
             log?.Invoke($"Esc {press}/3 enviado para MIR4 (PID {target.ProcessId}).");
             if (press < 3) await Task.Delay(180, token);
         }
+    }
+
+    public async Task SwipeRightAsync(PreviewWindow target, CancellationToken token)
+    {
+        await ActivateAsync(target, token);
+        var start = await MoveCursorAsync(target, 0.25, 0.50, token);
+        VerifyClickTarget(target, start, 0.25, 0.50);
+        token.ThrowIfCancellationRequested();
+        SendMouse(0x0002, "iniciar arrasto");
+        try
+        {
+            await Task.Delay(100, token);
+            for (var step = 1; step <= 4; step++)
+            {
+                if (GetForegroundWindow() != target.Handle)
+                    throw new InvalidOperationException("MIR4 perdeu o foco durante o arrasto.");
+                var x = 0.25 + 0.50 * step / 4;
+                var point = await MoveCursorAsync(target, x, 0.50, token);
+                VerifyClickTarget(target, point, x, 0.50);
+            }
+        }
+        finally { SendMouse(0x0004, "terminar arrasto"); }
     }
 
     public async Task PressKeyAsync(PreviewWindow target, ushort virtualKey, string keyName,
