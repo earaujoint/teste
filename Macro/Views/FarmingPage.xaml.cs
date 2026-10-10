@@ -22,10 +22,21 @@ public partial class FarmingPage : Page
     private readonly FarmingPresetService _presetService = new();
     private List<FarmingPreset> _presets = [];
     private bool _loadingPreset;
+    private bool _syncingMissionMapSelection;
     private bool _presetsAvailable = true;
     public FarmingConfiguration Configuration { get; private set; } = new();
     public string[] Launchers { get; } = ["MIR4 Launcher 1", "MIR4 Launcher 2", "MIR4 Steam"];
     public string[] GuestLaunchers { get; } = ["Não utilizar", "MIR4 Launcher 1", "MIR4 Launcher 2", "MIR4 Steam"];
+    public string[] MissionMaps { get; } = ["Campo", "Vale Oculto", "Miragem do Navio"];
+    public string[] DailyMissionMaps { get; } =
+    [
+        "Ginkgo Valley", "Bicheon Castle", "Bicheon Town", "Bicheon Valley", "Bicheon Labyrinth",
+        "Nefariox Ruins", "Nefariox Necropolis", "Crystalline Forest", "Demon Bull Temple",
+        "Snake Pit", "Viperbeast Plain", "Snake Pit Labyrinth", "Death Gorge", "Abandoned Mine",
+        "Sinner's Shire", "Snake Valley", "Secret Mine", "Spiritual Center", "Phantom Woods",
+        "Heaven's Way Peak", "Redmoon Mountain", "Redmoon Valley", "Desert Road", "Phantasia Desert",
+        "Ant Hole", "Phantasia Valley", "Sabuk Province", "Sabuk Castle"
+    ];
     public IReadOnlyList<RaidConfiguration> NormalRaids { get; private set; }
     public IReadOnlyList<RaidConfiguration> BossRaids { get; private set; }
 
@@ -76,6 +87,7 @@ public partial class FarmingPage : Page
         }
         try
         {
+            Configuration.DailyScrollLaunchers ??= [];
             var preset = new FarmingPreset { Name = name, Configuration = FarmingPresetService.Copy(Configuration) };
             var updated = _presetService.Load().Where(item => !string.Equals(item.Name, name, StringComparison.OrdinalIgnoreCase)).ToList();
             updated.Add(preset);
@@ -109,6 +121,28 @@ public partial class FarmingPage : Page
         try
         {
             var loaded = FarmingPresetService.Copy(preset.Configuration);
+            if (loaded.DailyItems is not { Count: 3 } ||
+                !loaded.DailyItems.Select(item => item.Name).SequenceEqual(new[] { "Platina", "Aço", "Óleo" }, StringComparer.OrdinalIgnoreCase))
+                loaded.DailyItems = FarmingConfiguration.CreateDailyMissionItems();
+            var assignedMaps = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var item in loaded.DailyItems)
+            {
+                if (!item.AvailableGrades.Contains(item.Grade, StringComparer.OrdinalIgnoreCase))
+                    item.Grade = "Rara";
+                item.SelectedMaps ??= [];
+                item.SelectedMaps = item.SelectedMaps.Where(DailyMissionMaps.Contains)
+                    .Distinct(StringComparer.OrdinalIgnoreCase).Where(assignedMaps.Add).Take(10).ToList();
+            }
+            // Presets antigos compartilhavam os launchers da doação e do DailyScroll.
+            loaded.DailyScrollLaunchers ??= [.. loaded.DonationLaunchers];
+            loaded.DailyTenOfTenLaunchers ??= [];
+            loaded.DailyTenOfTenLaunchers = loaded.DailyTenOfTenLaunchers
+                .Where(Launchers.Contains).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            loaded.DailyFavoriteLaunchers ??= loaded.DailyFavorites ? [.. loaded.DailyLaunchers] : [];
+            foreach (var launcher in loaded.DailyFavoriteLaunchers)
+                if (!loaded.DailyLaunchers.Contains(launcher, StringComparer.OrdinalIgnoreCase))
+                    loaded.DailyLaunchers.Add(launcher);
+            loaded.DailyFavorites = loaded.DailyFavoriteLaunchers.Count > 0;
             Configuration = loaded;
             NormalRaids = [Configuration.Normal, new() { Name = "Raide 2" }, new() { Name = "Raide 3" }];
             BossRaids = [Configuration.Boss, new() { Name = "Boss 2" }, new() { Name = "Boss 3" }];
@@ -116,8 +150,16 @@ public partial class FarmingPage : Page
             DataContext = this;
             foreach (var checkbox in new[] { DonateLauncher1, DonateLauncher2, DonateSteam })
                 checkbox.IsChecked = Configuration.DonationLaunchers.Contains((string)checkbox.Tag);
+            foreach (var checkbox in new[] { ScrollLauncher1, ScrollLauncher2, ScrollSteam })
+                checkbox.IsChecked = Configuration.DailyScrollLaunchers.Contains((string)checkbox.Tag);
+            foreach (var checkbox in new[] { TenOfTenLauncher1, TenOfTenLauncher2, TenOfTenSteam })
+                checkbox.IsChecked = Configuration.DailyTenOfTenLaunchers.Contains((string)checkbox.Tag);
             foreach (var checkbox in new[] { DailyLauncher1, DailyLauncher2, DailySteam })
                 checkbox.IsChecked = Configuration.DailyLaunchers.Contains((string)checkbox.Tag);
+            foreach (var checkbox in new[] { DailyFavoriteLauncher1, DailyFavoriteLauncher2, DailyFavoriteSteam })
+                checkbox.IsChecked = Configuration.DailyFavoriteLaunchers.Contains((string)checkbox.Tag);
+            foreach (var combo in new[] { DailyMapLauncher1, DailyMapLauncher2, DailyMapSteam })
+                combo.SelectedItem = GetDailyMap((string)combo.Tag);
             PresetName.Text = preset.Name;
             AppendLog($"Preset '{preset.Name}' carregado. Pressione Iniciar para executar o fluxo.");
         }
@@ -178,8 +220,103 @@ public partial class FarmingPage : Page
     // A interface permanece pronta para receber uma nova implementação.
     private void DonationLauncher_Checked(object sender, RoutedEventArgs e) => UpdateLauncherSelection(Configuration.DonationLaunchers, sender, true);
     private void DonationLauncher_Unchecked(object sender, RoutedEventArgs e) => UpdateLauncherSelection(Configuration.DonationLaunchers, sender, false);
+    private void ScrollLauncher_Checked(object sender, RoutedEventArgs e) => UpdateLauncherSelection(Configuration.DailyScrollLaunchers ??= [], sender, true);
+    private void ScrollLauncher_Unchecked(object sender, RoutedEventArgs e) => UpdateLauncherSelection(Configuration.DailyScrollLaunchers ??= [], sender, false);
+    private void TenOfTenLauncher_Checked(object sender, RoutedEventArgs e) => UpdateLauncherSelection(Configuration.DailyTenOfTenLaunchers, sender, true);
+    private void TenOfTenLauncher_Unchecked(object sender, RoutedEventArgs e) => UpdateLauncherSelection(Configuration.DailyTenOfTenLaunchers, sender, false);
     private void DailyLauncher_Checked(object sender, RoutedEventArgs e) => UpdateLauncherSelection(Configuration.DailyLaunchers, sender, true);
-    private void DailyLauncher_Unchecked(object sender, RoutedEventArgs e) => UpdateLauncherSelection(Configuration.DailyLaunchers, sender, false);
+    private void DailyLauncher_Unchecked(object sender, RoutedEventArgs e)
+    {
+        if (_loadingPreset) return;
+        UpdateLauncherSelection(Configuration.DailyLaunchers, sender, false);
+        if (sender is not CheckBox { Tag: string launcher }) return;
+        Configuration.DailyFavoriteLaunchers ??= [];
+        Configuration.DailyFavoriteLaunchers.RemoveAll(name => string.Equals(name, launcher, StringComparison.OrdinalIgnoreCase));
+        Configuration.DailyFavorites = Configuration.DailyFavoriteLaunchers.Count > 0;
+        GetDailyFavoriteCheckBox(launcher).IsChecked = false;
+    }
+    private void DailyFavoriteLauncher_Checked(object sender, RoutedEventArgs e)
+    {
+        if (_loadingPreset || sender is not CheckBox { Tag: string launcher }) return;
+        Configuration.DailyFavoriteLaunchers ??= [];
+        UpdateLauncherSelection(Configuration.DailyFavoriteLaunchers, sender, true);
+        GetDailyLauncherCheckBox(launcher).IsChecked = true;
+        Configuration.DailyFavorites = Configuration.DailyFavoriteLaunchers.Count > 0;
+    }
+    private void DailyFavoriteLauncher_Unchecked(object sender, RoutedEventArgs e)
+    {
+        if (_loadingPreset || sender is not CheckBox { Tag: string launcher }) return;
+        Configuration.DailyFavoriteLaunchers ??= [];
+        UpdateLauncherSelection(Configuration.DailyFavoriteLaunchers, sender, false);
+        Configuration.DailyFavorites = Configuration.DailyFavoriteLaunchers.Count > 0;
+    }
+
+    private CheckBox GetDailyLauncherCheckBox(string launcher) => launcher switch
+    {
+        "MIR4 Launcher 1" => DailyLauncher1,
+        "MIR4 Launcher 2" => DailyLauncher2,
+        "MIR4 Steam" => DailySteam,
+        _ => throw new InvalidOperationException($"Launcher desconhecido: {launcher}.")
+    };
+
+    private CheckBox GetDailyFavoriteCheckBox(string launcher) => launcher switch
+    {
+        "MIR4 Launcher 1" => DailyFavoriteLauncher1,
+        "MIR4 Launcher 2" => DailyFavoriteLauncher2,
+        "MIR4 Steam" => DailyFavoriteSteam,
+        _ => throw new InvalidOperationException($"Launcher desconhecido: {launcher}.")
+    };
+
+    private string GetDailyMap(string launcher) =>
+        Configuration.DailyLauncherMaps.TryGetValue(launcher, out var map) && MissionMaps.Contains(map) ? map : "Campo";
+
+    private void DailyMap_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loadingPreset || sender is not ComboBox { Tag: string launcher, SelectedItem: string map }) return;
+        Configuration.DailyLauncherMaps[launcher] = map;
+    }
+
+    private void DailyMissionMaps_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is not ListBox list || list.DataContext is not MissionItemConfiguration item) return;
+        _syncingMissionMapSelection = true;
+        try
+        {
+            var selected = item.SelectedMaps.Where(DailyMissionMaps.Contains)
+                .Distinct(StringComparer.OrdinalIgnoreCase).Take(10).ToArray();
+            item.SelectedMaps = [.. selected];
+            list.SelectedItems.Clear();
+            foreach (var map in selected) list.SelectedItems.Add(map);
+        }
+        finally { _syncingMissionMapSelection = false; }
+    }
+
+    private void DailyMissionMaps_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_syncingMissionMapSelection || sender is not ListBox list || list.DataContext is not MissionItemConfiguration item)
+            return;
+        var addedMaps = e.AddedItems.Cast<string>().ToArray();
+        var duplicateMaps = addedMaps.Where(map => Configuration.DailyItems.Any(other =>
+            !ReferenceEquals(other, item) && other.SelectedMaps.Contains(map, StringComparer.OrdinalIgnoreCase))).ToArray();
+        var rejectedMaps = duplicateMaps.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var exceedsLimit = list.SelectedItems.Count > 10;
+        if (exceedsLimit)
+            rejectedMaps.UnionWith(addedMaps);
+        if (rejectedMaps.Count > 0)
+        {
+            _syncingMissionMapSelection = true;
+            try
+            {
+                foreach (var map in rejectedMaps) list.SelectedItems.Remove(map);
+            }
+            finally { _syncingMissionMapSelection = false; }
+            if (duplicateMaps.Length > 0)
+                AppendLog($"{item.Name}: mapa já atribuído a outra missão; cada mapa só pode ser usado uma vez.");
+            if (exceedsLimit)
+                AppendLog($"{item.Name}: é possível selecionar no máximo 10 mapas.");
+        }
+        item.SelectedMaps = list.SelectedItems.Cast<string>().ToList();
+    }
 
     private void UpdateLauncherSelection(List<string> selection, object sender, bool enabled)
     {
@@ -203,14 +340,6 @@ public partial class FarmingPage : Page
             AppendLog(Configuration.DailyScroll
                 ? "DailyScroll ativado. Clique em Start para executar nos launchers selecionados."
                 : "DailyScroll desativado.");
-    }
-
-    private void DailyFavorites_Toggled(object sender, RoutedEventArgs e)
-    {
-        if (DataContext is not null)
-            AppendLog(Configuration.DailyFavorites
-                ? "Missões favoritas ativadas. Clique em Start para executar nos launchers diários selecionados."
-                : "Missões favoritas desativadas.");
     }
 
     private async void BtnDoArena_Click(object sender, RoutedEventArgs e)
@@ -445,8 +574,11 @@ public partial class FarmingPage : Page
                     case "Pergaminho diário" when Configuration.DailyScroll: await DailyScroll(cancellationToken); break;
                     case "Raids normais" when Configuration.Normal.IsEnabled: await DailyFavoriteRaid(cancellationToken); break;
                     case "Boss" when Configuration.Boss.IsEnabled: await DailyRaidBoss(cancellationToken); break;
-                    case "Missões favoritas" when Configuration.DailyFavorites: await DailyFavoriteMissions(cancellationToken); break;
+                    case "Missões favoritas" when Configuration.DailyFavoriteLaunchers is { Count: > 0 }:
+                        await DailyFavoriteMissions(cancellationToken);
+                        break;
                     case "Arena" when Configuration.ArenaEnabled:
+                        await WaitForArenaTimeAsync(cancellationToken);
                         if (!int.TryParse(Configuration.ArenaRepeatCountText, out var count) || count is < 1 or > 100)
                             throw new InvalidOperationException("Arena: informe entre 1 e 100 repetições.");
                         for (var iteration = 1; iteration <= count; iteration++)
@@ -458,7 +590,8 @@ public partial class FarmingPage : Page
                         break;
                 }
             }
-            if (!Configuration.DailyDonation && !Configuration.DailyScroll && !Configuration.DailyFavorites &&
+            if (!Configuration.DailyDonation && !Configuration.DailyScroll &&
+                Configuration.DailyFavoriteLaunchers is not { Count: > 0 } &&
                 !Configuration.Normal.IsEnabled && !Configuration.Boss.IsEnabled && !Configuration.ArenaEnabled)
                 AppendLog("Nenhuma rotina diária está ativada; nenhuma ação executada.");
             AppendLog("Macro finalizado.");
@@ -473,6 +606,25 @@ public partial class FarmingPage : Page
             ConfigurationPanel.IsEnabled = true;
             StatusText.Text = "Pronto";
         }
+    }
+
+    private async Task WaitForArenaTimeAsync(CancellationToken cancellationToken)
+    {
+        var requestedTime = Configuration.ArenaStartTime?.Trim();
+        if (string.IsNullOrWhiteSpace(requestedTime)) return;
+        if (!TimeOnly.TryParseExact(requestedTime, "HH:mm", CultureInfo.InvariantCulture,
+                DateTimeStyles.None, out var arenaTime))
+            throw new InvalidOperationException("Horário da Arena inválido. Informe no formato 24 horas HH:mm, por exemplo 21:30.");
+
+        var startAt = DateTime.Today.Add(arenaTime.ToTimeSpan());
+        if (startAt <= DateTime.Now) startAt = startAt.AddDays(1);
+        var delay = startAt - DateTime.Now;
+        if (delay <= TimeSpan.Zero) return;
+        StatusText.Text = "Aguardando Arena";
+        AppendLog($"Arena agendada para {startAt:dd/MM/yyyy HH:mm}. Use Stop para cancelar a espera.");
+        await Task.Delay(delay, cancellationToken);
+        AppendLog("Horário da Arena atingido; iniciando a Arena.");
+        StatusText.Text = "Em execução";
     }
 
     private async Task DailyDonate(CancellationToken cancellationToken)
@@ -588,7 +740,7 @@ public partial class FarmingPage : Page
 
     private async Task DailyScroll(CancellationToken cancellationToken)
     {
-        if (Configuration.DonationLaunchers.Count == 0)
+        if (Configuration.DailyScrollLaunchers is not { Count: > 0 })
         {
             AppendLog("DailyScroll: selecione pelo menos um launcher.");
             return;
@@ -632,7 +784,7 @@ public partial class FarmingPage : Page
             (buyTemplate, buyButtonRegion, "Comprar", null, null)
         };
 
-        foreach (var launcher in Launchers.Where(Configuration.DonationLaunchers.Contains))
+        foreach (var launcher in Launchers.Where(Configuration.DailyScrollLaunchers!.Contains))
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (!targets.TryGetValue(launcher, out var target))
@@ -668,9 +820,30 @@ public partial class FarmingPage : Page
                         AppendLog($"DailyScroll — {launcher}: aguardando 5 segundos antes de procurar o botão Comprar.");
                         await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
                     }
-                    var found = await FindAndClickTemplateAsync(target, step.Template, step.Region, crop,
-                        step.Name, threshold, cancellationToken, step.ClickX, step.ClickY,
-                        clickCount: step.Name == "Comprar" ? 3 : 1);
+                    bool found;
+                    if (step.Name == "Comprar")
+                    {
+                        found = false;
+                        for (var attempt = 0; attempt < 3 && !found; attempt++)
+                        {
+                            if (attempt > 0)
+                            {
+                                AppendLog($"DailyScroll — {launcher}: botão Comprar não encontrado; pressionando Z ({attempt}/2) e aguardando 4 segundos.");
+                                await _windowClickService.PressKeyAsync(target, 0x5A, "Z", cancellationToken, AppendLog);
+                                await Task.Delay(TimeSpan.FromSeconds(4), cancellationToken);
+                            }
+
+                            AppendLog($"DailyScroll — {launcher}: procurando o botão Comprar por até 4 segundos (tentativa {attempt + 1}/3).");
+                            found = await FindAndClickTemplateAsync(target, step.Template, step.Region, crop,
+                                step.Name, threshold, cancellationToken, step.ClickX, step.ClickY,
+                                timeoutOverride: TimeSpan.FromSeconds(4), clickCount: 3);
+                        }
+                    }
+                    else
+                    {
+                        found = await FindAndClickTemplateAsync(target, step.Template, step.Region, crop,
+                            step.Name, threshold, cancellationToken, step.ClickX, step.ClickY);
+                    }
                     if (!found)
                     {
                         AppendLog($"DailyScroll — {launcher}: sequência interrompida em {step.Name}; os passos seguintes foram ignorados.");
@@ -722,9 +895,9 @@ public partial class FarmingPage : Page
 
     private async Task DailyFavoriteMissions(CancellationToken cancellationToken)
     {
-        if (Configuration.DailyLaunchers.Count == 0)
+        if (Configuration.DailyFavoriteLaunchers is not { Count: > 0 })
         {
-            AppendLog("Missões favoritas: selecione ao menos um launcher na aba Missões Diárias.");
+            AppendLog("Missões favoritas: marque ao menos um launcher para executar essa rotina.");
             return;
         }
 
@@ -746,7 +919,7 @@ public partial class FarmingPage : Page
         var travelTemplate = Path.Combine(templatesDirectory, "daily-favorite-travel.png");
         var travelItemTemplate = Path.Combine(templatesDirectory, "daily-favorite-travel-item.png");
         var energyTemplate = Path.Combine(templatesDirectory, "daily-favorite-energy.png");
-        if (new[] { fieldTemplate, acceptTemplate, autoTemplate, checkTemplate, startTemplate,
+        if (new[] { acceptTemplate, autoTemplate, checkTemplate, startTemplate,
                 travelTemplate, travelItemTemplate, energyTemplate }
             .Any(path => !File.Exists(path)))
         {
@@ -754,7 +927,7 @@ public partial class FarmingPage : Page
             return;
         }
 
-        var fieldRegion = new RelativeSearchRegion(0.0012, 0.0420, 0.1382, 0.1670);
+        var mapRegion = new RelativeSearchRegion(0.0026, 0.0567, 0.6522, 0.2211);
         var acceptRegion = new RelativeSearchRegion(0.8247, 0.2581, 0.1753, 0.7419);
         var autoRegion = new RelativeSearchRegion(0.6423, 0.1427, 0.2612, 0.1597);
         var checkRegion = new RelativeSearchRegion(0.0896, 0.1304, 0.1175, 0.1400);
@@ -763,7 +936,7 @@ public partial class FarmingPage : Page
         var travelItemRegion = new RelativeSearchRegion(0.3632, 0.6610, 0.3109, 0.1572);
         var energyRegion = new RelativeSearchRegion(0.1615, 0.6585, 0.0912, 0.1646);
 
-        foreach (var launcher in Launchers.Where(Configuration.DailyLaunchers.Contains))
+        foreach (var launcher in Launchers.Where(Configuration.DailyFavoriteLaunchers!.Contains))
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (!targets.TryGetValue(launcher, out var target))
@@ -778,9 +951,32 @@ public partial class FarmingPage : Page
                 await PrepareRoutineWindowAsync(target, cancellationToken);
                 await _windowClickService.PressKeyAsync(target, 0x75, "F6", cancellationToken, AppendLog);
                 await Task.Delay(350, cancellationToken);
-                var fieldSelected = await FindAndClickTemplateAsync(target, fieldTemplate, fieldRegion,
-                    null, "Campo", 0.75, cancellationToken);
-                if (!fieldSelected) continue;
+                var selectedMap = GetDailyMap(launcher);
+                var mapTemplate = selectedMap switch
+                {
+                    "Campo" => fieldTemplate,
+                    "Vale Oculto" => Path.Combine(templatesDirectory, "daily-favorite-map-hidden-valley.png"),
+                    "Miragem do Navio" => Path.Combine(templatesDirectory, "daily-favorite-map-ship-mirage.png"),
+                    _ => throw new InvalidOperationException($"Mapa desconhecido: {selectedMap}.")
+                };
+                if (!File.Exists(mapTemplate))
+                {
+                    AppendLog($"Missões favoritas — {launcher}: falta a imagem de referência do mapa '{selectedMap}'.");
+                    continue;
+                }
+                AppendLog($"Missões favoritas — {launcher}: selecionado o mapa {selectedMap}; buscando sua imagem de entrada.");
+                // Compara somente o nome; exclui o contador variável, inclusive a linha (3) da Miragem.
+                Int32Rect? mapCrop = selectedMap switch
+                {
+                    "Campo" => null,
+                    "Vale Oculto" => new Int32Rect(13, 13, 110, 23),
+                    "Miragem do Navio" => new Int32Rect(25, 7, 109, 17),
+                    _ => throw new InvalidOperationException($"Mapa desconhecido: {selectedMap}.")
+                };
+                var mapSelected = await FindAndClickTemplateAsync(target, mapTemplate, mapRegion,
+                    mapCrop,
+                    selectedMap, 0.75, cancellationToken);
+                if (!mapSelected) continue;
 
                 var acceptedCount = 0;
                 var emptyScrolls = 0;

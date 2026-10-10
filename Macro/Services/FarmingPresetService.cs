@@ -42,11 +42,13 @@ public sealed class FarmingPreset : System.ComponentModel.INotifyPropertyChanged
                 return $"Starter: {group.Starter}" + (guestText.Length == 0 ? "" : $"\nConvidados: {guestText}");
             }
             if (c.DailyDonation) Add("Doação diária", Launchers(c.DonationLaunchers));
-            if (c.DailyScroll) Add("Pergaminho diário", Launchers(c.DonationLaunchers));
+            if (c.DailyScroll) Add("Pergaminho diário", Launchers(c.DailyScrollLaunchers ?? []));
             if (c.Normal.IsEnabled) Add("Raids normais", RaidDetails(c.NormalLaunchers), $"{c.Normal.RepeatCountText}×");
             if (c.Boss.IsEnabled) Add("Boss", RaidDetails(c.BossLaunchers), $"{c.Boss.RepeatCountText}×");
-            if (c.DailyFavorites) Add("Missões favoritas", Launchers(c.DailyLaunchers));
-            if (c.ArenaEnabled) Add("Arena", $"Starter: {c.ArenaStarter}\nConvidado: {c.ArenaInviter}", $"{c.ArenaRepeatCountText}×");
+            if (c.DailyFavorites) Add("Missões favoritas", string.Join(" · ", (c.DailyFavoriteLaunchers ?? c.DailyLaunchers).Select(launcher =>
+                $"{launcher}: {(c.DailyLauncherMaps.TryGetValue(launcher, out var map) ? map : "Campo")}")));
+            if (c.ArenaEnabled) Add("Arena", $"Starter: {c.ArenaStarter}\nConvidado: {c.ArenaInviter}" +
+                (string.IsNullOrWhiteSpace(c.ArenaStartTime) ? "" : $"\nHorário: {c.ArenaStartTime}"), $"{c.ArenaRepeatCountText}×");
             return c.OrderedActions.Select(title => steps.FirstOrDefault(step => step.Title == title))
                 .OfType<PresetStep>().Select((step, index) => step with { Number = (index + 1).ToString("00") }).ToList();
         }
@@ -63,9 +65,11 @@ public sealed class FarmingPreset : System.ComponentModel.INotifyPropertyChanged
             if (c.DailyScroll) steps.Add("Pergaminho diário");
             if (c.Normal.IsEnabled) steps.Add($"Raids normais ({c.Normal.RepeatCountText}x) — {c.NormalLaunchers.Starter}; convidados: {c.NormalLaunchers.Guest1}, {c.NormalLaunchers.Guest2}");
             if (c.Boss.IsEnabled) steps.Add($"Boss ({c.Boss.RepeatCountText}x) — {c.BossLaunchers.Starter}; convidados: {c.BossLaunchers.Guest1}, {c.BossLaunchers.Guest2}");
-            if (c.DailyFavorites) steps.Add("Missões favoritas — " + string.Join(", ", c.DailyLaunchers));
+            if (c.DailyFavorites) steps.Add("Missões favoritas — " + string.Join(", ", c.DailyFavoriteLaunchers ?? c.DailyLaunchers));
             if (steps.Count == 0) steps.Add("Nenhuma rotina ativada");
-            if (c.DailyDonation || c.DailyScroll) steps.Add("Launchers das rotinas diárias: " + string.Join(", ", c.DonationLaunchers));
+            if (c.DailyDonation) steps.Add("Launchers da doação: " + string.Join(", ", c.DonationLaunchers));
+            if (c.DailyScroll) steps.Add("Launchers do DailyScroll: " + string.Join(", ", c.DailyScrollLaunchers ?? []));
+            if (c.ArenaEnabled && !string.IsNullOrWhiteSpace(c.ArenaStartTime)) steps.Add("Horário da Arena: " + c.ArenaStartTime);
             steps.Add(string.IsNullOrWhiteSpace(c.StartTime) ? "Início imediato" : $"Horário: {c.StartTime}");
             return string.Join(Environment.NewLine, steps);
         }

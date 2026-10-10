@@ -8,24 +8,33 @@ public sealed class FarmingConfiguration
     public string ArenaStarter { get; set; } = "MIR4 Steam";
     public string ArenaInviter { get; set; } = "MIR4 Launcher 1";
     public string ArenaRepeatCountText { get; set; } = "1";
+    public string ArenaStartTime { get; set; } = "";
     public bool ArenaEnabled { get; set; }
     public List<string> ActionOrder { get; set; } = [];
     [System.Text.Json.Serialization.JsonIgnore]
     public IEnumerable<string> OrderedActions => (ActionOrder ?? []).Concat(new[]
         { "Doação diária", "Pergaminho diário", "Raids normais", "Boss", "Arena", "Missões favoritas" }).Distinct();
     public List<string> DonationLaunchers { get; set; } = [];
+    public List<string>? DailyScrollLaunchers { get; set; }
+    public List<string> DailyTenOfTenLaunchers { get; set; } = [];
     public List<string> DailyLaunchers { get; set; } = [];
+    public List<string>? DailyFavoriteLaunchers { get; set; }
+    public Dictionary<string, string> DailyLauncherMaps { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public bool DailyDonation { get; set; }
     public bool DailyScroll { get; set; }
+    public bool DailyTenOfTenEnabled { get; set; }
     public bool DailyFavorites { get; set; }
     public string StartTime { get; set; } = "";
     public RaidConfiguration Normal { get; set; } = new() { Name = "Raide 1" };
     public RaidConfiguration Boss { get; set; } = new() { Name = "Boss 1" };
-    public List<MissionItemConfiguration> DailyItems { get; set; } = CreateMissionItems();
+    public List<MissionItemConfiguration> DailyItems { get; set; } = CreateDailyMissionItems();
     public List<MissionItemConfiguration> DominationItems { get; set; } = CreateMissionItems();
 
+    public static List<MissionItemConfiguration> CreateDailyMissionItems() =>
+        [new() { Name = "Platina", Grade = "Rara" }, new() { Name = "Aço", Grade = "Rara" }, new() { Name = "Óleo", Grade = "Rara" }];
+
     private static List<MissionItemConfiguration> CreateMissionItems() =>
-        [new() { Name = "Minério Escuro" }, new() { Name = "Barra de Ferro" }, new() { Name = "Elixir de Vida" }];
+        [new() { Name = "Platina", Grade = "Rara" }, new() { Name = "Aço", Grade = "Rara" }, new() { Name = "Óleo", Grade = "Rara" }];
 }
 
 public sealed class RaidConfiguration
@@ -40,9 +49,13 @@ public sealed class RaidConfiguration
 public sealed class MissionItemConfiguration
 {
     public string Name { get; set; } = "";
+    public string Grade { get; set; } = "Rara";
     public bool IsEnabled { get; set; }
     public List<string> SelectedMaps { get; set; } = [];
     public string Launcher { get; set; } = "MIR4 Launcher 2";
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string[] AvailableGrades => Name == "Óleo" ? ["Rara"] : ["Rara", "Épica"];
 }
 
 public sealed class LauncherGroup

@@ -22,6 +22,60 @@
             <ItemsPanelTemplate x:Key="CardsPanel">
                 <WrapPanel />
             </ItemsPanelTemplate>
+            <DataTemplate x:Key="DailyMissionTemplate">
+                <Border Style="{StaticResource Card}" Width="300" Margin="0,0,12,12">
+                    <StackPanel>
+                        <TextBlock Text="{Binding Name}" FontSize="17" FontWeight="SemiBold" />
+                        <TextBlock Text="Raridade do item" Margin="0,12,0,6" />
+                        <ComboBox ItemsSource="{Binding AvailableGrades}" SelectedItem="{Binding Grade, UpdateSourceTrigger=PropertyChanged}"
+                                  AutomationProperties.Name="Raridade do item da missão" />
+                        <TextBlock Text="Mapas (selecione até 10)" Margin="0,14,0,6" />
+                        <ListBox Height="150" Background="#222220" Foreground="#F4F4F4" BorderBrush="#55534C" BorderThickness="1"
+                                 ItemsSource="{Binding DataContext.DailyMissionMaps, RelativeSource={RelativeSource AncestorType=Page}}"
+                                 SelectionMode="Multiple" SelectionChanged="DailyMissionMaps_SelectionChanged" Loaded="DailyMissionMaps_Loaded"
+                                 AutomationProperties.Name="Mapas da missão diária">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox Content="{Binding}"
+                                              IsChecked="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected, Mode=TwoWay}"
+                                              Focusable="False" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Foreground" Value="#F4F4F4" />
+                                    <Setter Property="Padding" Value="8,4" />
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <Border x:Name="MapRow" Background="{TemplateBinding Background}" CornerRadius="3"
+                                                        Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter TextElement.Foreground="{TemplateBinding Foreground}"
+                                                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                      VerticalAlignment="Center" />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="MapRow" Property="Background" Value="#343330" />
+                                                    </Trigger>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter TargetName="MapRow" Property="Background" Value="#493E30" />
+                                                    </Trigger>
+                                                    <Trigger Property="IsEnabled" Value="False">
+                                                        <Setter Property="Opacity" Value="0.45" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                        </ListBox>
+                    </StackPanel>
+                </Border>
+            </DataTemplate>
         </ResourceDictionary>
     </Page.Resources>
     <Grid>
@@ -84,6 +138,13 @@
                             </StackPanel>
                             <CheckBox Grid.Column="1" Style="{StaticResource Toggle}" IsChecked="{Binding Configuration.DailyDonation}" Checked="DailyDonation_Toggled" Unchecked="DailyDonation_Toggled" VerticalAlignment="Center" ToolTip="Ativar doação diária" AutomationProperties.Name="Ativar doação diária" />
                         </Grid>
+                        <TextBlock Text="Launchers da doação diária" FontWeight="SemiBold" Margin="0,14,0,8" />
+                        <WrapPanel>
+                            <CheckBox x:Name="DonateLauncher1" Style="{StaticResource DonationChoice}" Content="Launcher 1" Tag="MIR4 Launcher 1" Checked="DonationLauncher_Checked" Unchecked="DonationLauncher_Unchecked" />
+                            <CheckBox x:Name="DonateLauncher2" Style="{StaticResource DonationChoice}" Content="Launcher 2" Tag="MIR4 Launcher 2" Checked="DonationLauncher_Checked" Unchecked="DonationLauncher_Unchecked" />
+                            <CheckBox x:Name="DonateSteam" Style="{StaticResource DonationChoice}" Content="Steam" Tag="MIR4 Steam" Checked="DonationLauncher_Checked" Unchecked="DonationLauncher_Unchecked" />
+                        </WrapPanel>
+                        <TextBlock Text="Você pode selecionar os três launchers para a doação." Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,2,0,0" />
                         <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,16" />
                         <Grid>
                             <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
@@ -93,14 +154,28 @@
                             </StackPanel>
                             <CheckBox Grid.Column="1" Style="{StaticResource Toggle}" IsChecked="{Binding Configuration.DailyScroll}" Checked="DailyScroll_Toggled" Unchecked="DailyScroll_Toggled" VerticalAlignment="Center" ToolTip="Ativar rotina DailyScroll" AutomationProperties.Name="Ativar rotina DailyScroll" />
                         </Grid>
-                        <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,16" />
-                        <TextBlock Text="Selecione os launchers para as rotinas diárias" FontWeight="SemiBold" Margin="0,0,0,10" />
+                        <TextBlock Text="Launchers do DailyScroll" FontWeight="SemiBold" Margin="0,14,0,8" />
                         <WrapPanel>
-                            <CheckBox x:Name="DonateLauncher1" Style="{StaticResource DonationChoice}" Content="Launcher 1" Tag="MIR4 Launcher 1" Checked="DonationLauncher_Checked" Unchecked="DonationLauncher_Unchecked" />
-                            <CheckBox x:Name="DonateLauncher2" Style="{StaticResource DonationChoice}" Content="Launcher 2" Tag="MIR4 Launcher 2" Checked="DonationLauncher_Checked" Unchecked="DonationLauncher_Unchecked" />
-                            <CheckBox x:Name="DonateSteam" Style="{StaticResource DonationChoice}" Content="Steam" Tag="MIR4 Steam" Checked="DonationLauncher_Checked" Unchecked="DonationLauncher_Unchecked" />
+                            <CheckBox x:Name="ScrollLauncher1" Style="{StaticResource DonationChoice}" Content="Launcher 1" Tag="MIR4 Launcher 1" Checked="ScrollLauncher_Checked" Unchecked="ScrollLauncher_Unchecked" />
+                            <CheckBox x:Name="ScrollLauncher2" Style="{StaticResource DonationChoice}" Content="Launcher 2" Tag="MIR4 Launcher 2" Checked="ScrollLauncher_Checked" Unchecked="ScrollLauncher_Unchecked" />
+                            <CheckBox x:Name="ScrollSteam" Style="{StaticResource DonationChoice}" Content="Steam" Tag="MIR4 Steam" Checked="ScrollLauncher_Checked" Unchecked="ScrollLauncher_Unchecked" />
                         </WrapPanel>
-                        <TextBlock Text="Você pode selecionar os três launchers." Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,2,0,0" />
+                        <TextBlock Text="Você pode selecionar os três launchers para o DailyScroll." Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,2,0,0" />
+                        <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,16" />
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <TextBlock Text="Completar as 10/10 diárias" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <CheckBox x:Name="TenOfTenToggle" Grid.Column="1" Style="{StaticResource Toggle}"
+                                      IsChecked="{Binding Configuration.DailyTenOfTenEnabled}"
+                                      ToolTip="Ativar completar as 10/10 diárias" AutomationProperties.Name="Ativar completar as 10/10 diárias" />
+                        </Grid>
+                        <TextBlock Text="Vai coletar ervas, energia e minério e criar um item para completar as missões diárias." Foreground="{StaticResource MutedBrush}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,10" />
+                        <TextBlock Text="Launchers da rotina 10/10" FontWeight="SemiBold" Margin="0,0,0,8" />
+                        <WrapPanel>
+                            <CheckBox x:Name="TenOfTenLauncher1" Style="{StaticResource DonationChoice}" Content="Launcher 1" Tag="MIR4 Launcher 1" Checked="TenOfTenLauncher_Checked" Unchecked="TenOfTenLauncher_Unchecked" />
+                            <CheckBox x:Name="TenOfTenLauncher2" Style="{StaticResource DonationChoice}" Content="Launcher 2" Tag="MIR4 Launcher 2" Checked="TenOfTenLauncher_Checked" Unchecked="TenOfTenLauncher_Unchecked" />
+                            <CheckBox x:Name="TenOfTenSteam" Style="{StaticResource DonationChoice}" Content="Steam" Tag="MIR4 Steam" Checked="TenOfTenLauncher_Checked" Unchecked="TenOfTenLauncher_Unchecked" />
+                        </WrapPanel>
                     </StackPanel>
                 </Border>
                     </TabItem>
@@ -170,14 +245,29 @@
                         <StackPanel>
                             <TextBlock Text="Missões Diárias" Style="{StaticResource PageSectionHeading}" />
                             <TextBlock Text="O macro atual executa as missões favoritas selecionadas dentro do jogo." Style="{StaticResource Caption}" />
-                            <CheckBox Content="Executar missões favoritas nos launchers selecionados" IsChecked="{Binding Configuration.DailyFavorites}" Checked="DailyFavorites_Toggled" Unchecked="DailyFavorites_Toggled" Margin="0,4,0,12" />
+                            <TextBlock Text="Escolha os launchers e marque em quais executar as missões favoritas." Style="{StaticResource Caption}" />
                             <TextBlock Text="Launchers das missões diárias" FontWeight="SemiBold" Margin="0,0,0,8" />
                             <WrapPanel Margin="0,0,0,12">
-                                <CheckBox x:Name="DailyLauncher1" Style="{StaticResource DonationChoice}" Content="Launcher 1" Tag="MIR4 Launcher 1" Checked="DailyLauncher_Checked" Unchecked="DailyLauncher_Unchecked" />
-                                <CheckBox x:Name="DailyLauncher2" Style="{StaticResource DonationChoice}" Content="Launcher 2" Tag="MIR4 Launcher 2" Checked="DailyLauncher_Checked" Unchecked="DailyLauncher_Unchecked" />
-                                <CheckBox x:Name="DailySteam" Style="{StaticResource DonationChoice}" Content="Steam" Tag="MIR4 Steam" Checked="DailyLauncher_Checked" Unchecked="DailyLauncher_Unchecked" />
+                                <StackPanel Width="205" Margin="0,0,12,10">
+                                    <CheckBox x:Name="DailyLauncher1" Style="{StaticResource DonationChoice}" Content="Launcher 1" Tag="MIR4 Launcher 1" Checked="DailyLauncher_Checked" Unchecked="DailyLauncher_Unchecked" />
+                                    <CheckBox x:Name="DailyFavoriteLauncher1" Content="Executar as missões favoritas" Tag="MIR4 Launcher 1" Checked="DailyFavoriteLauncher_Checked" Unchecked="DailyFavoriteLauncher_Unchecked" Margin="0,0,0,8" />
+                                    <TextBlock Text="Mapa das missões" Style="{StaticResource Caption}" Margin="0,0,0,5" />
+                                    <ComboBox x:Name="DailyMapLauncher1" Tag="MIR4 Launcher 1" ItemsSource="{Binding MissionMaps}" SelectedItem="Campo" SelectionChanged="DailyMap_SelectionChanged" AutomationProperties.Name="Mapa das missões do Launcher 1" />
+                                </StackPanel>
+                                <StackPanel Width="205" Margin="0,0,12,10">
+                                    <CheckBox x:Name="DailyLauncher2" Style="{StaticResource DonationChoice}" Content="Launcher 2" Tag="MIR4 Launcher 2" Checked="DailyLauncher_Checked" Unchecked="DailyLauncher_Unchecked" />
+                                    <CheckBox x:Name="DailyFavoriteLauncher2" Content="Executar as missões favoritas" Tag="MIR4 Launcher 2" Checked="DailyFavoriteLauncher_Checked" Unchecked="DailyFavoriteLauncher_Unchecked" Margin="0,0,0,8" />
+                                    <TextBlock Text="Mapa das missões" Style="{StaticResource Caption}" Margin="0,0,0,5" />
+                                    <ComboBox x:Name="DailyMapLauncher2" Tag="MIR4 Launcher 2" ItemsSource="{Binding MissionMaps}" SelectedItem="Campo" SelectionChanged="DailyMap_SelectionChanged" AutomationProperties.Name="Mapa das missões do Launcher 2" />
+                                </StackPanel>
+                                <StackPanel Width="205" Margin="0,0,12,10">
+                                    <CheckBox x:Name="DailySteam" Style="{StaticResource DonationChoice}" Content="Steam" Tag="MIR4 Steam" Checked="DailyLauncher_Checked" Unchecked="DailyLauncher_Unchecked" />
+                                    <CheckBox x:Name="DailyFavoriteSteam" Content="Executar as missões favoritas" Tag="MIR4 Steam" Checked="DailyFavoriteLauncher_Checked" Unchecked="DailyFavoriteLauncher_Unchecked" Margin="0,0,0,8" />
+                                    <TextBlock Text="Mapa das missões" Style="{StaticResource Caption}" Margin="0,0,0,5" />
+                                    <ComboBox x:Name="DailyMapSteam" Tag="MIR4 Steam" ItemsSource="{Binding MissionMaps}" SelectedItem="Campo" SelectionChanged="DailyMap_SelectionChanged" AutomationProperties.Name="Mapa das missões do Steam" />
+                                </StackPanel>
                             </WrapPanel>
-<ItemsControl ItemsSource="{Binding Configuration.DailyItems}" ItemTemplate="{StaticResource MissionTemplate}" ItemsPanel="{StaticResource CardsPanel}" />
+                            <ItemsControl ItemsSource="{Binding Configuration.DailyItems}" ItemTemplate="{StaticResource DailyMissionTemplate}" ItemsPanel="{StaticResource CardsPanel}" />
                             <CheckBox Content="Limpar mochila com equipamentos incomuns" IsEnabled="False" Margin="0,8,0,0" />
                             <TextBlock Text="Limpeza de mochila ainda não implementada." Style="{StaticResource Caption}" />
                         </StackPanel>
@@ -217,6 +307,13 @@
                                 <TextBox Grid.Column="1" Text="{Binding Configuration.ArenaRepeatCountText, UpdateSourceTrigger=PropertyChanged}"
                                          VerticalContentAlignment="Center" ToolTip="Informe de 1 a 100 execuções"
                                          AutomationProperties.Name="Quantidade de repetições da Arena" />
+                            </Grid>
+                            <Grid Margin="0,0,0,12" HorizontalAlignment="Left">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="160" /><ColumnDefinition Width="90" /></Grid.ColumnDefinitions>
+                                <StackPanel><TextBlock Text="Horário da Arena" VerticalAlignment="Center" /><TextBlock Text="HH:mm; vazio = sem espera" FontSize="11" Foreground="{StaticResource MutedBrush}" /></StackPanel>
+                                <TextBox Grid.Column="1" Text="{Binding Configuration.ArenaStartTime, UpdateSourceTrigger=PropertyChanged}"
+                                         VerticalContentAlignment="Center" ToolTip="Horário no formato 24h, por exemplo 21:30"
+                                         AutomationProperties.Name="Horário para executar a Arena" />
                             </Grid>
                             <Button x:Name="BtnDoArena" Content="⚔   Executar Arena" Style="{StaticResource PrimaryButton}"
                                     Click="BtnDoArena_Click" HorizontalAlignment="Left" Margin="0,4,0,12" Padding="18,11" />
