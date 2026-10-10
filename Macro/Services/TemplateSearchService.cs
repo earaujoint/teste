@@ -22,13 +22,27 @@ public sealed class TemplateSearchService
         using var color = ToBgr(frame);
         using var gray = new Mat();
         Cv2.CvtColor(color, gray, ColorConversionCodes.BGR2GRAY);
-        using var originalTemplate = Cv2.ImRead(templatePath, ImreadModes.Grayscale);
-        if (originalTemplate.Empty()) throw new InvalidOperationException("Não foi possível abrir a imagem selecionada.");
+        using var sourceTemplate = Cv2.ImRead(templatePath, ImreadModes.Unchanged);
+        if (sourceTemplate.Empty()) throw new InvalidOperationException("Não foi possível abrir a imagem selecionada.");
+        using var originalTemplate = new Mat();
+        using var originalMask = new Mat();
+        if (sourceTemplate.Channels() == 4)
+        {
+            Cv2.CvtColor(sourceTemplate, originalTemplate, ColorConversionCodes.BGRA2GRAY);
+            Cv2.ExtractChannel(sourceTemplate, originalMask, 3);
+            Cv2.Threshold(originalMask, originalMask, 0, 255, ThresholdTypes.Binary);
+        }
+        else if (sourceTemplate.Channels() == 3)
+            Cv2.CvtColor(sourceTemplate, originalTemplate, ColorConversionCodes.BGR2GRAY);
+        else
+            sourceTemplate.CopyTo(originalTemplate);
         var crop = templateCrop ?? new Int32Rect(0, 0, originalTemplate.Width, originalTemplate.Height);
         if (crop.X < 0 || crop.Y < 0 || crop.Width <= 0 || crop.Height <= 0 ||
             crop.X + crop.Width > originalTemplate.Width || crop.Y + crop.Height > originalTemplate.Height)
             throw new ArgumentException("Recorte do ícone fora dos limites da imagem.");
         using var template = new Mat(originalTemplate, new OpenCvSharp.Rect(crop.X, crop.Y, crop.Width, crop.Height));
+        using var templateMask = originalMask.Empty() ? new Mat() : new Mat(originalMask,
+            new OpenCvSharp.Rect(crop.X, crop.Y, crop.Width, crop.Height));
         token.ThrowIfCancellationRequested();
 
         var x = Math.Clamp((int)Math.Round(region.X * gray.Width), 0, gray.Width - 1);
@@ -56,7 +70,15 @@ public sealed class TemplateSearchService
             Cv2.Resize(template, scaledTemplate, new OpenCvSharp.Size(width, height), 0, 0,
                 scale < 1 ? InterpolationFlags.Area : InterpolationFlags.Cubic);
             using var scores = new Mat();
-            Cv2.MatchTemplate(roiMat, scaledTemplate, scores, TemplateMatchModes.CCoeffNormed);
+            if (!templateMask.Empty())
+            {
+                using var scaledMask = new Mat();
+                Cv2.Resize(templateMask, scaledMask, new OpenCvSharp.Size(width, height), 0, 0,
+                    InterpolationFlags.Nearest);
+                Cv2.MatchTemplate(roiMat, scaledTemplate, scores, TemplateMatchModes.CCorrNormed, scaledMask);
+            }
+            else
+                Cv2.MatchTemplate(roiMat, scaledTemplate, scores, TemplateMatchModes.CCoeffNormed);
             Cv2.MinMaxLoc(scores, out _, out var max, out _, out var location);
             if (double.IsFinite(max) && max > confidence)
             {

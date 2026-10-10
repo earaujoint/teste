@@ -738,7 +738,7 @@ public partial class FarmingPage : Page
         if (steamWindow is not null) targets["MIR4 Steam"] = steamWindow;
 
         var templatesDirectory = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates");
-        var fieldTemplate = Path.Combine(templatesDirectory, "daily-favorite-field.png");
+        var fieldTemplate = Path.Combine(templatesDirectory, "daily-favorite-field-name.png");
         var acceptTemplate = Path.Combine(templatesDirectory, "daily-favorite-accept.png");
         var autoTemplate = Path.Combine(templatesDirectory, "daily-favorite-auto.png");
         var checkTemplate = Path.Combine(templatesDirectory, "daily-favorite-check.png");
@@ -779,7 +779,7 @@ public partial class FarmingPage : Page
                 await _windowClickService.PressKeyAsync(target, 0x75, "F6", cancellationToken, AppendLog);
                 await Task.Delay(350, cancellationToken);
                 var fieldSelected = await FindAndClickTemplateAsync(target, fieldTemplate, fieldRegion,
-                    new Int32Rect(12, 14, 78, 32), "Campo", 0.75, cancellationToken);
+                    null, "Campo", 0.75, cancellationToken);
                 if (!fieldSelected) continue;
 
                 var acceptedCount = 0;
@@ -837,7 +837,12 @@ public partial class FarmingPage : Page
                     Int32Rect? crop = step.Name == "item Deslocamento rápido"
                         ? new Int32Rect(104, 14, 91, 26)
                         : null;
-                    var threshold = step.Name == "Deslocamento rápido" ? 0.65 : 0.78;
+                    var threshold = step.Name switch
+                    {
+                        "Deslocamento rápido" => 0.65,
+                        "Jogar autom." => 0.72,
+                        _ => 0.78
+                    };
                     var completed = await FindAndClickTemplateAsync(target, step.Template, step.Region, crop,
                         step.Name, threshold, cancellationToken);
                     if (!completed)
@@ -918,7 +923,7 @@ public partial class FarmingPage : Page
         var directory = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates", "DailyRaid");
         var templates = new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            ["ícone Raide"] = Path.Combine(directory, "daily-raid-icon.png"),
+            ["ícone Raide"] = Path.Combine(directory, "daily-raid-icon-only.png"),
             ["opção Raide"] = Path.Combine(directory, "daily-raid-label.png"),
             ["Criar um Raide (menu)"] = Path.Combine(directory, "daily-raid-create-banner.png"),
             ["Privado"] = Path.Combine(directory, "daily-raid-private.png"),
@@ -967,6 +972,8 @@ public partial class FarmingPage : Page
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 AppendLog($"DailyFavoriteRaid — {launcherGroup.Starter}: iniciando raide {raid}/{raidCount}.");
+                AppendLog($"DailyFavoriteRaid — raide {raid}/{raidCount}: aguardando 2 segundos antes de F9.");
+                await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
                 await _windowClickService.PressKeyAsync(starter, 0x78, "F9", cancellationToken, AppendLog);
                 await Task.Delay(350, cancellationToken);
                 var steps = new[] { "ícone Raide", "opção Raide", "Criar um Raide (menu)", "Privado", "campo da senha", "botão 2", "Entrada completa", "Criar um Raide", "adicionar convidados", "Convidar todos" };
@@ -1081,7 +1088,7 @@ public partial class FarmingPage : Page
         var directory = Path.Combine(AppContext.BaseDirectory, "Assets", "Templates", "DailyRaid");
         var templates = new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            ["ícone Raide"] = Path.Combine(directory, "daily-raid-icon.png"),
+            ["ícone Raide"] = Path.Combine(directory, "daily-raid-icon-only.png"),
             ["Raide de Boss"] = Path.Combine(directory, "daily-raid-boss-label.png"),
             ["Criar um Raide (menu)"] = Path.Combine(directory, "daily-raid-create-banner.png"),
             ["Criar um Raide"] = Path.Combine(directory, "daily-raid-boss-create.png"),
@@ -1118,6 +1125,8 @@ public partial class FarmingPage : Page
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 AppendLog($"DailyRaidBoss — {launcherGroup.Starter}: iniciando raide {raid}/{raidCount}.");
+                AppendLog($"DailyRaidBoss — raide {raid}/{raidCount}: aguardando 2 segundos antes de F9.");
+                await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
                 await _windowClickService.PressKeyAsync(starter, 0x78, "F9", cancellationToken, AppendLog);
                 await Task.Delay(350, cancellationToken);
                 foreach (var name in new[] { "ícone Raide", "Raide de Boss", "Criar um Raide (menu)", "Criar um Raide", "adicionar convidados", "Convidar todos" })
